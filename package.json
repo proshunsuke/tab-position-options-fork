@@ -1,0 +1,45 @@
+{
+  "name": "tab-position-options-fork",
+  "version": "1.0.0",
+  "description": "Chrome extension to control where new tabs are opened",
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check --write --unsafe .",
+    "lint:check": "biome check .",
+    "format": "biome format --write .",
+    "check:ci": "biome ci .",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "webextension-polyfill": "^0.12.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.1.1",
+    "@tailwindcss/postcss": "^4.1.11",
+    "@types/chrome": "^0.1.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@types/webextension-polyfill": "^0.12.3",
+    "@vitejs/plugin-react": "^4.6.0",
+    "@wxt-dev/module-react": "^1.1.3",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.4",
+    "vitest": "^3.2.4",
+    "wxt": "^0.20.7"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
