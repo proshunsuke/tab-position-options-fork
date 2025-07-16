@@ -1,0 +1,44 @@
+export type TabPosition = "first" | "last" | "right" | "left" | "default";
+export type TabActivation = "first" | "last" | "left" | "right" | "lastAccessed" | "default";
+export type TabOnActivateBehavior = "default" | "last" | "first";
+
+export type Settings = {
+  newTab: {
+    position: TabPosition;
+  };
+  loadingPage: {
+    position: TabPosition;
+  };
+  afterTabClosing: {
+    activateTab: TabActivation;
+  };
+  tabOnActivate: {
+    behavior: TabOnActivateBehavior;
+  };
+  popup: {
+    openAsNewTab: boolean;
+  };
+};
+
+export type StorageData = {
+  version: string;
+  settings: Settings;
+};
+
+export const defaultSettings: Settings = {
+  newTab: {
+    position: "default",
+  },
+  loadingPage: {
+    position: "default",
+  },
+  afterTabClosing: {
+    activateTab: "default",
+  },
+  tabOnActivate: {
+    behavior: "default",
+  },
+  popup: {
+    openAsNewTab: false,
+  },
+};
