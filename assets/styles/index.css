@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+/* Chrome拡張機能用のカスタムテーマ設定 */
+@theme {
+  /* Chrome ブランドカラー */
+  --color-chrome-blue: #4285f4;
+  --color-chrome-green: #34a853;
+  --color-chrome-yellow: #fbbc04;
+  --color-chrome-red: #ea4335;
+
+  /* カスタムアニメーション時間 */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+}
+
+/* ソースファイルの明示的な指定（Chrome拡張機能の構造に対応） */
+@source "./entrypoints/**/*.{ts,tsx}";
+@source "./entrypoints/**/*.html";
+@source "./components/**/*.{ts,tsx}";
+@source "./utils/**/*.{ts,tsx}";
+
+/* カスタムユーティリティクラス */
+@layer utilities {
+  .chrome-extension-shadow {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .chrome-extension-focus {
+    @apply outline-none ring-2 ring-chrome-blue ring-offset-2;
+  }
+}
