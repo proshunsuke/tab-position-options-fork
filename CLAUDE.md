@@ -85,6 +85,12 @@ npm run check:ci
 npm run test
 ```
 
+## コミット規約
+
+- コミットメッセージは英語で記述する
+- 適切な粒度でコミットを分割する（機能ごと、目的ごと）
+- 明確で簡潔なメッセージを心がける
+
 ## 主要機能
 
 ### 1. 新規タブ（New Tab）設定
@@ -102,7 +108,7 @@ npm run test
 - **First tab**: 最初のタブ
 - **Last tab**: 最後のタブ
 - **Right tab**: 右側のタブ
-- **Left tab**: 左側のタブ（デフォルト）
+- **Left tab**: 左側のタブ
 - **In activated order**: アクティブ化された順序
 - **Source tab (Open link)**: リンク元のタブ
 - **Source tab (Open link) & In activated order**: リンク元のタブとアクティブ化順序の組み合わせ
