@@ -112,7 +112,7 @@ npm run test
 - **In activated order**: アクティブ化された順序
 - **Source tab (Open link)**: リンク元のタブ
 - **Source tab (Open link) & In activated order**: リンク元のタブとアクティブ化順序の組み合わせ
-- **Default**: ブラウザのデフォルト動作
+- **Default**: ブラウザのデフォルト動作（デフォルト）
 
 ### 4. アクティブタブの動作（Tab on Activate）
 - **Default**: デフォルト動作（デフォルト）
@@ -123,14 +123,14 @@ npm run test
 - **Open pop-up window as new tab**: ポップアップウィンドウを新しいタブとして開く
 
 ### 6. 設定の保存
-- `chrome.storage.sync` APIを使用して設定をGoogleアカウントに同期
+- `chrome.storage.local` APIを使用してローカルに設定を保存
 - すべての設定はOptionsページで管理
 
 ## Chrome拡張機能API使用方法
 
 ### 主要API
 - **chrome.tabs**: タブの作成、移動、クエリ等の操作
-- **chrome.storage.sync**: 設定の保存とGoogleアカウント間での同期
+- **chrome.storage.local**: 設定のローカル保存
 - **chrome.runtime**: 拡張機能内でのメッセージング
 
 ## ビルド設定
@@ -187,7 +187,7 @@ Chrome Storage Localに保存されるデータは以下の構造を持ちます
       position: 'first' | 'last' | 'right' | 'left' | 'default'
     },
     afterTabClosing: {
-      activateTab: 'first' | 'last' | 'right' | 'left' | 'lastAccessed' | 'default'
+      activateTab: 'first' | 'last' | 'right' | 'left' | 'inActivatedOrder' | 'sourceTab' | 'sourceTabAndOrder' | 'default'
     },
     tabOnActivate: {
       behavior: 'default' | 'last' | 'first'
