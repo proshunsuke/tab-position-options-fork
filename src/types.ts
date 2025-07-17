@@ -1,5 +1,13 @@
 export type TabPosition = "first" | "last" | "right" | "left" | "default";
-export type TabActivation = "first" | "last" | "left" | "right" | "lastAccessed" | "default";
+export type TabActivation =
+  | "first"
+  | "last"
+  | "left"
+  | "right"
+  | "inActivatedOrder"
+  | "sourceTab"
+  | "sourceTabAndOrder"
+  | "default";
 export type TabOnActivateBehavior = "default" | "last" | "first";
 
 export type Settings = {
