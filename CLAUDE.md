@@ -25,12 +25,21 @@ tab-position-options-fork/
 │       ├── index.html       # 設定画面のHTMLエントリー
 │       ├── main.tsx         # 設定画面のメインエントリー
 │       ├── App.tsx          # 設定画面のメインコンポーネント
-│       └── style.css        # 設定画面のスタイル
+│       ├── style.css        # 設定画面のスタイル
+│       ├── TabBehavior.tsx  # タブ動作設定コンポーネント
+│       ├── TabClosing.tsx   # タブ閉じ設定コンポーネント
+│       └── ui/              # 再利用可能なUIコンポーネント
+│           ├── RadioGroup.tsx   # ラジオボタングループ
+│           ├── TabSection.tsx   # セクションレイアウト
+│           └── TabContent.tsx   # タブコンテンツラッパー
 ├── src/
-│   ├── shared/
-│   │   ├── types/           # 共通型定義
-│   │   ├── utils/           # ユーティリティ関数
-│   │   └── storage.ts       # chrome.storage APIのラッパー
+│   ├── tabs/                # タブ操作ロジック
+│   │   ├── closeHandler.ts  # タブ閉じ時の処理
+│   │   ├── handler.ts       # タブイベントハンドラー
+│   │   └── position.ts      # タブ位置計算ロジック
+│   ├── storage.ts           # chrome.storage APIのラッパー
+│   └── types.ts             # 共通型定義
+├── assets/
 │   └── styles/
 │       └── index.css        # Tailwind CSS 4のメインスタイル
 ├── public/
@@ -40,7 +49,6 @@ tab-position-options-fork/
 ├── wxt.config.ts            # WXT設定ファイル
 ├── biome.json              # Biomeリンター/フォーマッター設定
 ├── tsconfig.json           # TypeScript設定
-├── tsconfig.node.json      # Node.js環境用TypeScript設定
 ├── postcss.config.js       # PostCSS設定
 └── package.json
 ```
@@ -96,12 +104,13 @@ npm run test
 ### 1. 新規タブ（New Tab）設定
 - **Always first**: 常に最初に開く
 - **Always last**: 常に最後に開く
-- **Right of current tab**: 現在のタブの右側に開く（デフォルト）
+- **Right of current tab**: 現在のタブの右側に開く
 - **Left of current tab**: 現在のタブの左側に開く
-- **Default**: ブラウザのデフォルト動作
+- **Default**: ブラウザのデフォルト動作（デフォルト）
 
 ### 2. ローディングページ（Loading Page）設定
 新しいページを読み込む際のタブ位置（New Tabと同じオプション）
+※ 現在は未実装（UI上で "Coming soon..." と表示）
 
 ### 3. タブを閉じた後のアクティブタブ（Activate Tab After Tab Closing）
 タブを閉じた後にどのタブをアクティブにするか：
@@ -118,9 +127,11 @@ npm run test
 - **Default**: デフォルト動作（デフォルト）
 - **Last**: 最後のタブ
 - **First**: 最初のタブ
+※ 現在は未実装
 
 ### 5. ポップアップ（Pop-up）設定
 - **Open pop-up window as new tab**: ポップアップウィンドウを新しいタブとして開く
+※ 現在は未実装
 
 ### 6. 設定の保存
 - `chrome.storage.local` APIを使用してローカルに設定を保存
@@ -146,23 +157,23 @@ npm run test
 
 拡張機能の設定は以下の5つのカテゴリに分類されます：
 
-1. **新規タブの位置（New Tab）**
+1. **新規タブの位置（New Tab）** - 実装済み
    - ブラウザで新しいタブを開く際の位置を制御
    - アドレスバーの＋ボタン、Ctrl+T、右クリックメニューなどから開かれるタブが対象
 
-2. **ローディングページの位置（Loading Page）**
+2. **ローディングページの位置（Loading Page）** - 未実装
    - 既存のタブから新しいページを開く際の位置を制御
    - リンククリック、window.open()、target="_blank"などが対象
 
-3. **タブを閉じた後のアクティブタブ（Activate Tab After Tab Closing）**
+3. **タブを閉じた後のアクティブタブ（Activate Tab After Tab Closing）** - 実装済み
    - タブを閉じた際に次にアクティブにするタブを制御
    - ユーザーエクスペリエンスを考慮した複数のオプションを提供
 
-4. **タブのアクティブ時動作（Tab on Activate）**
+4. **タブのアクティブ時動作（Tab on Activate）** - 未実装
    - 特定の条件下でタブの左右に新しいタブを開く機能
    - 高度なタブ管理のためのオプション
 
-5. **ポップアップウィンドウ（Pop-up）**
+5. **ポップアップウィンドウ（Pop-up）** - 未実装
    - JavaScriptのポップアップウィンドウの扱いを制御
    - セキュリティと利便性のバランスを考慮
 
@@ -222,7 +233,7 @@ Chrome Storage Localに保存されるデータは以下の構造を持ちます
 ### 2. 設定管理システム
 
 **リアクティブな設定更新**
-- React Contextを使用した設定の状態管理
+- Reactの状態管理（useState）を使用した設定の管理
 - chrome.storage.onChangedリスナーによる即座の反映
 - 設定画面とバックグラウンドスクリプトの同期
 
@@ -271,7 +282,7 @@ Chrome Storage Localに保存されるデータは以下の構造を持ちます
 ## Tailwind CSS 4の設定
 
 - 設定ファイル（tailwind.config.js）は不要
-- src/styles/index.cssで@importと@themeディレクティブを使用
+- assets/styles/index.cssで@importと@themeディレクティブを使用
 - Chromeブランドカラーをカスタムテーマ変数として定義
 
 ## WXTの特徴
