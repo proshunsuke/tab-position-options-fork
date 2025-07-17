@@ -12,6 +12,9 @@ export default defineConfig({
       "Control where new tabs are opened - a modern fork of the classic Tab Position Options extension",
     permissions: ["tabs", "storage"],
     host_permissions: [],
+    action: {
+      // アイコンクリック時の動作をbackground.tsで制御
+    },
   },
 
   // Development configuration
