@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { TabActivation, TabPosition } from "@/src/types";
+import { APP_VERSION } from "@/src/version";
 import { TabBehavior } from "./TabBehavior";
 import { TabClosing } from "./TabClosing";
 
@@ -48,7 +49,7 @@ export default function App() {
 
       // 新しい設定を保存
       await chrome.storage.local.set({
-        version: "1.0.0",
+        version: APP_VERSION,
         settings: {
           ...currentSettings,
           newTab: {

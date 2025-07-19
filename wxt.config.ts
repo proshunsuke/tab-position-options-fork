@@ -1,4 +1,5 @@
 import { defineConfig } from "wxt";
+import { APP_VERSION } from "./src/version";
 
 export default defineConfig({
   // Module configuration
@@ -7,7 +8,7 @@ export default defineConfig({
   // Manifest configuration
   manifest: {
     name: "Tab Position Options Fork",
-    version: "1.0.0",
+    version: APP_VERSION,
     description:
       "Control where new tabs are opened - a modern fork of the classic Tab Position Options extension",
     permissions: ["tabs", "storage"],
