@@ -31,6 +31,9 @@ lerna-debug.log*
 # Testing
 coverage/
 .vitest/
+test-results/
+playwright-report/
+playwright/.cache/
 
 # Environment variables
 .env

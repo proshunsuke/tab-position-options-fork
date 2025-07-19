@@ -5,7 +5,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["chrome"]
+    "types": ["chrome", "node"]
   },
   "include": [
     "entrypoints",
@@ -13,6 +13,7 @@
     "utils",
     "assets",
     "src",
+    "e2e",
     "wxt.config.ts",
     ".wxt/wxt.d.ts"
   ],
