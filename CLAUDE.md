@@ -13,44 +13,26 @@ Tab Position Options Chrome拡張機能の再実装プロジェクト。Chrome M
 - **CSSフレームワーク**: Tailwind CSS 4.1.11
 - **拡張機能フレームワーク**: WXT 0.20.7
 - **リンター/フォーマッター**: Biome 2.1.1
+- **E2Eテストフレームワーク**: Playwright 1.54.1
 - **Chrome Extension API**: Manifest V3
 
 ## プロジェクト構造
 
 ```
 tab-position-options-fork/
-├── entrypoints/
-│   ├── background.ts         # Service Worker - タブ操作のコアロジック
-│   └── options/
-│       ├── index.html       # 設定画面のHTMLエントリー
-│       ├── main.tsx         # 設定画面のメインエントリー
-│       ├── App.tsx          # 設定画面のメインコンポーネント
-│       ├── style.css        # 設定画面のスタイル
-│       ├── TabBehavior.tsx  # タブ動作設定コンポーネント
-│       ├── TabClosing.tsx   # タブ閉じ設定コンポーネント
-│       └── ui/              # 再利用可能なUIコンポーネント
-│           ├── RadioGroup.tsx   # ラジオボタングループ
-│           ├── TabSection.tsx   # セクションレイアウト
-│           └── TabContent.tsx   # タブコンテンツラッパー
+├── entrypoints/             # WXTエントリーポイント
+│   ├── background.ts        # Service Worker
+│   └── options/            # 設定画面
 ├── src/
-│   ├── tabs/                # タブ操作ロジック
-│   │   ├── closeHandler.ts  # タブ閉じ時の処理
-│   │   ├── handler.ts       # タブイベントハンドラー
-│   │   └── position.ts      # タブ位置計算ロジック
-│   ├── storage.ts           # chrome.storage APIのラッパー
-│   └── types.ts             # 共通型定義
-├── assets/
-│   └── styles/
-│       └── index.css        # Tailwind CSS 4のメインスタイル
-├── public/
-│   ├── icon-16.png
-│   ├── icon-48.png
-│   └── icon-128.png
-├── wxt.config.ts            # WXT設定ファイル
-├── biome.json              # Biomeリンター/フォーマッター設定
-├── tsconfig.json           # TypeScript設定
-├── postcss.config.js       # PostCSS設定
-└── package.json
+│   ├── tabs/               # タブ操作ロジック
+│   ├── storage.ts          # ストレージ管理
+│   └── types.ts            # 型定義
+├── assets/                 # 静的アセット
+├── public/                 # 公開リソース
+├── e2e/                    # E2Eテスト
+│   ├── specs/              # テストスペック
+│   └── utils/              # テストユーティリティ
+└── [設定ファイル群]
 ```
 
 ## 開発コマンド
@@ -89,8 +71,14 @@ npm run format
 # CI環境用のチェック（エラーがあれば失敗）
 npm run check:ci
 
-# テストの実行
-npm run test
+# E2Eテストの実行（ビルド込み）
+npm run test:e2e
+
+# E2EテストをUIモードで実行
+npm run test:e2e:ui
+
+# E2Eテストをデバッグモードで実行
+npm run test:e2e:debug
 ```
 
 ## コミット規約
@@ -304,3 +292,38 @@ Chrome Storage Localに保存されるデータは以下の構造を持ちます
 - **真のHMR**: UI開発で即座に反映、content/backgroundスクリプトも高速リロード
 - **クロスブラウザ対応**: Chrome、Firefox、Edge、Safariに対応
 - **アイコンクリック時の動作**: popupを使用せず、直接オプションページを開く
+
+## E2Eテスト
+
+### テスト方針
+
+1. **Service Worker経由でのテスト**
+   - Chrome拡張機能のイベントを正しく発火させるため、Service Worker経由でタブ操作を実行
+   - Chrome Extension APIを直接使用してテストの信頼性を確保
+
+2. **テストの分離**
+   - UIテスト: 設定画面の操作とUI要素の確認
+   - 機能テスト: 拡張機能の動作確認
+   - 統合テスト: エンドツーエンドのシナリオテスト
+
+3. **テストユーティリティの活用**
+   - Service Workerの初期化待機
+   - 設定の直接操作（UIを経由しない高速なセットアップ）
+   - タブ状態の取得と検証
+
+### テスト環境の考慮事項
+
+1. **Chrome Extension API特有の制約**
+   - イベントの発火タイミングが非同期
+   - 一部のAPIで取得できる情報に制限がある
+   - Service Workerのライフサイクル管理
+
+2. **Playwrightとの統合**
+   - 拡張機能の永続的なコンテキストを使用
+   - カスタムフィクスチャによるテスト環境の構築
+   - 非同期処理の適切な待機戦略
+
+3. **テストの安定性**
+   - リトライ機構の活用
+   - タイムアウトの適切な設定
+   - CI環境での実行を考慮した設計
