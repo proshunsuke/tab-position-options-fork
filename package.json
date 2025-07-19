@@ -1,6 +1,6 @@
 {
   "name": "tab-position-options-fork",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Chrome extension to control where new tabs are opened",
   "type": "module",
   "scripts": {

@@ -5,7 +5,8 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["chrome", "node"]
+    "types": ["chrome", "node"],
+    "resolveJsonModule": true
   },
   "include": [
     "entrypoints",
