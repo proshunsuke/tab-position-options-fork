@@ -8,7 +8,15 @@ import {
 import { calculateNewTabIndex } from "@/src/tabs/position";
 
 export const handleNewTab = async (tab: chrome.tabs.Tab) => {
-  console.log("New tab created:", tab);
+  // chrome.tabs.getで最新のタブ情報を取得（openerTabIdを含む）
+  if (tab.id) {
+    try {
+      // 更新されたタブ情報を使用
+      tab = await chrome.tabs.get(tab.id);
+    } catch (err) {
+      console.error("Failed to get full tab info:", err);
+    }
+  }
 
   // インデックスをキャッシュ
   if (tab.id) {
@@ -27,8 +35,6 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
     // 現在はnewTabの設定をすべてのタブに適用（ブックマークからのタブも含む）
     const position = settings.newTab.position;
 
-    console.log("Current newTab position setting:", position);
-
     // デフォルトの場合は何もしない
     if (position === "default" || !tab.id) {
       return;
@@ -36,10 +42,6 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
 
     // 現在のウィンドウのすべてのタブを取得
     const tabs = await chrome.tabs.query({ currentWindow: true });
-    console.log(
-      "All tabs:",
-      tabs.map(t => ({ id: t.id, index: t.index, active: t.active, url: t.url?.substring(0, 30) })),
-    );
 
     // タブ作成前のアクティブタブを特定
     // 新規タブがすでにアクティブになっている場合、openerTabIdを使用
@@ -57,23 +59,14 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
       }
     }
 
-    console.log(
-      "Previous active tab:",
-      previousActiveTab ? { id: previousActiveTab.id, index: previousActiveTab.index } : "none",
-    );
-
     // 新しいタブの位置を計算
     const newIndex = calculateNewTabIndex(position, tabs, previousActiveTab);
-    console.log(`Calculated new index: ${newIndex}, current index: ${tab.index}`);
 
     // タブを移動
     if (newIndex !== undefined && newIndex !== tab.index) {
-      console.log(`Moving tab from index ${tab.index} to ${newIndex}`);
       await chrome.tabs.move(tab.id, { index: newIndex });
       // 移動後もインデックスを更新
       await updateTabIndexCache(tab.id);
-    } else {
-      console.log("No move needed");
     }
   } catch (error) {
     console.error("Error handling new tab:", error);
@@ -112,8 +105,6 @@ export const handleTabRemoved = async (
   tabId: number,
   removeInfo: { windowId: number; isWindowClosing: boolean },
 ) => {
-  console.log("Tab removed:", tabId, removeInfo);
-
   // ウィンドウが閉じられた場合は何もしない
   if (removeInfo.isWindowClosing) {
     cleanupTabData(tabId);
@@ -136,9 +127,6 @@ export const handleTabRemoved = async (
     const wasLastActive = lastActiveTabId === tabId;
 
     if (!wasLastActive) {
-      console.log(
-        `[Tab Closing] Tab ${tabId} was not the last active tab (last active: ${lastActiveTabId})`,
-      );
       cleanupTabData(tabId);
       tabIndexCache.delete(tabId);
       return;
@@ -146,8 +134,6 @@ export const handleTabRemoved = async (
 
     // キャッシュからタブのインデックスを取得
     const closedTabIndex = tabIndexCache.get(tabId) ?? 0;
-    console.log(`[Tab Closing] Cached index for tab ${tabId}: ${closedTabIndex}`);
-    console.log(`[Tab Closing] Tab ${tabId} was active, applying ${activateTabSetting} behavior`);
 
     // 次にアクティブにするタブを決定
     const nextTabId = await determineNextActiveTab(
@@ -163,7 +149,6 @@ export const handleTabRemoved = async (
 
     // 次のタブをアクティブにする
     if (nextTabId !== null) {
-      console.log(`[Tab Closing] Activating tab ${nextTabId}`);
       // 一時的にlastActiveTabIdをクリアして、自動的なタブアクティブ化を履歴に記録しないようにする
       const tempLastActiveTabId = lastActiveTabId;
       lastActiveTabId = null;
@@ -203,7 +188,6 @@ const initializeTabIndexCache = async () => {
       tabIndexCache.set(tab.id, tab.index);
     }
   }
-  console.log(`[Tab Index Cache] Initialized with ${tabIndexCache.size} tabs`);
 };
 
 export const setupTabHandlers = () => {
