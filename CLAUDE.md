@@ -279,6 +279,18 @@ Chrome Storage Localに保存されるデータは以下の構造を持ちます
    - React Hooksの依存関係チェック（useExhaustiveDependenciesはエラー）
    - CI環境では`npm run check:ci`でエラーチェック
 
+6. **コード構成の方針**
+   - 定数定義、型定義、内部データ構造は最上部に配置
+   - その下にメイン処理やexportされる関数を配置
+   - 詳細な実装やヘルパー関数はファイルの下部に配置
+   - トップダウンで読みやすい構造を心がける
+
+7. **TypeScript/JavaScriptの規約**
+   - メソッドはアロー関数で記述
+   - 関数の返り値の型は省略（型推論に任せる）
+   - 型定義には`interface`ではなく`type`を使用
+   - 定数は大文字のスネークケース（UPPER_SNAKE_CASE）で定義
+
 ## Tailwind CSS 4の設定
 
 - 設定ファイル（tailwind.config.js）は不要
