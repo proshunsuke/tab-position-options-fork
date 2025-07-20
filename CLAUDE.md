@@ -65,9 +65,6 @@ npm run lint
 # Biomeによるチェックのみ（修正なし）
 npm run lint:check
 
-# フォーマットのみ実行
-npm run format
-
 # CI環境用のチェック（エラーがあれば失敗）
 npm run check:ci
 
