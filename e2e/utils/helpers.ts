@@ -79,3 +79,16 @@ export const createTabViaServiceWorker = async (serviceWorker: Worker) =>
       openerTabId: newTab.openerTabId,
     };
   });
+
+/**
+ * Service Worker経由でアクティブなタブを閉じる
+ */
+export const closeActiveTabViaServiceWorker = async (serviceWorker: Worker) =>
+  serviceWorker.evaluate(async () => {
+    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (activeTab?.id) {
+      await chrome.tabs.remove(activeTab.id);
+      return true;
+    }
+    return false;
+  });

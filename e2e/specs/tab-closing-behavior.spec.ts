@@ -1,5 +1,9 @@
 import { expect, test } from "@/e2e/fixtures";
-import { getTabState, setExtensionSettings } from "@/e2e/utils/helpers";
+import {
+  closeActiveTabViaServiceWorker,
+  getTabState,
+  setExtensionSettings,
+} from "@/e2e/utils/helpers";
 
 test.describe("Tab Behavior - After Tab Closing", () => {
   test("activate first tab after closing", async ({ context, serviceWorker }) => {
@@ -23,12 +27,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     expect(beforeState.activeTabIndex).toBe(initialTabCount + 2);
 
     // Service Worker経由でタブを閉じる
-    await serviceWorker.evaluate(async () => {
-      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (activeTab?.id) {
-        await chrome.tabs.remove(activeTab.id);
-      }
-    });
+    await closeActiveTabViaServiceWorker(serviceWorker);
 
     // 最初のタブ（インデックス0）がアクティブになるべき
     await expect(async () => {
@@ -61,12 +60,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     expect(beforeState.activeTabIndex).toBe(initialTabCount);
 
     // Service Worker経由でタブを閉じる
-    await serviceWorker.evaluate(async () => {
-      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (activeTab?.id) {
-        await chrome.tabs.remove(activeTab.id);
-      }
-    });
+    await closeActiveTabViaServiceWorker(serviceWorker);
 
     // 最後のタブがアクティブになるべき
     await expect(async () => {
@@ -99,12 +93,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     expect(beforeState.activeTabIndex).toBe(initialTabCount);
 
     // Service Worker経由でタブを閉じる
-    await serviceWorker.evaluate(async () => {
-      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (activeTab?.id) {
-        await chrome.tabs.remove(activeTab.id);
-      }
-    });
+    await closeActiveTabViaServiceWorker(serviceWorker);
 
     // 右側のタブがアクティブになるべき
     await expect(async () => {
@@ -137,12 +126,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     expect(beforeState.activeTabIndex).toBe(initialTabCount + 1);
 
     // Service Worker経由でタブを閉じる
-    await serviceWorker.evaluate(async () => {
-      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (activeTab?.id) {
-        await chrome.tabs.remove(activeTab.id);
-      }
-    });
+    await closeActiveTabViaServiceWorker(serviceWorker);
 
     // 左側のタブがアクティブになるべき
     await expect(async () => {
@@ -183,12 +167,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     expect(beforeState.activeTabIndex).toBe(initialTabCount + 3); // tab4
 
     // Service Worker経由でタブを閉じる
-    await serviceWorker.evaluate(async () => {
-      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (activeTab?.id) {
-        await chrome.tabs.remove(activeTab.id);
-      }
-    });
+    await closeActiveTabViaServiceWorker(serviceWorker);
 
     // 最後にアクティブだったタブ（tab2）がアクティブになるべき
     await expect(async () => {
@@ -221,12 +200,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     expect(beforeState.activeTabIndex).toBe(initialTabCount + 1);
 
     // Service Worker経由でタブを閉じる
-    await serviceWorker.evaluate(async () => {
-      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (activeTab?.id) {
-        await chrome.tabs.remove(activeTab.id);
-      }
-    });
+    await closeActiveTabViaServiceWorker(serviceWorker);
 
     // デフォルトでは、ブラウザの標準動作（通常は右側のタブ）
     await expect(async () => {
@@ -261,12 +235,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     expect(beforeState.activeTabIndex).toBe(initialTabCount);
 
     // Service Worker経由でタブを閉じる
-    await serviceWorker.evaluate(async () => {
-      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (activeTab?.id) {
-        await chrome.tabs.remove(activeTab.id);
-      }
-    });
+    await closeActiveTabViaServiceWorker(serviceWorker);
 
     // タブの左側は存在しないので、右側がアクティブになるべき
     await expect(async () => {
@@ -299,12 +268,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     expect(beforeState.activeTabIndex).toBe(initialTabCount + 1);
 
     // Service Worker経由でタブを閉じる
-    await serviceWorker.evaluate(async () => {
-      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (activeTab?.id) {
-        await chrome.tabs.remove(activeTab.id);
-      }
-    });
+    await closeActiveTabViaServiceWorker(serviceWorker);
 
     // 最後のタブの右側は存在しないので、左側がアクティブになるべき
     await expect(async () => {
