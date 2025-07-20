@@ -1,5 +1,5 @@
 import { defineConfig } from "wxt";
-import { APP_VERSION } from "@/src/version";
+import { APP_VERSION } from "./src/version";
 
 export default defineConfig({
   // Module configuration
