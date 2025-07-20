@@ -28,11 +28,6 @@ export type Settings = {
   };
 };
 
-export type StorageData = {
-  version: string;
-  settings: Settings;
-};
-
 export const defaultSettings: Settings = {
   newTab: {
     position: "default",

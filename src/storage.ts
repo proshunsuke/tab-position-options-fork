@@ -3,16 +3,6 @@ import { defaultSettings } from "@/src/types";
 
 let cachedSettings: Settings | undefined;
 
-export const getSettings = async () => {
-  if (cachedSettings) {
-    return cachedSettings;
-  }
-
-  const result = await chrome.storage.local.get(["settings"]);
-  cachedSettings = result.settings as Settings | undefined;
-  return cachedSettings;
-};
-
 export const loadSettings = async () => {
   const result = await chrome.storage.local.get(["settings"]);
   cachedSettings = (result.settings as Settings) || defaultSettings;
