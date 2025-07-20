@@ -2,13 +2,10 @@ import { loadSettings, setupStorageListener } from "@/src/storage";
 import { setupTabHandlers } from "@/src/tabs/handler";
 
 export default defineBackground(() => {
-  console.log("Tab Position Options: Background script started");
-
   // 初期設定を読み込む
   const initializeExtension = async () => {
     try {
       await loadSettings();
-      console.log("Settings loaded successfully");
     } catch (error) {
       console.error("Failed to load settings:", error);
     }

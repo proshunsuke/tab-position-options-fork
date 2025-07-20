@@ -21,21 +21,16 @@ export default function App() {
         if (result.settings.afterTabClosing?.activateTab) {
           setAfterTabClosing(result.settings.afterTabClosing.activateTab);
         }
-        console.log("Loaded settings:", result);
-      } else {
-        console.log("No saved settings found, using defaults");
       }
     });
   }, []);
 
   const handleNewTabPositionChange = (value: string) => {
     setNewTabPosition(value as TabPosition);
-    console.log("New Tab Position changed to:", value);
   };
 
   const handleAfterTabClosingChange = (value: string) => {
     setAfterTabClosing(value as TabActivation);
-    console.log("After Tab Closing changed to:", value);
   };
 
   const handleSave = async () => {
@@ -62,7 +57,6 @@ export default function App() {
       });
 
       setSaveMessage("Settings saved successfully!");
-      console.log("Settings saved:", { newTabPosition, afterTabClosing });
 
       // 3秒後にメッセージを消す
       setTimeout(() => setSaveMessage(""), 3000);

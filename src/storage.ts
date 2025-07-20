@@ -23,7 +23,6 @@ export const setupStorageListener = () => {
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName === "local" && changes.settings) {
       cachedSettings = changes.settings.newValue as Settings;
-      console.log("Settings updated:", cachedSettings);
     }
   });
 };

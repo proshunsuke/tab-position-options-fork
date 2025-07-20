@@ -27,11 +27,6 @@ export const recordTabActivation = (tabId: number) => {
   if (tabActivationHistory.length > MAX_HISTORY_SIZE) {
     tabActivationHistory.shift();
   }
-
-  console.log(
-    `[Tab Activation] Recorded tab ${tabId}, history:`,
-    tabActivationHistory.map(h => h.tabId),
-  );
 };
 
 // タブのソース情報を記録
@@ -86,32 +81,19 @@ export const determineNextActiveTab = async (
 
     case "right": {
       // 閉じたタブの右側のタブ
-      console.log(
-        `[Tab Closing] Right - closedTabIndex: ${closedTabIndex}, tabs:`,
-        tabs.map(t => ({ id: t.id, index: t.index })),
-      );
 
       // タブが閉じられた後、右側のタブは同じインデックスを持つ
       const rightTab = tabs.find(tab => tab.index === closedTabIndex);
       if (rightTab) {
-        console.log(
-          `[Tab Closing] Right - Found right tab: id=${rightTab.id}, index=${rightTab.index}`,
-        );
         return rightTab.id ?? null;
       }
       // 右側にタブがない場合は左側
-      console.log(`[Tab Closing] Right - No right tab, returning last tab`);
       return tabs[tabs.length - 1]?.id ?? null;
     }
 
     case "inActivatedOrder": {
       // アクティブ化履歴から最も最近のタブを選択
-      console.log(
-        `[Tab Closing] inActivatedOrder - searching in history:`,
-        tabActivationHistory.map(h => h.tabId),
-      );
       const historyTab = getTabFromActivationHistory(closedTabId, tabs);
-      console.log(`[Tab Closing] inActivatedOrder - found tab: ${historyTab}`);
       return historyTab;
     }
 
@@ -153,27 +135,16 @@ const getSourceTab = (tabId: number, availableTabs: chrome.tabs.Tab[]) => {
 
 // アクティブ化履歴から次のタブを取得
 const getTabFromActivationHistory = (excludeTabId: number, availableTabs: chrome.tabs.Tab[]) => {
-  // デバッグ: 利用可能なタブIDを表示
-  console.log(
-    `[Tab Closing] Available tabs:`,
-    availableTabs.map(t => t.id),
-  );
-
   // 閉じたタブより前の履歴を逆順で検索
   for (let i = tabActivationHistory.length - 1; i >= 0; i--) {
     const entry = tabActivationHistory[i];
 
     // 閉じたタブに到達したら、それより前の履歴を探す
     if (entry.tabId === excludeTabId) {
-      console.log(`[Tab Closing] Found closed tab at index ${i}, searching before this`);
-
       // 閉じたタブより前の履歴を探す
       for (let j = i - 1; j >= 0; j--) {
         const previousEntry = tabActivationHistory[j];
         if (availableTabs.some(tab => tab.id === previousEntry.tabId)) {
-          console.log(
-            `[Tab Closing] Found previous active tab: ${previousEntry.tabId} at index ${j}`,
-          );
           return previousEntry.tabId;
         }
       }
@@ -182,6 +153,5 @@ const getTabFromActivationHistory = (excludeTabId: number, availableTabs: chrome
   }
 
   // 閉じたタブが履歴にない、または前の履歴がない場合
-  console.log(`[Tab Closing] No previous active tab found in history`);
   return null;
 };
