@@ -1,4 +1,4 @@
-import { expect, test } from "../fixtures";
+import { expect, test } from "@/e2e/fixtures";
 
 test.describe("Options Page", () => {
   test("should open options page in new tab from extension icon", async ({

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { type BrowserContext, test as base, chromium, type Worker } from "@playwright/test";
-import { waitForServiceWorker } from "./utils/helpers";
+import { waitForServiceWorker } from "@/e2e/utils/helpers";
 
 export type TestFixtures = {
   context: BrowserContext;

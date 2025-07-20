@@ -1,5 +1,5 @@
-import { expect, test } from "../fixtures";
-import { createTabViaServiceWorker, getTabState, setExtensionSettings } from "../utils/helpers";
+import { expect, test } from "@/e2e/fixtures";
+import { createTabViaServiceWorker, getTabState, setExtensionSettings } from "@/e2e/utils/helpers";
 
 test.describe("Tab Behavior - New Tab Position", () => {
   test("new tab opens at first position", async ({ context, serviceWorker }) => {

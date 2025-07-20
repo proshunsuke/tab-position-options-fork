@@ -1,4 +1,4 @@
-import { expect, test } from "../fixtures";
+import { expect, test } from "@/e2e/fixtures";
 
 test.describe("Settings Storage", () => {
   test("should persist all settings correctly", async ({ context, extensionId }) => {
