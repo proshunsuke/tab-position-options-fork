@@ -1,8 +1,8 @@
 import type { FC } from "react";
+import { RadioGroup, type RadioOption } from "@/entrypoints/options/ui/RadioGroup";
+import { TabContent } from "@/entrypoints/options/ui/TabContent";
+import { TabSection } from "@/entrypoints/options/ui/TabSection";
 import type { TabActivation } from "@/src/types";
-import { RadioGroup, type RadioOption } from "./ui/RadioGroup";
-import { TabContent } from "./ui/TabContent";
-import { TabSection } from "./ui/TabSection";
 
 type Props = {
   afterTabClosing: TabActivation;

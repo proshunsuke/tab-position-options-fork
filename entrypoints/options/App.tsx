@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
+import { TabBehavior } from "@/entrypoints/options/TabBehavior";
+import { TabClosing } from "@/entrypoints/options/TabClosing";
 import type { TabActivation, TabPosition } from "@/src/types";
 import { APP_VERSION } from "@/src/version";
-import { TabBehavior } from "./TabBehavior";
-import { TabClosing } from "./TabClosing";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<"behavior" | "closing">("behavior");
