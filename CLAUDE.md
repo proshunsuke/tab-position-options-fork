@@ -177,7 +177,7 @@ Chrome Storage Localに保存されるデータは以下の構造を持ちます
 
 ```
 {
-  version: "1.0.0",  // package.jsonのバージョンと同期
+  version: "0.0.1",  // package.jsonのバージョンと同期
   settings: {
     newTab: {
       position: 'first' | 'last' | 'right' | 'left' | 'default'
