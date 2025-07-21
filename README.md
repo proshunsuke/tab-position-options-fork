@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="store-assets/promotional-440x280.png" alt="Tab Position Options" width="440" height="280">
+  <img src="store-assets/social-preview-1280x640.png" alt="Tab Position Options" width="640" height="320">
   
   # Tab Position Options
   
