@@ -10,7 +10,7 @@ export default defineConfig({
     name: "Tab Position Options Fork",
     version: APP_VERSION,
     description:
-      "Control where new tabs are opened - a modern fork of the classic Tab Position Options extension",
+      "Fork of Tab Position Options - Select the tab opening position, new tab behavior and behavior after closing a tab",
     permissions: ["tabs", "storage"],
     host_permissions: [],
     action: {
