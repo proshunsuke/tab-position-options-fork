@@ -1,0 +1,107 @@
+name: Release Extension
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_notes:
+        description: 'Release notes'
+        required: false
+        type: string
+        default: 'Bug fixes and improvements'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.4.0
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Get version from package.json
+        id: package_version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Prepare WXT
+        run: npx wxt prepare
+      
+      - name: Build extension
+        run: npm run build
+      
+      - name: Create ZIP file
+        run: |
+          npm run zip
+          # WXTが生成するファイル名に対応
+          ZIP_FILE="dist/tab-position-options-fork-${{ env.VERSION }}-chrome.zip"
+          echo "ZIP_FILE=$ZIP_FILE" >> $GITHUB_ENV
+      
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.VERSION }}
+          release_name: Release v${{ env.VERSION }}
+          body: |
+            ## What's Changed
+            ${{ inputs.release_notes }}
+            
+            ## Installation
+            
+            ### Recommended: Install from Chrome Web Store
+            🎯 **[Install from Chrome Web Store](https://chrome.google.com/webstore/detail/${{ secrets.CHROME_EXTENSION_ID }})**
+            
+            ### Alternative: Manual Installation
+            For developers or advanced users who prefer manual installation:
+            
+            1. Download the attached ZIP file below
+            2. Extract the ZIP file to a folder
+            3. Open Chrome Extensions page (chrome://extensions/)
+            4. Enable "Developer mode" in the top right
+            5. Click "Load unpacked" and select the extracted folder
+          draft: false
+          prerelease: false
+      
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ env.ZIP_FILE }}
+          asset_name: tab-position-options-fork-v${{ env.VERSION }}.zip
+          asset_content_type: application/zip
+      
+      - name: Upload to Chrome Web Store (Draft)
+        uses: mnao305/chrome-extension-upload@v5.0.0
+        with:
+          file-path: ${{ env.ZIP_FILE }}
+          extension-id: ${{ secrets.CHROME_EXTENSION_ID }}
+          client-id: ${{ secrets.CHROME_CLIENT_ID }}
+          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          publish: false  # 下書きとして保存
+      
+      - name: Summary
+        run: |
+          echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Version: v${{ env.VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- GitHub Release: [v${{ env.VERSION }}](${{ steps.create_release.outputs.html_url }})" >> $GITHUB_STEP_SUMMARY
+          echo "- Chrome Web Store: [Draft uploaded](https://chrome.google.com/webstore/devconsole)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Go to [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)" >> $GITHUB_STEP_SUMMARY
+          echo "2. Review the draft" >> $GITHUB_STEP_SUMMARY
+          echo "3. Submit for review when ready" >> $GITHUB_STEP_SUMMARY
