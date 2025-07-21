@@ -12,6 +12,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     steps:
       - name: Checkout code
@@ -48,12 +50,11 @@ jobs:
       
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: v${{ env.VERSION }}
-          release_name: Release v${{ env.VERSION }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: v${{ env.VERSION }}
+          name: Release v${{ env.VERSION }}
           body: |
             ## What's Changed
             ${{ inputs.release_notes }}
@@ -73,16 +74,7 @@ jobs:
             5. Click "Load unpacked" and select the extracted folder
           draft: false
           prerelease: false
-      
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ env.ZIP_FILE }}
-          asset_name: tab-position-options-fork-v${{ env.VERSION }}.zip
-          asset_content_type: application/zip
+          artifacts: ${{ env.ZIP_FILE }}
       
       - name: Upload to Chrome Web Store (Draft)
         uses: mnao305/chrome-extension-upload@v5.0.0
@@ -98,7 +90,7 @@ jobs:
         run: |
           echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
           echo "- Version: v${{ env.VERSION }}" >> $GITHUB_STEP_SUMMARY
-          echo "- GitHub Release: [v${{ env.VERSION }}](${{ steps.create_release.outputs.html_url }})" >> $GITHUB_STEP_SUMMARY
+          echo "- GitHub Release: [v${{ env.VERSION }}](https://github.com/${{ github.repository }}/releases/tag/v${{ env.VERSION }})" >> $GITHUB_STEP_SUMMARY
           echo "- Chrome Web Store: [Draft uploaded](https://chrome.google.com/webstore/devconsole)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
