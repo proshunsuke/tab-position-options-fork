@@ -325,3 +325,30 @@ Chrome Storage Localに保存されるデータは以下の構造を持ちます
    - リトライ機構の活用
    - タイムアウトの適切な設定
    - CI環境での実行を考慮した設計
+
+## リリースプロセス
+
+### リリースワークフローの仕組み
+`.github/workflows/release.yml`で定義されたワークフローを使用します：
+- 手動実行のみ（`workflow_dispatch`）
+- `package.json`のバージョンを読み取ってリリース
+- GitHub ReleaseとChrome Web Storeへの同時アップロード
+
+### リリース時の重要な制約
+1. **バージョン番号は`package.json`のみで管理** - 他の場所でバージョンをハードコードしない
+2. **Chrome Web Store APIの制限** - APIではZIPファイルのアップロードのみ可能。ストア掲載情報（説明文、スクリーンショット等）の更新は不可
+3. **リリースワークフローの実行前に必ずビルドとテストが通ることを確認**
+
+### コード実装時の注意
+1. **Service Workerの制限を常に意識** - DOM API使用不可、イベント駆動型実装
+2. **エラーハンドリング** - `chrome.runtime.lastError`の確認を忘れない
+3. **非同期処理** - Chrome Extension APIは基本的に非同期。適切にawaitを使用
+
+### GitHub Secretsの構成
+リリースワークフローは以下のRepository Secretsに依存：
+- `CHROME_EXTENSION_ID`: Chrome Web StoreでのID
+- `CHROME_CLIENT_ID`: OAuth 2.0クライアントID
+- `CHROME_CLIENT_SECRET`: OAuth 2.0クライアントシークレット
+- `CHROME_REFRESH_TOKEN`: OAuth 2.0リフレッシュトークン
+
+これらが設定されていないとリリースワークフローは失敗します。
