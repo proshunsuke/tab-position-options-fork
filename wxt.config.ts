@@ -11,7 +11,7 @@ export default defineConfig({
     version: APP_VERSION,
     description:
       "Fork of Tab Position Options - Select the tab opening position, new tab behavior and behavior after closing a tab",
-    permissions: ["tabs", "storage"],
+    permissions: ["storage"],
     host_permissions: [],
     action: {
       // アイコンクリック時の動作をbackground.tsで制御
