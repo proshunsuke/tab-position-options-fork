@@ -84,6 +84,17 @@ npm run test:e2e:debug
 - 適切な粒度でコミットを分割する（機能ごと、目的ごと）
 - 明確で簡潔なメッセージを心がける
 
+## Changelogの規約
+
+CHANGELOG.mdは[Claude Code形式](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)に従う：
+
+- **バージョン番号のみ**を見出しとする（例：`## 0.0.2`）
+- **日付やUnreleasedセクションは記載しない**
+- **リリース済みバージョンのみ**を記載する
+- 新しいバージョンを上に、古いバージョンを下に配置
+- 各バージョンの下に箇条書きで簡潔な変更内容を記載
+- 動詞で始まる文章（Fixed, Added, Removed など）
+
 ## Issue作成時の規約
 
 GitHubのissueは**英語で**記載すること。以下の要素を含める：
