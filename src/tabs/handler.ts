@@ -124,7 +124,18 @@ export const handleTabRemoved = async (
     }
 
     // 閉じたタブが最後にアクティブだったタブかチェック
-    const wasLastActive = lastActiveTabId === tabId;
+    // 重要: タブが閉じられた直後にChromeが自動的に別のタブをアクティブにすることがある
+    // そのため、lastActiveTabIdがnullまたは閉じたタブでない場合でも、
+    // 直前まで閉じたタブがアクティブだった可能性がある
+
+    let wasLastActive = lastActiveTabId === tabId;
+
+    // lastActiveTabIdがnullの場合、タブがアクティブだった可能性を考慮
+    // タブを閉じた直後に他のタブがアクティブになっている場合も考慮
+    if (!wasLastActive && lastActiveTabId === null) {
+      // タブが閉じられた直後の状況を確認
+      wasLastActive = true;
+    }
 
     if (!wasLastActive) {
       cleanupTabData(tabId);
@@ -150,13 +161,11 @@ export const handleTabRemoved = async (
     // 次のタブをアクティブにする
     if (nextTabId !== null) {
       // 一時的にlastActiveTabIdをクリアして、自動的なタブアクティブ化を履歴に記録しないようにする
-      const tempLastActiveTabId = lastActiveTabId;
       lastActiveTabId = null;
 
       await chrome.tabs.update(nextTabId, { active: true });
 
-      // 復元
-      lastActiveTabId = tempLastActiveTabId;
+      // 復元しない - handleTabActivatedが新しい値を設定する
     }
   } catch (error) {
     console.error("Error handling tab removal:", error);

@@ -280,4 +280,77 @@ test.describe("Tab Behavior - After Tab Closing", () => {
       timeout: 3000,
     });
   });
+
+  test('activate left tab after closing parent tab opened from target="_blank" link', async ({
+    context,
+    serviceWorker,
+  }) => {
+    await setExtensionSettings(context, { afterTabClosing: { activateTab: "left" } });
+
+    // 初期タブの状態を取得
+    const initialState = await getTabState(serviceWorker);
+    const initialTabCount = initialState.totalTabs;
+
+    // Step 1: 3つのタブを作成 [Tab A] [Tab B] [Tab C]
+    const tabA = await context.newPage();
+    await tabA.goto("data:text/html,<h1>Tab A</h1>");
+
+    const tabB = await context.newPage();
+    // Tab Bにtarget="_blank"リンクを含むHTMLを設定
+    await tabB.goto(`data:text/html,
+      <html lang="en">
+        <body>
+          <h1>Tab B</h1>
+          <a href="about:blank" target="_blank" id="test-link">Open Tab D</a>
+        </body>
+      </html>
+    `);
+
+    const tabC = await context.newPage();
+    await tabC.goto("data:text/html,<h1>Tab C</h1>");
+
+    // Step 2: Tab Bをアクティブに
+    await tabB.bringToFront();
+    await tabB.waitForTimeout(200);
+
+    // Step 3: Tab Bのtarget="_blank"リンクを実際にクリック
+    const newPagePromise = context.waitForEvent("page");
+    await tabB.click("#test-link");
+    const tabD = await newPagePromise;
+
+    // Tab Dのコンテンツを設定
+    await tabD.goto("data:text/html,<h1>Tab D</h1>");
+    await tabD.waitForTimeout(200);
+
+    // Tab Dがアクティブになっていることを確認
+    const state = await getTabState(serviceWorker);
+    expect(state.totalTabs).toBe(initialTabCount + 4); // A, B, D, C
+    expect(state.activeTabIndex).toBe(initialTabCount + 2); // Tab D
+
+    // Step 4: Tab Dを閉じる
+    await closeActiveTabViaServiceWorker(serviceWorker);
+
+    // Tab Bがアクティブになるべき（openerTabに戻る）
+    await expect(async () => {
+      const currentState = await getTabState(serviceWorker);
+      expect(currentState.totalTabs).toBe(initialTabCount + 3);
+      expect(currentState.activeTabIndex).toBe(initialTabCount + 1); // Tab B
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 3000,
+    });
+
+    // Step 5: Tab Bを閉じる - ここでバグが発生するはず
+    await closeActiveTabViaServiceWorker(serviceWorker);
+
+    // Left Tab設定により、Tab Aがアクティブになるべき
+    await expect(async () => {
+      const finalState = await getTabState(serviceWorker);
+      expect(finalState.totalTabs).toBe(initialTabCount + 2); // Tab A, Tab C
+      expect(finalState.activeTabIndex).toBe(initialTabCount); // Tab A (左側のタブ)
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 3000,
+    });
+  });
 });
