@@ -88,12 +88,39 @@ npm run test:e2e:debug
 
 CHANGELOG.mdは[Claude Code形式](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)に従う：
 
+### 厳守すべきフォーマット
 - **バージョン番号のみ**を見出しとする（例：`## 0.0.2`）
 - **日付やUnreleasedセクションは記載しない**
 - **リリース済みバージョンのみ**を記載する
 - 新しいバージョンを上に、古いバージョンを下に配置
-- 各バージョンの下に箇条書きで簡潔な変更内容を記載
-- 動詞で始まる文章（Fixed, Added, Removed など）
+
+### 変更内容の記載方法
+- 各バージョンの下に箇条書き（`-`）で変更内容を記載
+- **ユーザー視点の変更のみ**を記載（バグ修正、新機能など）
+- 動詞で始まる簡潔な文章（Fixed, Added, Removed など）
+- **実装詳細やテスト追加は記載しない**
+
+### 絶対に追加してはいけないもの
+- `Note:` などの追加説明セクション
+- 実装の技術的詳細（「200msのthreshold」など内部実装の数値）
+- テストの追加に関する記載
+- コードの内部的な改善（リファクタリングなど）
+
+### 良い例
+```markdown
+## 0.0.2
+- Fixed "Left Tab" setting not working correctly when closing tabs opened via target="_blank" links
+- Fixed tab order preservation during browser session restore
+```
+
+### 悪い例
+```markdown
+## 0.0.2
+- Added configurable threshold-based detection (200ms) ← 内部実装の詳細
+- Added E2E tests for race conditions ← テストの追加
+- Refactored tab handler ← 内部的な改善
+Note: This release includes... ← 余計な説明セクション
+```
 
 ## Issue作成時の規約
 
@@ -358,16 +385,28 @@ Chrome Storage Localに保存されるデータは以下の構造を持ちます
 
 ## リリースプロセス
 
+### リリース準備の手順
+1. **package.jsonのバージョンを更新**
+2. **CHANGELOG.mdを更新**（上記の規約に厳密に従うこと）
+3. **全てのチェックを実行**:
+   - `npm run typecheck`
+   - `npm run lint:check`
+   - `npm run test:e2e`
+   - `npm run build`
+4. **変更をコミット**: `chore: bump version to X.X.X`
+
 ### リリースワークフローの仕組み
 `.github/workflows/release.yml`で定義されたワークフローを使用します：
 - 手動実行のみ（`workflow_dispatch`）
 - `package.json`のバージョンを読み取ってリリース
 - GitHub ReleaseとChrome Web Storeへの同時アップロード
+- **タグは自動的に作成される**（手動でタグを作成しない）
 
 ### リリース時の重要な制約
 1. **バージョン番号は`package.json`のみで管理** - 他の場所でバージョンをハードコードしない
 2. **Chrome Web Store APIの制限** - APIではZIPファイルのアップロードのみ可能。ストア掲載情報（説明文、スクリーンショット等）の更新は不可
 3. **リリースワークフローの実行前に必ずビルドとテストが通ることを確認**
+4. **手動でGitタグを作成しない** - ワークフローが自動的に処理する
 
 ### コード実装時の注意
 1. **Service Workerの制限を常に意識** - DOM API使用不可、イベント駆動型実装
