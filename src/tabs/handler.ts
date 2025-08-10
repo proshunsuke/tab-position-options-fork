@@ -6,8 +6,26 @@ import {
   recordTabSource,
 } from "@/src/tabs/closeHandler";
 import { calculateNewTabIndex } from "@/src/tabs/position";
+import {
+  handleBrowserStartup,
+  initSessionRestoreDetector,
+  isSessionRestoreTab,
+} from "@/src/tabs/sessionRestoreDetector";
 
 export const handleNewTab = async (tab: chrome.tabs.Tab) => {
+  // セッション復元によるタブかチェック
+  const isSessionRestore = isSessionRestoreTab();
+
+  if (isSessionRestore) {
+    // タブの追跡は記録するが、位置調整はスキップ
+    if (tab.id) {
+      await updateTabIndexCache(tab.id);
+      if (tab.openerTabId) {
+        recordTabSource(tab.id, tab.openerTabId);
+      }
+    }
+    return;
+  }
   // chrome.tabs.getで最新のタブ情報を取得（openerTabIdを含む）
   if (tab.id) {
     try {
@@ -200,11 +218,15 @@ const initializeTabIndexCache = async () => {
 };
 
 export const setupTabHandlers = () => {
-  if (typeof chrome !== "undefined" && chrome.tabs) {
+  if (typeof chrome !== "undefined" && chrome.tabs && chrome.runtime) {
+    // セッション復元検出器を初期化
+    initSessionRestoreDetector();
+
     chrome.tabs.onCreated.addListener(handleNewTab);
     chrome.tabs.onActivated.addListener(handleTabActivated);
     chrome.tabs.onRemoved.addListener(handleTabRemoved);
     chrome.tabs.onMoved.addListener(handleTabMoved);
+    chrome.runtime.onStartup.addListener(handleBrowserStartup);
 
     // 初期化時に既存タブのインデックスをキャッシュ
     initializeTabIndexCache();
