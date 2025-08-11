@@ -53,6 +53,35 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
     // 現在はnewTabの設定をすべてのタブに適用（ブックマークからのタブも含む）
     const position = settings.newTab.position;
 
+    // バックグラウンドで開く設定の場合、タブを非アクティブにする
+    if (settings.newTab.background && tab.id && tab.active) {
+      // 前のアクティブタブを特定
+      // 優先順位: lastActiveTabId > openerTabId > 位置から推測
+      let previousActiveTabId: number | null = null;
+
+      // 最も確実：記録されている最後のアクティブタブ
+      if (lastActiveTabId && lastActiveTabId !== tab.id) {
+        previousActiveTabId = lastActiveTabId;
+      }
+      // 次善：openerTabId（リンクから開かれた場合）
+      else if (tab.openerTabId) {
+        previousActiveTabId = tab.openerTabId;
+      }
+      // フォールバック：位置から推測
+      else {
+        const tabs = await chrome.tabs.query({ currentWindow: true });
+        const previousTab = tabs.find(t => t.id !== tab.id && t.index === tab.index - 1);
+        if (previousTab?.id) {
+          previousActiveTabId = previousTab.id;
+        }
+      }
+
+      // 前のアクティブタブに戻す
+      if (previousActiveTabId) {
+        await chrome.tabs.update(previousActiveTabId, { active: true });
+      }
+    }
+
     // デフォルトの場合は何もしない
     if (position === "default" || !tab.id) {
       return;
