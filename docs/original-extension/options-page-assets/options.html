@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <title>options</title>
+    <link rel="stylesheet" href="options.css">
+    <script src="options.js"></script>
+</head>
+<body>
+<div style="margin-top:10px;margin-left:40px">
+    <div class="controllbuttoncontainer" style="float:right">
+        <button type="button" class="btnclass" id="importbutton">Import Settings</button>
+        <button type="button" class="btnclass" id="exportbutton">Export Settings</button>
+    </div>
+    <div class="keysortstrclass">
+        <div style="display:inline-block">
+            Keyboard Shortcuts<br>
+            <br>
+            Alt+t = Sort tab (title)<br>
+            Alt+u = Sort tab (url)<br>
+            Alt+c = Switch between current and last active tab
+        </div>
+        <div style="display:inline-block;margin-left:50px">
+            ----Change keyboard shortcut keys---<br>
+            Open the extensions page<br>
+            scroll to the bottom of the page and click "Configure commands".
+        </div>
+    </div>
+    <div class="headerclass">New Tab</div>
+    <div class="checkcontainerclass">
+        <div style="margin-top:12px">
+            <label>
+                <input type="radio" name="openposbuttn" value="first" id="openbutton1">
+                Always first
+            </label>
+        </div>
+        <div style="margin-top:12px">
+            <label>
+                <input type="radio" name="openposbuttn" value="last" id="openbutton2">
+                Always last
+            </label>
+        </div>
+        <div style="margin-top:12px">
+            <label>
+                <input type="radio" name="openposbuttn" value="right" id="openbutton3">
+                Right of current tab
+            </label>
+        </div>
+        <div style="margin-top:12px">
+            <label>
+                <input type="radio" name="openposbuttn" value="left" id="openbutton4">
+                Left of current tab
+            </label>
+        </div>
+        <div style="margin-top:12px">
+            <label>
+                <input type="radio" name="openposbuttn" value="default" checked id="openbutton5">
+                Default
+            </label>
+        </div>
+        <div style="margin-top:50px">
+            <label>
+                <input type="checkbox" value="first" id="newtabgcheckbox">
+                New Tab Background
+            </label>
+        </div>
+    </div>
+    <div class="urlcontainerclass">
+        <div>Matching URLs<img src="add.png" id="addbutton" style="margin-left:5px">
+        </div>
+        <div id="openurllist">
+        </div>
+    </div>
+    <div style="clear:both;width: 100%;margin-bottom: 45px;">
+    </div>
+    <div class="headerclass">Loading Page</div>
+    <div class="urlcontainerclass" id="loadingurlcontainer" style="padding-left:275px">
+        <div>Matching URLs<img src="add.png" id="addbutton4" style="margin-left:5px">
+        </div>
+        <div id="loadingurllist"></div>
+    </div>
+    <div style="clear:both;width: 100%;margin-bottom: 45px;">
+    </div>
+    <div class="headerclass">Activate Tab After Tab Closing</div>
+    <div class="checkcontainerclass2">
+        <div style="margin-top:12px">
+            <label>
+                <input type="radio" name="activetagbutton" value="first" id="activebutton1">
+                First tab
+            </label>
+        </div>
+        <div style="margin-top:12px">
+            <label>
+                <input type="radio" name="activetagbutton" value="last" id="activebutton2">
+                Last tab
+            </label>
+        </div>
+        <div style="margin-top:12px">
+            <label>
+                <input type="radio" name="activetagbutton" value="right" id="activebutton3">
+                Right tab
+            </label>
+        </div>
+        <div style="margin-top:12px">
+            <label>
+                <input type="radio" name="activetagbutton" value="left" id="activebutton4">
+                Left tab
+            </label>
+        </div>
+        <div style="margin-top:12px">
+            <label>
+                <input type="radio" name="activetagbutton" value="order" id="activebutton5">
+                In activated order
+            </label>
+        </div>
+        <div style="margin-top:12px">
+            <label>
+                <input type="radio" name="activetagbutton" value="prnt" id="activebutton7">
+                Source tab (Open link)
+            </label>
+        </div>
+        <div style="margin-top:12px">
+            <label>
+                <input type="radio" name="activetagbutton" value="prnt" id="activebutton8">
+                Source tab (Open link) &amp; In activated order
+            </label>
+        </div>
+        <div style="margin-top:12px">
+            <label>
+                <input type="radio" name="activetagbutton" value="default" checked id="activebutton6">
+                Default
+            </label>
+        </div>
+    </div>
+    <div style="clear:both;width: 100%;margin-bottom: 45px;"></div>
+    <div class="headerclass">Tab on Activate</div>
+    <div class="checkcontainerclass2">
+        <div style="margin-top:12px">
+            <label>
+                <input type="radio" name="onactivebutton" value="first" id="onactbutton1" checked>
+                Default
+            </label>
+        </div>
+        <div style="margin-top:12px">
+            <label>
+                <input type="radio" name="onactivebutton" value="last" id="onactbutton2">
+                Last
+            </label>
+        </div>
+        <div style="margin-top:12px">
+            <label>
+                <input type="radio" name="onactivebutton" value="right" id="onactbutton3">
+                First
+            </label>
+        </div>
+    </div>
+    <div style="clear:both;width: 100%;margin-bottom: 45px;">
+    </div>
+    <div class="headerclass">External Links</div>
+    <div class="checkcontainerclass">
+        <div style="margin-top:12px">
+            <label>
+                <input type="checkbox" id="exlinknewtabcheckbox">
+                External Links in New Tab
+            </label>
+        </div>
+    </div>
+    <div class="urlcontainerclass" id="exceptextlinklistcontainer">
+        <div>Matching URLs<img src="add.png" id="addbutton3" style="margin-left:5px">
+        </div>
+        <div id="exceptextlinkllist"></div>
+    </div>
+    <div style="clear:both;width: 100%;margin-bottom: 45px;">
+    </div>
+    <div class="headerclass">Pop-up</div>
+    <div class="checkcontainerclass">
+        <div style="margin-top:12px">
+            <label>
+                <input type="checkbox" value="first" id="popupntbcheckbox">
+                Open pop-up window as new tab
+            </label>
+        </div>
+    </div>
+    <div class="urlcontainerclass" id="exceptlistcontainer">
+        <div>Exceptions<img src="add.png" id="addbutton2" style="margin-left:5px">
+        </div>
+        <div id="exceptpopupllist">
+        </div>
+    </div>
+</div>
+</body>
+</html>
