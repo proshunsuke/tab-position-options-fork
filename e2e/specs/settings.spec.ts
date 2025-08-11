@@ -28,7 +28,7 @@ test.describe("Settings Storage", () => {
     });
 
     expect(savedSettings).toEqual({
-      newTab: { position: "first" },
+      newTab: { position: "first", background: false },
       afterTabClosing: { activateTab: "inActivatedOrder" },
     });
   });
