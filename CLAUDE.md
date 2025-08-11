@@ -296,6 +296,14 @@ Chrome Storage Localに保存されるデータは以下の構造を持ちます
 - 設定値の検証とバリデーション
 - Service Workerのライフサイクル管理
 
+## オリジナル拡張機能の仕様
+
+オリジナルのTab Position Options拡張機能の詳細な仕様と実装については、`/docs/original-extension/`ディレクトリを参照：
+
+- **specification.md**: オリジナル拡張機能の完全な機能仕様書
+- **options-page-assets/**: オリジナルの設定画面の実装（HTML/CSS/JS）
+- **screenshots/**: 各機能のUIスクリーンショット
+
 ## 開発時の注意点
 
 1. **Service Worker の制限**
