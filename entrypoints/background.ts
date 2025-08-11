@@ -1,13 +1,18 @@
-import { loadSettings, setupStorageListener } from "@/src/storage";
+import { initializeSettingsState, setupStorageListener } from "@/src/storage";
 import { setupTabHandlers } from "@/src/tabs/handler";
+import { initializeAllStates } from "@/src/tabs/tabState";
 
 export default defineBackground(() => {
   // 初期設定を読み込む
   const initializeExtension = async () => {
     try {
-      await loadSettings();
+      // すべてのStateManagerを初期化（ストレージから復元）
+      await Promise.all([
+        initializeAllStates(), // タブ関連の状態（sessionStorage）
+        initializeSettingsState(), // 設定（localStorage）
+      ]);
     } catch (error) {
-      console.error("Failed to load settings:", error);
+      console.error("Failed to initialize extension:", error);
     }
   };
 

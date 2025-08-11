@@ -1,4 +1,4 @@
-import { getCachedSettings } from "@/src/storage";
+import { getSettings } from "@/src/storage";
 import {
   cleanupTabData,
   determineNextActiveTab,
@@ -11,6 +11,13 @@ import {
   initSessionRestoreDetector,
   isSessionRestoreTab,
 } from "@/src/tabs/sessionRestoreDetector";
+import {
+  deleteFromTabIndexCache,
+  getTabIndexCache,
+  lastActiveTabState,
+  setTabIndexCache,
+  updateTabIndexCache,
+} from "@/src/tabs/tabState";
 
 export const handleNewTab = async (tab: chrome.tabs.Tab) => {
   // セッション復元によるタブかチェック
@@ -48,7 +55,7 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
 
   try {
     // キャッシュされた設定を取得（非同期処理なし）
-    const settings = getCachedSettings();
+    const settings = await getSettings();
 
     // 現在はnewTabの設定をすべてのタブに適用（ブックマークからのタブも含む）
     const position = settings.newTab.position;
@@ -93,29 +100,11 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
 
 // タブがアクティブになった時の処理
 export const handleTabActivated = async (activeInfo: { tabId: number; windowId: number }) => {
-  recordTabActivation(activeInfo.tabId);
+  await recordTabActivation(activeInfo.tabId);
   await updateTabIndexCache(activeInfo.tabId);
 
   // 最後にアクティブだったタブを記録
-  lastActiveTabId = activeInfo.tabId;
-};
-
-// タブインデックスのキャッシュ（タブIDとインデックスのマッピング）
-const tabIndexCache = new Map<number, number>();
-
-// 最後にアクティブだったタブを記録
-let lastActiveTabId: number | null = null;
-
-// タブが作成・移動・アクティブになった時にインデックスをキャッシュ
-export const updateTabIndexCache = async (tabId: number) => {
-  try {
-    const tab = await chrome.tabs.get(tabId);
-    if (tab) {
-      tabIndexCache.set(tabId, tab.index);
-    }
-  } catch (_error) {
-    // タブが既に存在しない場合は無視
-  }
+  await lastActiveTabState.set(activeInfo.tabId);
 };
 
 // タブが閉じられた時の処理
@@ -125,19 +114,19 @@ export const handleTabRemoved = async (
 ) => {
   // ウィンドウが閉じられた場合は何もしない
   if (removeInfo.isWindowClosing) {
-    cleanupTabData(tabId);
-    tabIndexCache.delete(tabId);
+    await cleanupTabData(tabId);
+    await deleteFromTabIndexCache(tabId);
     return;
   }
 
   try {
-    const settings = getCachedSettings();
+    const settings = await getSettings();
     const activateTabSetting = settings.afterTabClosing.activateTab;
 
     // デフォルト設定の場合は、ブラウザのデフォルト動作に任せる
     if (activateTabSetting === "default") {
-      cleanupTabData(tabId);
-      tabIndexCache.delete(tabId);
+      await cleanupTabData(tabId);
+      await deleteFromTabIndexCache(tabId);
       return;
     }
 
@@ -146,6 +135,7 @@ export const handleTabRemoved = async (
     // そのため、lastActiveTabIdがnullまたは閉じたタブでない場合でも、
     // 直前まで閉じたタブがアクティブだった可能性がある
 
+    const lastActiveTabId = await lastActiveTabState.get();
     let wasLastActive = lastActiveTabId === tabId;
 
     // lastActiveTabIdがnullの場合、タブがアクティブだった可能性を考慮
@@ -156,13 +146,14 @@ export const handleTabRemoved = async (
     }
 
     if (!wasLastActive) {
-      cleanupTabData(tabId);
-      tabIndexCache.delete(tabId);
+      await cleanupTabData(tabId);
+      await deleteFromTabIndexCache(tabId);
       return;
     }
 
     // キャッシュからタブのインデックスを取得
-    const closedTabIndex = tabIndexCache.get(tabId) ?? 0;
+    const cache = await getTabIndexCache();
+    const closedTabIndex = cache.get(tabId) ?? 0;
 
     // 次にアクティブにするタブを決定
     const nextTabId = await determineNextActiveTab(
@@ -173,13 +164,13 @@ export const handleTabRemoved = async (
     );
 
     // クリーンアップ
-    cleanupTabData(tabId);
-    tabIndexCache.delete(tabId);
+    await cleanupTabData(tabId);
+    await deleteFromTabIndexCache(tabId);
 
     // 次のタブをアクティブにする
     if (nextTabId !== null) {
       // 一時的にlastActiveTabIdをクリアして、自動的なタブアクティブ化を履歴に記録しないようにする
-      lastActiveTabId = null;
+      await lastActiveTabState.set(null);
 
       await chrome.tabs.update(nextTabId, { active: true });
 
@@ -187,8 +178,8 @@ export const handleTabRemoved = async (
     }
   } catch (error) {
     console.error("Error handling tab removal:", error);
-    cleanupTabData(tabId);
-    tabIndexCache.delete(tabId);
+    await cleanupTabData(tabId);
+    await deleteFromTabIndexCache(tabId);
   }
 };
 
@@ -200,21 +191,25 @@ const handleTabMoved = async (
   await updateTabIndexCache(tabId);
   // 他のタブのインデックスも更新
   const tabs = await chrome.tabs.query({ windowId: moveInfo.windowId });
+  const cache = await getTabIndexCache();
   for (const tab of tabs) {
     if (tab.id) {
-      tabIndexCache.set(tab.id, tab.index);
+      cache.set(tab.id, tab.index);
     }
   }
+  await setTabIndexCache(cache);
 };
 
 // 初期化時に既存のタブのインデックスをキャッシュ
 const initializeTabIndexCache = async () => {
   const tabs = await chrome.tabs.query({});
+  const cache = new Map<number, number>();
   for (const tab of tabs) {
     if (tab.id) {
-      tabIndexCache.set(tab.id, tab.index);
+      cache.set(tab.id, tab.index);
     }
   }
+  await setTabIndexCache(cache);
 };
 
 export const setupTabHandlers = () => {

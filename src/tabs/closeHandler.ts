@@ -1,53 +1,52 @@
+import { getTabSourceMap, setTabSourceMap, tabActivationHistoryState } from "@/src/tabs/tabState";
 import type { TabActivation } from "@/src/types";
-
-type TabActivationInfo = {
-  tabId: number;
-  timestamp: number;
-};
 
 const MAX_HISTORY_SIZE = 50;
 
-// タブのアクティブ化履歴を保持
-const tabActivationHistory: TabActivationInfo[] = [];
-
-// タブのソース情報を保持（リンク元タブの追跡用）
-const tabSourceMap = new Map<number, number>();
-
 // タブがアクティブになった時に履歴を更新
-export const recordTabActivation = (tabId: number) => {
+export const recordTabActivation = async (tabId: number) => {
   const timestamp = Date.now();
+  const history = await tabActivationHistoryState.get();
 
   // 既存のエントリーを削除（最新を最後に追加するため）
-  removeTabFromHistory(tabId);
+  const updatedHistory = history.filter(entry => entry.tabId !== tabId);
 
   // 新しいエントリーを追加
-  tabActivationHistory.push({ tabId, timestamp });
+  updatedHistory.push({ tabId, timestamp });
 
   // 履歴のサイズを制限
-  if (tabActivationHistory.length > MAX_HISTORY_SIZE) {
-    tabActivationHistory.shift();
+  if (updatedHistory.length > MAX_HISTORY_SIZE) {
+    updatedHistory.shift();
   }
+
+  await tabActivationHistoryState.set(updatedHistory);
 };
 
 // タブのソース情報を記録
-export const recordTabSource = (newTabId: number, sourceTabId: number) => {
-  tabSourceMap.set(newTabId, sourceTabId);
+export const recordTabSource = async (newTabId: number, sourceTabId: number) => {
+  const sourceMap = await getTabSourceMap();
+  sourceMap.set(newTabId, sourceTabId);
+  await setTabSourceMap(sourceMap);
 };
 
 // タブが閉じられた時にクリーンアップ
-export const cleanupTabData = (tabId: number) => {
+export const cleanupTabData = async (tabId: number) => {
   // アクティブ化履歴から削除
-  removeTabFromHistory(tabId);
+  const history = await tabActivationHistoryState.get();
+  const updatedHistory = history.filter(entry => entry.tabId !== tabId);
+  await tabActivationHistoryState.set(updatedHistory);
 
   // ソースマップから削除
-  tabSourceMap.delete(tabId);
+  const sourceMap = await getTabSourceMap();
+  sourceMap.delete(tabId);
 
   // このタブをソースとしている他のタブの情報も削除
-  for (const [key, value] of tabSourceMap.entries()) {
+  for (const [key, value] of sourceMap.entries()) {
     if (value === tabId) {
-      tabSourceMap.delete(key);
+      sourceMap.delete(key);
     }
   }
+  await setTabSourceMap(sourceMap);
 };
 
 // 次にアクティブにするタブを決定
@@ -93,22 +92,22 @@ export const determineNextActiveTab = async (
 
     case "inActivatedOrder": {
       // アクティブ化履歴から最も最近のタブを選択
-      const historyTab = getTabFromActivationHistory(closedTabId, tabs);
+      const historyTab = await getTabFromActivationHistory(closedTabId, tabs);
       return historyTab;
     }
 
     case "sourceTab":
       // リンク元のタブ
-      return getSourceTab(closedTabId, tabs);
+      return await getSourceTab(closedTabId, tabs);
 
     case "sourceTabAndOrder": {
       // まずリンク元のタブを試す
-      const sourceTab = getSourceTab(closedTabId, tabs);
+      const sourceTab = await getSourceTab(closedTabId, tabs);
       if (sourceTab !== null) {
         return sourceTab;
       }
       // 次にアクティブ化履歴から選択
-      return getTabFromActivationHistory(closedTabId, tabs);
+      return await getTabFromActivationHistory(closedTabId, tabs);
     }
     default:
       // ブラウザのデフォルト動作に任せる
@@ -116,17 +115,10 @@ export const determineNextActiveTab = async (
   }
 };
 
-// タブ履歴から既存のエントリーを削除
-const removeTabFromHistory = (tabId: number) => {
-  const existingIndex = tabActivationHistory.findIndex(entry => entry.tabId === tabId);
-  if (existingIndex !== -1) {
-    tabActivationHistory.splice(existingIndex, 1);
-  }
-};
-
 // ソースタブを取得
-const getSourceTab = (tabId: number, availableTabs: chrome.tabs.Tab[]) => {
-  const sourceTabId = tabSourceMap.get(tabId);
+const getSourceTab = async (tabId: number, availableTabs: chrome.tabs.Tab[]) => {
+  const sourceMap = await getTabSourceMap();
+  const sourceTabId = sourceMap.get(tabId);
   if (sourceTabId && availableTabs.some(tab => tab.id === sourceTabId)) {
     return sourceTabId;
   }
@@ -134,16 +126,21 @@ const getSourceTab = (tabId: number, availableTabs: chrome.tabs.Tab[]) => {
 };
 
 // アクティブ化履歴から次のタブを取得
-const getTabFromActivationHistory = (excludeTabId: number, availableTabs: chrome.tabs.Tab[]) => {
+const getTabFromActivationHistory = async (
+  excludeTabId: number,
+  availableTabs: chrome.tabs.Tab[],
+) => {
+  const history = await tabActivationHistoryState.get();
+
   // 閉じたタブより前の履歴を逆順で検索
-  for (let i = tabActivationHistory.length - 1; i >= 0; i--) {
-    const entry = tabActivationHistory[i];
+  for (let i = history.length - 1; i >= 0; i--) {
+    const entry = history[i];
 
     // 閉じたタブに到達したら、それより前の履歴を探す
     if (entry.tabId === excludeTabId) {
       // 閉じたタブより前の履歴を探す
       for (let j = i - 1; j >= 0; j--) {
-        const previousEntry = tabActivationHistory[j];
+        const previousEntry = history[j];
         if (availableTabs.some(tab => tab.id === previousEntry.tabId)) {
           return previousEntry.tabId;
         }
