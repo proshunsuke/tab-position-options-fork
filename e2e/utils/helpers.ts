@@ -1,5 +1,6 @@
 import type { BrowserContext, Worker } from "@playwright/test";
 import type { Settings } from "@/src/types";
+import { defaultSettings } from "@/src/types";
 
 /**
  * Service Workerが利用可能になるまで待機
@@ -92,3 +93,63 @@ export const closeActiveTabViaServiceWorker = async (serviceWorker: Worker) =>
     }
     return false;
   });
+
+/**
+ * 拡張機能のストレージをクリアしてデフォルト設定に戻す
+ */
+export const clearExtensionStorage = async (serviceWorker: Worker) => {
+  await serviceWorker.evaluate(async defaultSettings => {
+    // chrome.storage.localとsessionを完全にクリア
+    await chrome.storage.local.clear();
+    await chrome.storage.session.clear();
+
+    // デフォルト設定を復元
+    await chrome.storage.local.set({ settings: defaultSettings });
+  }, defaultSettings);
+};
+
+// グローバル型定義
+declare global {
+  // biome-ignore lint/suspicious/noExplicitAny: テスト用のグローバル変数のため
+  var __simpleStorageTestHelpers: any;
+}
+
+/**
+ * Service Workerの再起動をシミュレート
+ * メモリキャッシュをクリアして、ストレージからの再読み込みを強制
+ */
+export const simulateServiceWorkerRestart = async (serviceWorker: Worker): Promise<void> => {
+  // メモリキャッシュをクリア
+  await serviceWorker.evaluate(() => {
+    // simpleStorageのメモリキャッシュをクリア
+    if (globalThis.__simpleStorageTestHelpers) {
+      globalThis.__simpleStorageTestHelpers.clearMemoryCache();
+    }
+
+    // sessionRestoreDetectorの状態もリセット
+    if (globalThis.__testExports) {
+      globalThis.__testExports.defaultDetector.__testHelpers.resetState();
+    }
+  });
+
+  // ストレージから状態を再読み込みする時間を確保
+  await new Promise(resolve => setTimeout(resolve, 100));
+};
+
+/**
+ * メモリキャッシュの状態を確認
+ */
+export const getMemoryCacheState = async (serviceWorker: Worker) => {
+  return serviceWorker.evaluate(() => {
+    if (globalThis.__simpleStorageTestHelpers) {
+      return {
+        size: globalThis.__simpleStorageTestHelpers.getMemoryCacheSize(),
+        keys: globalThis.__simpleStorageTestHelpers.getMemoryCacheKeys(),
+        hasLastActiveTab: globalThis.__simpleStorageTestHelpers.hasInMemoryCache("lastActiveTabId"),
+        hasTabIndexCache: globalThis.__simpleStorageTestHelpers.hasInMemoryCache("tabIndexCache"),
+        hasSettings: globalThis.__simpleStorageTestHelpers.hasInMemoryCache("settings"),
+      };
+    }
+    return null;
+  });
+};
