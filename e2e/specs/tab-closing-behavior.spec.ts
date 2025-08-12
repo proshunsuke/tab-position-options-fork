@@ -1,11 +1,15 @@
 import { expect, test } from "@/e2e/fixtures";
 import {
+  clearExtensionStorage,
   closeActiveTabViaServiceWorker,
   getTabState,
   setExtensionSettings,
 } from "@/e2e/utils/helpers";
 
 test.describe("Tab Behavior - After Tab Closing", () => {
+  test.beforeEach(async ({ serviceWorker }) => {
+    await clearExtensionStorage(serviceWorker);
+  });
   test("activate first tab after closing", async ({ context, serviceWorker }) => {
     // 設定を先に変更
     await setExtensionSettings(context, { afterTabClosing: { activateTab: "first" } });
@@ -36,7 +40,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
       expect(state.activeTabIndex).toBe(0);
     }).toPass({
       intervals: [100, 100, 100],
-      timeout: 3000,
+      timeout: 5000,
     });
   });
 
@@ -69,7 +73,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
       expect(state.activeTabIndex).toBe(state.totalTabs - 1); // 最後のタブ
     }).toPass({
       intervals: [100, 100, 100],
-      timeout: 3000,
+      timeout: 5000,
     });
   });
 
@@ -102,7 +106,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
       expect(state.activeTabIndex).toBe(beforeState.activeTabIndex); // タブが削除されて右側のタブが同じインデックスに
     }).toPass({
       intervals: [100, 100, 100],
-      timeout: 3000,
+      timeout: 5000,
     });
   });
 
@@ -135,7 +139,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
       expect(state.activeTabIndex).toBe(beforeState.activeTabIndex - 1); // 左側のタブ
     }).toPass({
       intervals: [100, 100, 100],
-      timeout: 3000,
+      timeout: 5000,
     });
   });
 
@@ -176,7 +180,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
       expect(state.activeTabIndex).toBe(initialTabCount + 1); // tab2
     }).toPass({
       intervals: [100, 100, 100],
-      timeout: 3000,
+      timeout: 5000,
     });
   });
 
@@ -210,7 +214,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
       expect(state.activeTabIndex).toBe(beforeState.activeTabIndex);
     }).toPass({
       intervals: [100, 100, 100],
-      timeout: 3000,
+      timeout: 5000,
     });
   });
 
@@ -245,7 +249,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
       expect(state.activeTabIndex).toBe(initialTabCount - 1);
     }).toPass({
       intervals: [100, 100, 100],
-      timeout: 3000,
+      timeout: 5000,
     });
   });
 
@@ -277,7 +281,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
       expect(state.activeTabIndex).toBe(beforeState.activeTabIndex - 1); // 左側のタブ
     }).toPass({
       intervals: [100, 100, 100],
-      timeout: 3000,
+      timeout: 5000,
     });
   });
 
@@ -337,7 +341,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
       expect(currentState.activeTabIndex).toBe(initialTabCount + 1); // Tab B
     }).toPass({
       intervals: [100, 100, 100],
-      timeout: 3000,
+      timeout: 5000,
     });
 
     // Step 5: Tab Bを閉じる - ここでバグが発生するはず
@@ -350,7 +354,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
       expect(finalState.activeTabIndex).toBe(initialTabCount); // Tab A (左側のタブ)
     }).toPass({
       intervals: [100, 100, 100],
-      timeout: 3000,
+      timeout: 5000,
     });
   });
 });

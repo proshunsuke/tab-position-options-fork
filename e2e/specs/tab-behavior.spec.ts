@@ -1,7 +1,15 @@
 import { expect, test } from "@/e2e/fixtures";
-import { createTabViaServiceWorker, getTabState, setExtensionSettings } from "@/e2e/utils/helpers";
+import {
+  clearExtensionStorage,
+  createTabViaServiceWorker,
+  getTabState,
+  setExtensionSettings,
+} from "@/e2e/utils/helpers";
 
 test.describe("Tab Behavior - New Tab Position", () => {
+  test.beforeEach(async ({ serviceWorker }) => {
+    await clearExtensionStorage(serviceWorker);
+  });
   test("new tab opens at first position", async ({ context, serviceWorker }) => {
     await setExtensionSettings(context, { newTab: { position: "first" } });
 

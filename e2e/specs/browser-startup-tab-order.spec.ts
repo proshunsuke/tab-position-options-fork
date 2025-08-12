@@ -1,5 +1,5 @@
 import { expect, test } from "@/e2e/fixtures";
-import { setExtensionSettings } from "@/e2e/utils/helpers";
+import { clearExtensionStorage, setExtensionSettings } from "@/e2e/utils/helpers";
 
 // テスト用のグローバル型定義
 type DetectorConfig = {
@@ -39,6 +39,10 @@ declare global {
 }
 
 test.describe("Browser Startup Tab Order", () => {
+  test.beforeEach(async ({ serviceWorker }) => {
+    await clearExtensionStorage(serviceWorker);
+  });
+
   test("should respect 'first' position setting for new tabs after session restore", async ({
     context,
     serviceWorker,

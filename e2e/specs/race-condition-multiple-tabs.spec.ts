@@ -1,7 +1,10 @@
 import { expect, test } from "@/e2e/fixtures";
-import { setExtensionSettings } from "@/e2e/utils/helpers";
+import { clearExtensionStorage, setExtensionSettings } from "@/e2e/utils/helpers";
 
 test.describe("Race Condition - Multiple Tab Closure", () => {
+  test.beforeEach(async ({ serviceWorker }) => {
+    await clearExtensionStorage(serviceWorker);
+  });
   test("should handle multiple tabs closing simultaneously without race conditions", async ({
     context,
     serviceWorker,

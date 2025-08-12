@@ -1,6 +1,10 @@
 import { expect, test } from "@/e2e/fixtures";
+import { clearExtensionStorage } from "@/e2e/utils/helpers";
 
 test.describe("Settings Storage", () => {
+  test.beforeEach(async ({ serviceWorker }) => {
+    await clearExtensionStorage(serviceWorker);
+  });
   test("should persist all settings correctly", async ({ context, extensionId }) => {
     const optionsPage = await context.newPage();
     await optionsPage.goto(`chrome-extension://${extensionId}/options.html`);
@@ -27,9 +31,13 @@ test.describe("Settings Storage", () => {
       return result.settings;
     });
 
+    // デフォルト設定とマージされた状態を期待
     expect(savedSettings).toEqual({
       newTab: { position: "first" },
       afterTabClosing: { activateTab: "inActivatedOrder" },
+      loadingPage: { position: "default" },
+      tabOnActivate: { behavior: "default" },
+      popup: { openAsNewTab: false },
     });
   });
 

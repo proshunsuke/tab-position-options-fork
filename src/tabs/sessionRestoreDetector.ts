@@ -64,32 +64,27 @@ export const createSessionRestoreDetector = (
    * @returns セッション復元によるタブの場合はtrue
    */
   const isSessionRestoreTab = () => {
-    // 起動フェーズが終了していれば、通常のタブ
     if (!state.isStartupPhase) {
       return false;
     }
 
     const now = timeProvider();
 
-    // 最初のタブ
     if (state.lastTabCreationTime === 0) {
       state.lastTabCreationTime = now;
       // 最初のタブはセッション復元の可能性があるため、スキップ
       return true;
     }
 
-    // 前回のタブからの間隔をチェック
     const interval = now - state.lastTabCreationTime;
     state.lastTabCreationTime = now;
 
     // 間隔が閾値より長い場合、ユーザーによる手動作成と判断
     if (interval >= RAPID_CREATION_THRESHOLD_MS) {
-      // セッション復元フェーズ終了
       state.isStartupPhase = false;
       return false;
     }
 
-    // 短い間隔の場合、セッション復元中
     return true;
   };
 
