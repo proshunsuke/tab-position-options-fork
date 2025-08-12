@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.4
+- Fixed issues with Service Worker restart handling that were not fully resolved in version 0.0.3
+
 ## 0.0.3
 - Fixed unexpected behavior when Service Worker restarts after 30 seconds of inactivity
 
