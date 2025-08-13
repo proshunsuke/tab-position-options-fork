@@ -7,6 +7,7 @@ import { APP_VERSION } from "@/src/version";
 export default function App() {
   const [activeTab, setActiveTab] = useState<"behavior" | "closing">("behavior");
   const [newTabPosition, setNewTabPosition] = useState<TabPosition>("default");
+  const [newTabBackground, setNewTabBackground] = useState(false);
   const [afterTabClosing, setAfterTabClosing] = useState<TabActivation>("default");
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
@@ -18,6 +19,9 @@ export default function App() {
         if (result.settings.newTab?.position) {
           setNewTabPosition(result.settings.newTab.position);
         }
+        if (result.settings.newTab?.background !== undefined) {
+          setNewTabBackground(result.settings.newTab.background);
+        }
         if (result.settings.afterTabClosing?.activateTab) {
           setAfterTabClosing(result.settings.afterTabClosing.activateTab);
         }
@@ -27,6 +31,10 @@ export default function App() {
 
   const handleNewTabPositionChange = (value: string) => {
     setNewTabPosition(value as TabPosition);
+  };
+
+  const handleNewTabBackgroundChange = (checked: boolean) => {
+    setNewTabBackground(checked);
   };
 
   const handleAfterTabClosingChange = (value: string) => {
@@ -49,6 +57,7 @@ export default function App() {
           ...currentSettings,
           newTab: {
             position: newTabPosition,
+            background: newTabBackground,
           },
           afterTabClosing: {
             activateTab: afterTabClosing,
@@ -107,6 +116,8 @@ export default function App() {
               <TabBehavior
                 newTabPosition={newTabPosition}
                 onNewTabPositionChange={handleNewTabPositionChange}
+                newTabBackground={newTabBackground}
+                onNewTabBackgroundChange={handleNewTabBackgroundChange}
               />
             )}
 

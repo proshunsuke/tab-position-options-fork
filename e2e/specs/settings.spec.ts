@@ -33,7 +33,7 @@ test.describe("Settings Storage", () => {
 
     // デフォルト設定とマージされた状態を期待
     expect(savedSettings).toEqual({
-      newTab: { position: "first" },
+      newTab: { position: "first", background: false },
       afterTabClosing: { activateTab: "inActivatedOrder" },
       loadingPage: { position: "default" },
       tabOnActivate: { behavior: "default" },
