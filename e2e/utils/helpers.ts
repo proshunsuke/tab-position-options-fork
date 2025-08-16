@@ -82,6 +82,23 @@ export const createTabViaServiceWorker = async (serviceWorker: Worker) =>
   });
 
 /**
+ * Service Worker経由で外部アプリケーションからのタブ開放をシミュレート
+ * openerTabIdがない状態でタブを作成
+ */
+export const createExternalTabViaServiceWorker = async (serviceWorker: Worker) =>
+  serviceWorker.evaluate(async () => {
+    const newTab = await chrome.tabs.create({
+      active: true,
+      // openerTabIdを意図的に設定しない（外部タブの特徴）
+    });
+    return {
+      newTabId: newTab.id,
+      newTabIndex: newTab.index,
+      openerTabId: newTab.openerTabId, // undefined になるはず
+    };
+  });
+
+/**
  * Service Worker経由でアクティブなタブを閉じる
  */
 export const closeActiveTabViaServiceWorker = async (serviceWorker: Worker) =>
