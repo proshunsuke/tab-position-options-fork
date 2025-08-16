@@ -60,6 +60,8 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
       return;
     }
 
+    // lastActiveTabIdを事前に取得
+    const lastActiveTabId = await lastActiveTabState.get();
     const tabs = await chrome.tabs.query({ currentWindow: true });
 
     let previousActiveTab: chrome.tabs.Tab | undefined;
@@ -67,12 +69,21 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
     if (tab.openerTabId) {
       previousActiveTab = tabs.find(t => t.id === tab.openerTabId);
     } else {
-      // openerTabIdがない場合、新規タブ以外でアクティブなタブを探す
-      previousActiveTab = tabs.find(t => t.id !== tab.id && t.active);
+      // 外部アプリケーションからのタブ（openerTabIdがなく、作成時にアクティブ）の場合
+      if (tab.active && lastActiveTabId) {
+        // lastActiveTabIdから前のアクティブタブを取得
+        previousActiveTab = tabs.find(t => t.id === lastActiveTabId);
+      }
 
-      // それでも見つからない場合、新規タブの左隣のタブを前のアクティブタブとみなす
-      if (!previousActiveTab && tab.index > 0) {
-        previousActiveTab = tabs.find(t => t.index === tab.index - 1);
+      // それでも見つからない場合のフォールバック
+      if (!previousActiveTab) {
+        // 新規タブ以外でアクティブなタブを探す
+        previousActiveTab = tabs.find(t => t.id !== tab.id && t.active);
+
+        // それでも見つからない場合、新規タブの左隣のタブを前のアクティブタブとみなす
+        if (!previousActiveTab && tab.index > 0) {
+          previousActiveTab = tabs.find(t => t.index === tab.index - 1);
+        }
       }
     }
 
