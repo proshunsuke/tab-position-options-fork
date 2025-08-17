@@ -10,7 +10,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
   test.beforeEach(async ({ serviceWorker }) => {
     await clearExtensionStorage(serviceWorker);
   });
-  test("activate first tab after closing", async ({ context, serviceWorker }) => {
+  test("should activate first tab after closing", async ({ context, serviceWorker }) => {
     // 設定を先に変更
     await setExtensionSettings(context, { afterTabClosing: { activateTab: "first" } });
 
@@ -44,7 +44,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     });
   });
 
-  test("activate last tab after closing", async ({ context, serviceWorker }) => {
+  test("should activate last tab after closing", async ({ context, serviceWorker }) => {
     await setExtensionSettings(context, { afterTabClosing: { activateTab: "last" } });
 
     // 初期タブの状態を取得
@@ -77,7 +77,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     });
   });
 
-  test("activate right tab after closing", async ({ context, serviceWorker }) => {
+  test("should activate right tab after closing", async ({ context, serviceWorker }) => {
     await setExtensionSettings(context, { afterTabClosing: { activateTab: "right" } });
 
     // 初期タブの状態を取得
@@ -110,7 +110,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     });
   });
 
-  test("activate left tab after closing", async ({ context, serviceWorker }) => {
+  test("should activate left tab after closing", async ({ context, serviceWorker }) => {
     await setExtensionSettings(context, { afterTabClosing: { activateTab: "left" } });
 
     // 初期タブの状態を取得
@@ -143,7 +143,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     });
   });
 
-  test("activate in activated order after closing", async ({ context, serviceWorker }) => {
+  test("should activate in activated order after closing", async ({ context, serviceWorker }) => {
     await setExtensionSettings(context, { afterTabClosing: { activateTab: "inActivatedOrder" } });
 
     // 初期タブの状態を取得
@@ -184,7 +184,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     });
   });
 
-  test("use browser default behavior after closing", async ({ context, serviceWorker }) => {
+  test("should use browser default behavior after closing", async ({ context, serviceWorker }) => {
     await setExtensionSettings(context, { afterTabClosing: { activateTab: "default" } });
 
     // 初期タブの状態を取得
@@ -219,7 +219,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
   });
 
   // エッジケースのテスト
-  test("activate left tab when closing first tab", async ({ context, serviceWorker }) => {
+  test("should activate left tab when closing first tab", async ({ context, serviceWorker }) => {
     await setExtensionSettings(context, { afterTabClosing: { activateTab: "left" } });
 
     // 初期タブの状態を取得
@@ -253,7 +253,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     });
   });
 
-  test("activate right tab when closing last tab", async ({ context, serviceWorker }) => {
+  test("should activate right tab when closing last tab", async ({ context, serviceWorker }) => {
     await setExtensionSettings(context, { afterTabClosing: { activateTab: "right" } });
 
     // 初期タブの状態を取得
@@ -285,7 +285,7 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     });
   });
 
-  test('activate left tab after closing parent tab opened from target="_blank" link', async ({
+  test('should activate left tab after closing parent tab opened from target="_blank" link', async ({
     context,
     serviceWorker,
   }) => {

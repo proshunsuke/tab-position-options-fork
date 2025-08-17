@@ -3,7 +3,7 @@ import path from "node:path";
 import { expect, test } from "@/e2e/fixtures";
 
 test.describe("Basic Extension Loading", () => {
-  test.beforeAll(() => {
+  test.beforeEach(() => {
     // ビルド出力が存在することを確認
     const extensionPath = path.join(process.cwd(), "dist", "chrome-mv3");
     const manifestPath = path.join(extensionPath, "manifest.json");

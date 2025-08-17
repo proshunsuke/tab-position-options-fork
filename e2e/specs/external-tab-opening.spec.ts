@@ -12,7 +12,7 @@ test.describe("External Tab Opening Behavior", () => {
     await clearExtensionStorage(serviceWorker);
   });
 
-  test("external tab opens to the right of current tab", async ({ context, serviceWorker }) => {
+  test("should open external tab to the right of current tab", async ({ context, serviceWorker }) => {
     await setExtensionSettings(context, { newTab: { position: "right" } });
 
     // 初期タブの状態を取得
@@ -52,7 +52,7 @@ test.describe("External Tab Opening Behavior", () => {
     });
   });
 
-  test("external tab opens to the left of current tab", async ({ context, serviceWorker }) => {
+  test("should open external tab to the left of current tab", async ({ context, serviceWorker }) => {
     await setExtensionSettings(context, { newTab: { position: "left" } });
 
     // 初期タブの状態を取得
@@ -92,7 +92,7 @@ test.describe("External Tab Opening Behavior", () => {
     });
   });
 
-  test("external tab opens at first position", async ({ context, serviceWorker }) => {
+  test("should open external tab at first position", async ({ context, serviceWorker }) => {
     await setExtensionSettings(context, { newTab: { position: "first" } });
 
     // 初期タブの状態を取得
@@ -134,7 +134,7 @@ test.describe("External Tab Opening Behavior", () => {
     });
   });
 
-  test("external tab opens at last position", async ({ context, serviceWorker }) => {
+  test("should open external tab at last position", async ({ context, serviceWorker }) => {
     await setExtensionSettings(context, { newTab: { position: "last" } });
 
     // 初期タブの状態を取得
@@ -174,7 +174,7 @@ test.describe("External Tab Opening Behavior", () => {
     });
   });
 
-  test("external tab from middle tab position", async ({ context, serviceWorker }) => {
+  test("should open external tab from middle tab position", async ({ context, serviceWorker }) => {
     await setExtensionSettings(context, { newTab: { position: "right" } });
 
     // 初期タブの状態を取得
@@ -220,7 +220,7 @@ test.describe("External Tab Opening Behavior", () => {
     });
   });
 
-  test("external tab with default position setting", async ({ context, serviceWorker }) => {
+  test("should open external tab with default position setting", async ({ context, serviceWorker }) => {
     await setExtensionSettings(context, { newTab: { position: "default" } });
 
     // 初期タブの状態を取得
@@ -269,7 +269,7 @@ test.describe("External Tab Opening with Race Condition", () => {
     await clearExtensionStorage(serviceWorker);
   });
 
-  test("race condition: external tab should respect 'right' position", async ({
+  test("should handle race condition: external tab respects 'right' position", async ({
     context,
     serviceWorker,
   }) => {
@@ -313,7 +313,7 @@ test.describe("External Tab Opening with Race Condition", () => {
     });
   });
 
-  test("race condition: external tab should respect 'left' position", async ({
+  test("should handle race condition: external tab respects 'left' position", async ({
     context,
     serviceWorker,
   }) => {
@@ -357,7 +357,7 @@ test.describe("External Tab Opening with Race Condition", () => {
     });
   });
 
-  test("race condition: external tab should respect 'first' position", async ({
+  test("should handle race condition: external tab respects 'first' position", async ({
     context,
     serviceWorker,
   }) => {
@@ -400,7 +400,7 @@ test.describe("External Tab Opening with Race Condition", () => {
     });
   });
 
-  test("race condition: external tab should respect 'last' position", async ({
+  test("should handle race condition: external tab respects 'last' position", async ({
     context,
     serviceWorker,
   }) => {
