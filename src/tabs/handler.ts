@@ -13,7 +13,7 @@ import {
 } from "@/src/tabs/sessionRestoreDetector";
 import {
   deleteFromTabIndexCache,
-  lastActiveTabState,
+  getPreviousActiveTabId,
   tabIndexCacheState,
   updateTabIndexCache,
 } from "@/src/tabs/tabState";
@@ -60,8 +60,6 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
       return;
     }
 
-    // lastActiveTabIdを事前に取得
-    const lastActiveTabId = await lastActiveTabState.get();
     const tabs = await chrome.tabs.query({ currentWindow: true });
 
     let previousActiveTab: chrome.tabs.Tab | undefined;
@@ -70,9 +68,13 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
       previousActiveTab = tabs.find(t => t.id === tab.openerTabId);
     } else {
       // 外部アプリケーションからのタブ（openerTabIdがなく、作成時にアクティブ）の場合
-      if (tab.active && lastActiveTabId) {
-        // lastActiveTabIdから前のアクティブタブを取得
-        previousActiveTab = tabs.find(t => t.id === lastActiveTabId);
+      if (tab.active && tab.id) {
+        // getPreviousActiveTabIdに現在のタブIDを渡すだけ
+        // メソッドがレースコンディションを自動判定して適切な前のタブを返す
+        const previousTabId = await getPreviousActiveTabId(tab.id);
+        if (previousTabId) {
+          previousActiveTab = tabs.find(t => t.id === previousTabId);
+        }
       }
 
       // それでも見つからない場合のフォールバック
@@ -99,8 +101,6 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
 export const handleTabActivated = async (activeInfo: { tabId: number; windowId: number }) => {
   await recordTabActivation(activeInfo.tabId);
   await updateTabIndexCache(activeInfo.tabId);
-
-  await lastActiveTabState.set(activeInfo.tabId);
 };
 
 export const handleTabRemoved = async (
@@ -127,10 +127,10 @@ export const handleTabRemoved = async (
 
     // 閉じたタブが最後にアクティブだったタブかチェック
     // 重要: タブが閉じられた直後にChromeが自動的に別のタブをアクティブにすることがある
-    // そのため、lastActiveTabIdがnullまたは閉じたタブでない場合でも、
+    // そのため、履歴の最後が閉じたタブでない場合でも、
     // 直前まで閉じたタブがアクティブだった可能性がある
 
-    const lastActiveTabId = await lastActiveTabState.get();
+    const lastActiveTabId = await getPreviousActiveTabId();
     let wasLastActive = lastActiveTabId === tabId;
 
     // lastActiveTabIdがnullの場合、タブがアクティブだった可能性を考慮
@@ -168,12 +168,7 @@ export const handleTabRemoved = async (
     await deleteFromTabIndexCache(tabId);
 
     if (nextTabId !== null) {
-      // 一時的にlastActiveTabIdをクリアして、自動的なタブアクティブ化を履歴に記録しないようにする
-      await lastActiveTabState.set(null);
-
       await chrome.tabs.update(nextTabId, { active: true });
-
-      // 復元しない - handleTabActivatedが新しい値を設定する
     }
   } catch (_error) {
     await cleanupTabData(tabId);
