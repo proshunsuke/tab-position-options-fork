@@ -99,6 +99,73 @@ export const createExternalTabViaServiceWorker = async (serviceWorker: Worker) =
   });
 
 /**
+ * 外部アプリケーションからのタブ作成時に発生するレースコンディションを再現
+ *
+ * ⚠️ 警告: これは非常に特殊なテストヘルパーです
+ *
+ * 背景:
+ * - 外部アプリ（VSCode、Slack等）からリンクを開くと、Chromeは特殊な順序でイベントを発火
+ * - 通常: onCreated → onActivated の順
+ * - 外部アプリ: onActivated → onCreated の順（レースコンディション）
+ * - この順序の違いにより、lastActiveTabIdが新規タブ自身のIDになってしまう
+ *
+ * 実装の詳細:
+ * - Chrome Extension APIではイベントを直接発火できない
+ * - そのため、イベントリスナーを一時的に削除し、手動で関数を実行
+ * - chrome.tabs.create()による通常のイベント発火と手動実行の二重実行を防ぐ
+ *
+ * 注意:
+ * - handler.tsの実装（関数名等）が変わった場合、このテストも更新が必要
+ * - イベントリスナーの削除・再登録の間に実際のイベントが発生すると見逃す可能性がある
+ *
+ * @param serviceWorker - Service Workerのインスタンス
+ * @returns 作成されたタブの情報
+ */
+export const createExternalTabWithRaceCondition = async (serviceWorker: Worker) =>
+  serviceWorker.evaluate(async () => {
+    // グローバルに公開されたテスト用エクスポートから関数を取得
+    if (!globalThis.__testExports?.tabHandlers) {
+      throw new Error(
+        "Tab handlers not found in test exports. Make sure test environment is set up.",
+      );
+    }
+
+    const { handleTabActivated, handleNewTab, onCreated, onActivated } =
+      globalThis.__testExports.tabHandlers;
+
+    // 一時的にイベントリスナーを削除（二重実行を防ぐため）
+    onCreated.removeListener(handleNewTab);
+    onActivated.removeListener(handleTabActivated);
+
+    try {
+      // 新規タブを作成（イベントリスナーが削除されているため、handleNewTab/handleTabActivatedは呼ばれない）
+      const newTab = await chrome.tabs.create({
+        active: true,
+      });
+
+      // 外部アプリからのタブ作成時の動作を再現：
+      // Step 1: onActivatedが先に発火（これによりlastActiveTabIdが新規タブ自身のIDになる）
+      await handleTabActivated({
+        tabId: newTab.id!,
+        windowId: newTab.windowId,
+      });
+
+      // Step 2: その後onCreatedが発火
+      await handleNewTab(newTab);
+
+      return {
+        newTabId: newTab.id,
+        newTabIndex: newTab.index,
+        openerTabId: newTab.openerTabId, // undefined のはず
+      };
+    } finally {
+      // 必ずイベントリスナーを復元
+      onCreated.addListener(handleNewTab);
+      onActivated.addListener(handleTabActivated);
+    }
+  });
+
+/**
  * Service Worker経由でアクティブなタブを閉じる
  */
 export const closeActiveTabViaServiceWorker = async (serviceWorker: Worker) =>

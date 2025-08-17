@@ -2,6 +2,7 @@ import { expect, test } from "@/e2e/fixtures";
 import {
   clearExtensionStorage,
   createExternalTabViaServiceWorker,
+  createExternalTabWithRaceCondition,
   getTabState,
   setExtensionSettings,
 } from "@/e2e/utils/helpers";
@@ -249,6 +250,190 @@ test.describe("External Tab Opening Behavior", () => {
     expect(result.openerTabId).toBeUndefined();
 
     // デフォルト設定では、ブラウザのデフォルト動作（最後に作成）
+    await expect(async () => {
+      const state = await getTabState(serviceWorker);
+      expect(state.totalTabs).toBe(beforeState.totalTabs + 1);
+      expect(state.activeTabIndex).toBe(state.totalTabs - 1);
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+  });
+});
+
+// ⚠️ 以下のテストは特殊な方法でレースコンディションを再現しています
+// 外部アプリからのタブ作成時にChromeが発火するイベント順序（onActivated → onCreated）を模擬
+// handler.tsの実装が変更された場合、テストの更新が必要です
+test.describe("External Tab Opening with Race Condition", () => {
+  test.beforeEach(async ({ serviceWorker }) => {
+    await clearExtensionStorage(serviceWorker);
+  });
+
+  test("race condition: external tab should respect 'right' position", async ({
+    context,
+    serviceWorker,
+  }) => {
+    await setExtensionSettings(context, { newTab: { position: "right" } });
+
+    // 初期タブの状態を取得
+    const initialState = await getTabState(serviceWorker);
+    const initialTabCount = initialState.totalTabs;
+
+    // 3つのタブを作成
+    const tab1 = await context.newPage();
+    await tab1.goto("data:text/html,<h1>Tab 1</h1>");
+
+    const tab2 = await context.newPage();
+    await tab2.goto("data:text/html,<h1>Tab 2</h1>");
+
+    const tab3 = await context.newPage();
+    await tab3.goto("data:text/html,<h1>Tab 3</h1>");
+
+    // tab2（インデックス1）をアクティブに
+    await tab2.bringToFront();
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const beforeState = await getTabState(serviceWorker);
+    expect(beforeState.totalTabs).toBe(initialTabCount + 3);
+    expect(beforeState.activeTabIndex).toBe(initialTabCount + 1); // tab2
+
+    // レースコンディションを伴う外部タブ作成
+    const result = await createExternalTabWithRaceCondition(serviceWorker);
+    expect(result.openerTabId).toBeUndefined();
+
+    // 期待: 現在のタブ（tab2）の右側に作成される
+    // 現在のバグ: 最後尾に配置される
+    await expect(async () => {
+      const state = await getTabState(serviceWorker);
+      expect(state.totalTabs).toBe(beforeState.totalTabs + 1);
+      expect(state.activeTabIndex).toBe(beforeState.activeTabIndex + 1);
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+  });
+
+  test("race condition: external tab should respect 'left' position", async ({
+    context,
+    serviceWorker,
+  }) => {
+    await setExtensionSettings(context, { newTab: { position: "left" } });
+
+    // 初期タブの状態を取得
+    const initialState = await getTabState(serviceWorker);
+    const initialTabCount = initialState.totalTabs;
+
+    // 3つのタブを作成
+    const tab1 = await context.newPage();
+    await tab1.goto("data:text/html,<h1>Tab 1</h1>");
+
+    const tab2 = await context.newPage();
+    await tab2.goto("data:text/html,<h1>Tab 2</h1>");
+
+    const tab3 = await context.newPage();
+    await tab3.goto("data:text/html,<h1>Tab 3</h1>");
+
+    // tab2（インデックス1）をアクティブに
+    await tab2.bringToFront();
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const beforeState = await getTabState(serviceWorker);
+    expect(beforeState.totalTabs).toBe(initialTabCount + 3);
+    expect(beforeState.activeTabIndex).toBe(initialTabCount + 1); // tab2
+
+    // レースコンディションを伴う外部タブ作成
+    const result = await createExternalTabWithRaceCondition(serviceWorker);
+    expect(result.openerTabId).toBeUndefined();
+
+    // 期待: 現在のタブ（tab2）の左側に作成される
+    // 現在のバグ: 最後尾に配置される
+    await expect(async () => {
+      const state = await getTabState(serviceWorker);
+      expect(state.totalTabs).toBe(beforeState.totalTabs + 1);
+      expect(state.activeTabIndex).toBe(beforeState.activeTabIndex); // 同じインデックス（左に挿入されたため）
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+  });
+
+  test("race condition: external tab should respect 'first' position", async ({
+    context,
+    serviceWorker,
+  }) => {
+    await setExtensionSettings(context, { newTab: { position: "first" } });
+
+    // 初期タブの状態を取得
+    const initialState = await getTabState(serviceWorker);
+    const initialTabCount = initialState.totalTabs;
+
+    // 3つのタブを作成
+    const tab1 = await context.newPage();
+    await tab1.goto("data:text/html,<h1>Tab 1</h1>");
+
+    const tab2 = await context.newPage();
+    await tab2.goto("data:text/html,<h1>Tab 2</h1>");
+
+    const tab3 = await context.newPage();
+    await tab3.goto("data:text/html,<h1>Tab 3</h1>");
+
+    // tab2をアクティブに
+    await tab2.bringToFront();
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const beforeState = await getTabState(serviceWorker);
+    expect(beforeState.totalTabs).toBe(initialTabCount + 3);
+
+    // レースコンディションを伴う外部タブ作成
+    const result = await createExternalTabWithRaceCondition(serviceWorker);
+    expect(result.openerTabId).toBeUndefined();
+
+    // 期待: 最初（インデックス0）に作成される
+    // 現在のバグ: 最後尾に配置される
+    await expect(async () => {
+      const state = await getTabState(serviceWorker);
+      expect(state.totalTabs).toBe(beforeState.totalTabs + 1);
+      expect(state.activeTabIndex).toBe(0);
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+  });
+
+  test("race condition: external tab should respect 'last' position", async ({
+    context,
+    serviceWorker,
+  }) => {
+    await setExtensionSettings(context, { newTab: { position: "last" } });
+
+    // 初期タブの状態を取得
+    const initialState = await getTabState(serviceWorker);
+    const initialTabCount = initialState.totalTabs;
+
+    // 3つのタブを作成
+    const tab1 = await context.newPage();
+    await tab1.goto("data:text/html,<h1>Tab 1</h1>");
+
+    const tab2 = await context.newPage();
+    await tab2.goto("data:text/html,<h1>Tab 2</h1>");
+
+    const tab3 = await context.newPage();
+    await tab3.goto("data:text/html,<h1>Tab 3</h1>");
+
+    // tab2（インデックス1）をアクティブに
+    await tab2.bringToFront();
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const beforeState = await getTabState(serviceWorker);
+    expect(beforeState.totalTabs).toBe(initialTabCount + 3);
+    expect(beforeState.activeTabIndex).toBe(initialTabCount + 1); // tab2
+
+    // レースコンディションを伴う外部タブ作成
+    const result = await createExternalTabWithRaceCondition(serviceWorker);
+    expect(result.openerTabId).toBeUndefined();
+
+    // 期待: 最後に作成される
+    // このケースは現在のバグでも正しく動作する（最後尾が期待値のため）
     await expect(async () => {
       const state = await getTabState(serviceWorker);
       expect(state.totalTabs).toBe(beforeState.totalTabs + 1);
