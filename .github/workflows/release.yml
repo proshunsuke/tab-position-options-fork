@@ -2,12 +2,6 @@ name: Release Extension
 
 on:
   workflow_dispatch:
-    inputs:
-      release_notes:
-        description: 'Release notes'
-        required: false
-        type: string
-        default: 'Bug fixes and improvements'
 
 jobs:
   release:
@@ -35,6 +29,27 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
       
+      - name: Extract changelog for version
+        id: changelog
+        run: |
+          # Extract the changelog content for the specific version
+          # Pattern: Start from "## VERSION" and stop at the next "## " or end of file
+          VERSION_PATTERN="^## ${VERSION}$"
+          CHANGELOG_CONTENT=$(awk -v ver="$VERSION" '
+            /^## / { if (found) exit; if ($2 == ver) found=1; next }
+            found { print }
+          ' CHANGELOG.md)
+          
+          # If no content found, use a default message
+          if [ -z "$CHANGELOG_CONTENT" ]; then
+            CHANGELOG_CONTENT="- Bug fixes and improvements"
+          fi
+          
+          # Save to environment file (GitHub Actions multiline string handling)
+          echo "CHANGELOG_CONTENT<<EOF" >> $GITHUB_ENV
+          echo "$CHANGELOG_CONTENT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+      
       - name: Prepare WXT
         run: npx wxt prepare
       
@@ -57,7 +72,7 @@ jobs:
           name: Release v${{ env.VERSION }}
           body: |
             ## What's Changed
-            ${{ inputs.release_notes }}
+            ${{ env.CHANGELOG_CONTENT }}
             
             ## Installation
             
