@@ -3,7 +3,6 @@ import { clearExtensionStorage } from "@/e2e/utils/helpers";
 
 test.describe("Options Page", () => {
   test.beforeEach(async ({ context }) => {
-    // Service Workerを取得
     const [serviceWorker] = context.serviceWorkers();
     if (serviceWorker) {
       await clearExtensionStorage(serviceWorker);
