@@ -41,6 +41,9 @@
       "complexity": {
         "noBannedTypes": "error",
         "useArrowFunction": "error"
+      },
+      "performance": {
+        "noBarrelFile": "error"
       }
     }
   },
