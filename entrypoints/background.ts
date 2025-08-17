@@ -1,19 +1,11 @@
-import { setupStorageListener } from "@/src/storage";
+import { setupActionHandlers } from "@/src/action/handler";
+import { setupStorageHandlers } from "@/src/storage";
 import { setupTabHandlers } from "@/src/tabs/handler";
 import { setupTestEnvironment } from "@/src/test/setup";
 
 export default defineBackground(() => {
-  if (typeof chrome !== "undefined" && chrome.action) {
-    chrome.action.onClicked.addListener(() => {
-      chrome.tabs.create({
-        url: chrome.runtime.getURL("options.html"),
-      });
-    });
-  }
-
-  setupStorageListener();
+  setupActionHandlers();
+  setupStorageHandlers();
   setupTabHandlers();
-
-  // テスト環境のセットアップ
   setupTestEnvironment();
 });

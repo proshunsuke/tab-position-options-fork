@@ -11,7 +11,7 @@ export const settingsState = createState<Settings>("settings", defaultSettings, 
 /**
  * ストレージの変更を監視
  */
-export const setupStorageListener = () => {
+export const setupStorageHandlers = () => {
   chrome.storage.onChanged.addListener(async (changes, areaName) => {
     if (areaName === "local" && changes.settings) {
       const newSettings = changes.settings.newValue as Settings;
