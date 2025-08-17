@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.5
+- Fixed tab position settings not being applied when opening links from external applications
+
 ## 0.0.4
 - Fixed issues with Service Worker restart handling that were not fully resolved in version 0.0.3
 

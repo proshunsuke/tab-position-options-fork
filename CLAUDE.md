@@ -411,13 +411,23 @@ Service WorkerのDevToolsを開くと、Service Workerが常に動作し続け�
 
 ### リリース準備の手順
 1. **package.jsonのバージョンを更新**
-2. **CHANGELOG.mdを更新**（上記の規約に厳密に従うこと）
-3. **全てのチェックを実行**:
+2. **`npm install`を実行してpackage-lock.jsonを更新**
+3. **CHANGELOG.mdを更新**（上記の規約に厳密に従うこと）
+4. **全てのチェックを実行**:
    - `npm run typecheck`
    - `npm run lint:check`
    - `npm run test:e2e`
    - `npm run build`
-4. **変更をコミット**: `chore: bump version to X.X.X`
+5. **変更をコミット**: `chore: bump version to X.X.X`
+
+### リリースPRの作成
+リリース準備が完了したら、以下の手順でPRを作成：
+1. **リリース用のブランチを作成**: `release/vX.X.X`
+2. **mainブランチへのPRを作成**
+3. **PR概要に含める内容**:
+   - リリースバージョン番号
+   - 主な変更内容（CHANGELOGと同じ内容）
+   - チェックリスト（ビルド確認、テスト確認など）
 
 ### リリースワークフローの仕組み
 `.github/workflows/release.yml`で定義されたワークフローを使用します：
