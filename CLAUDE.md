@@ -342,6 +342,22 @@ Chrome Storage Localに保存されるデータは以下の構造を持ちます
    - 定数は大文字のスネークケース（UPPER_SNAKE_CASE）で定義
    - インポートは相対パスではなく`@/`エイリアスを使用した絶対パスで記述
 
+## デバッグログの仕込み方
+
+Service WorkerのDevToolsを開くと、Service Workerが常に動作し続けるため、実際のプロダクション環境（30秒で自動停止）と異なる挙動になってしまう。
+そのため、DevToolsを開かずにログを収集する仕組みが必要。
+
+### 手順
+1. `@/src/utils/debugLogger.ts`を使用してログを仕込む
+2. `wxt.config.ts`の`permissions`に以下を追加:
+   - `"unlimitedStorage"`（大量ログ保存のため）
+   - `"tabs"`（タブのタイトルやURL等の詳細情報取得のため）
+3. ログは`debug_logs`をキーとしてchrome.storage.localに保存される
+4. **重要**: デバッグ完了後は必ず以下を実施
+   - デバッグログのコードを削除
+   - `unlimitedStorage`権限を削除
+   - `tabs`権限を削除（デバッグ目的のみで使用の場合）
+
 ## Tailwind CSS 4の設定
 
 - 設定ファイル（tailwind.config.js）は不要

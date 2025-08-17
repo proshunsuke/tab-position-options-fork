@@ -9,6 +9,7 @@ type LogEntry = {
   tag: string;
   message: string;
   data?: unknown;
+  tabs?: chrome.tabs.Tab | chrome.tabs.Tab[];
 };
 
 const MAX_LOG_ENTRIES = 1000; // 最大ログエントリ数
@@ -21,6 +22,7 @@ export const saveLog = async (
   level: LogEntry["level"],
   tag: string,
   message: string,
+  tabs?: chrome.tabs.Tab | chrome.tabs.Tab[],
   data?: unknown,
 ) => {
   try {
@@ -35,6 +37,7 @@ export const saveLog = async (
       tag,
       message,
       data: data !== undefined ? JSON.parse(JSON.stringify(data)) : undefined, // シリアライズ可能にする
+      tabs: tabs !== undefined ? JSON.parse(JSON.stringify(tabs)) : undefined, // タブ情報を追加
     };
 
     // ログを追加（最新を先頭に）
@@ -64,16 +67,31 @@ export const saveLog = async (
 /**
  * デバッグログのショートカット関数
  */
-export const debugLog = (tag: string, message: string, data?: unknown) => {
-  return saveLog("log", tag, message, data);
+export const debugLog = (
+  tag: string,
+  message: string,
+  tabs?: chrome.tabs.Tab | chrome.tabs.Tab[],
+  data?: unknown,
+) => {
+  return saveLog("log", tag, message, tabs, data);
 };
 
-export const debugWarn = (tag: string, message: string, data?: unknown) => {
-  return saveLog("warn", tag, message, data);
+export const debugWarn = (
+  tag: string,
+  message: string,
+  tabs?: chrome.tabs.Tab | chrome.tabs.Tab[],
+  data?: unknown,
+) => {
+  return saveLog("warn", tag, message, tabs, data);
 };
 
-export const debugError = (tag: string, message: string, data?: unknown) => {
-  return saveLog("error", tag, message, data);
+export const debugError = (
+  tag: string,
+  message: string,
+  tabs?: chrome.tabs.Tab | chrome.tabs.Tab[],
+  data?: unknown,
+) => {
+  return saveLog("error", tag, message, tabs, data);
 };
 
 /**

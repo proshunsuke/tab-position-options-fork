@@ -112,27 +112,9 @@ export const createSessionRestoreDetector = (
 };
 
 // デフォルトのインスタンスを作成
-const defaultDetector = createSessionRestoreDetector();
+export const defaultDetector = createSessionRestoreDetector();
 
 // シンプルなAPIとして公開
 export const handleBrowserStartup = defaultDetector.handleBrowserStartup;
 export const initSessionRestoreDetector = defaultDetector.initSessionRestoreDetector;
 export const isSessionRestoreTab = defaultDetector.isSessionRestoreTab;
-
-// テスト用にファクトリー関数とデフォルトインスタンスをグローバルに公開
-// Service Worker内でのみ利用可能
-declare global {
-  var __testExports:
-    | {
-        createDetector: typeof createSessionRestoreDetector;
-        defaultDetector: SessionRestoreDetector;
-      }
-    | undefined;
-}
-
-if (typeof globalThis !== "undefined") {
-  globalThis.__testExports = {
-    createDetector: createSessionRestoreDetector,
-    defaultDetector,
-  };
-}

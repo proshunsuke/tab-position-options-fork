@@ -1,43 +1,6 @@
 import { expect, test } from "@/e2e/fixtures";
 import { clearExtensionStorage, setExtensionSettings } from "@/e2e/utils/helpers";
 
-// テスト用のグローバル型定義
-type DetectorConfig = {
-  timeProvider?: () => number;
-  thresholdMs?: number;
-};
-
-type DetectorState = {
-  isStartupPhase: boolean;
-  lastTabCreationTime: number;
-};
-
-type SessionRestoreDetector = {
-  handleBrowserStartup: () => void;
-  initSessionRestoreDetector: () => void;
-  isSessionRestoreTab: () => boolean;
-  __testHelpers: {
-    setStartupPhase: (value: boolean) => void;
-    getState: () => DetectorState;
-    resetState: () => void;
-  };
-};
-
-declare global {
-  var __testExports:
-    | {
-        createDetector: (config?: DetectorConfig) => SessionRestoreDetector;
-        defaultDetector: SessionRestoreDetector;
-      }
-    | undefined;
-  var __testDetector:
-    | {
-        detector: SessionRestoreDetector;
-        setTime: (time: number) => void;
-      }
-    | undefined;
-}
-
 test.describe("Browser Startup Tab Order", () => {
   test.beforeEach(async ({ serviceWorker }) => {
     await clearExtensionStorage(serviceWorker);
@@ -54,8 +17,8 @@ test.describe("Browser Startup Tab Order", () => {
 
     // Service Worker内でセッション復元をシミュレート
     await serviceWorker.evaluate(() => {
-      if (globalThis.__testExports) {
-        globalThis.__testExports.defaultDetector.__testHelpers.setStartupPhase(true);
+      if (globalThis.__testExports?.sessionRestore) {
+        globalThis.__testExports.sessionRestore.defaultDetector.__testHelpers.setStartupPhase(true);
       }
     });
 
@@ -76,8 +39,10 @@ test.describe("Browser Startup Tab Order", () => {
 
     // セッション復元フェーズを明示的に終了
     await serviceWorker.evaluate(() => {
-      if (globalThis.__testExports) {
-        globalThis.__testExports.defaultDetector.__testHelpers.setStartupPhase(false);
+      if (globalThis.__testExports?.sessionRestore) {
+        globalThis.__testExports.sessionRestore.defaultDetector.__testHelpers.setStartupPhase(
+          false,
+        );
       }
     });
 
@@ -121,8 +86,8 @@ test.describe("Browser Startup Tab Order", () => {
 
     // Service Worker内でセッション復元をシミュレート
     await serviceWorker.evaluate(() => {
-      if (globalThis.__testExports) {
-        globalThis.__testExports.defaultDetector.__testHelpers.setStartupPhase(true);
+      if (globalThis.__testExports?.sessionRestore) {
+        globalThis.__testExports.sessionRestore.defaultDetector.__testHelpers.setStartupPhase(true);
       }
     });
 
@@ -142,8 +107,10 @@ test.describe("Browser Startup Tab Order", () => {
 
     // セッション復元フェーズを明示的に終了
     await serviceWorker.evaluate(() => {
-      if (globalThis.__testExports) {
-        globalThis.__testExports.defaultDetector.__testHelpers.setStartupPhase(false);
+      if (globalThis.__testExports?.sessionRestore) {
+        globalThis.__testExports.sessionRestore.defaultDetector.__testHelpers.setStartupPhase(
+          false,
+        );
       }
     });
 
@@ -174,14 +141,14 @@ test.describe("Browser Startup Tab Order", () => {
   }) => {
     // カスタム検出器をService Worker内に設定
     await serviceWorker.evaluate(() => {
-      if (!globalThis.__testExports) {
+      if (!globalThis.__testExports?.sessionRestore) {
         console.error("Test exports not available");
         return;
       }
 
       // モック時刻を使用するカスタム検出器を作成
       let mockTime = 0;
-      const customDetector = globalThis.__testExports.createDetector({
+      const customDetector = globalThis.__testExports.sessionRestore.createDetector({
         timeProvider: () => mockTime,
         thresholdMs: 100, // テスト用に短い閾値
       });
@@ -267,8 +234,8 @@ test.describe("Browser Startup Tab Order", () => {
 
     // セッション復元を開始
     await serviceWorker.evaluate(() => {
-      if (globalThis.__testExports) {
-        globalThis.__testExports.defaultDetector.__testHelpers.setStartupPhase(true);
+      if (globalThis.__testExports?.sessionRestore) {
+        globalThis.__testExports.sessionRestore.defaultDetector.__testHelpers.setStartupPhase(true);
       }
     });
 
@@ -289,8 +256,10 @@ test.describe("Browser Startup Tab Order", () => {
 
     // セッション復元フェーズを明示的に終了
     await serviceWorker.evaluate(() => {
-      if (globalThis.__testExports) {
-        globalThis.__testExports.defaultDetector.__testHelpers.setStartupPhase(false);
+      if (globalThis.__testExports?.sessionRestore) {
+        globalThis.__testExports.sessionRestore.defaultDetector.__testHelpers.setStartupPhase(
+          false,
+        );
       }
     });
 

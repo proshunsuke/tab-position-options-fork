@@ -9,11 +9,6 @@ type TabActivationInfo = {
 };
 
 /**
- * 最後にアクティブだったタブIDの状態管理
- */
-export const lastActiveTabState = createState<number | null>("lastActiveTabId", null);
-
-/**
  * タブインデックスキャッシュの状態管理
  */
 export const tabIndexCacheState = createMapState<number, number>("tabIndexCache");
@@ -30,6 +25,29 @@ export const tabActivationHistoryState = createState<TabActivationInfo[]>(
  * タブソースマップの状態管理
  */
 export const tabSourceMapState = createMapState<number, number>("tabSourceMap");
+
+/**
+ * 前回アクティブだったタブIDを取得
+ * @param currentTabId - 現在処理中のタブID（あれば渡す）
+ * @returns 前回アクティブだったタブID
+ */
+export const getPreviousActiveTabId = async (currentTabId?: number) => {
+  const history = await tabActivationHistoryState.get();
+
+  if (history.length === 0) return null;
+
+  const lastEntry = history[history.length - 1];
+
+  // currentTabIdが渡されて、それが履歴の最後と一致する場合
+  // → レースコンディション（onActivatedが先に発火）と判断
+  // → その前のタブを返す
+  if (currentTabId && lastEntry.tabId === currentTabId) {
+    return history.length >= 2 ? history[history.length - 2].tabId : null;
+  }
+
+  // 通常ケース：履歴の最後を返す
+  return lastEntry.tabId;
+};
 
 export const updateTabIndexCache = async (tabId: number): Promise<void> => {
   try {
