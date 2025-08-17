@@ -1,4 +1,4 @@
-import { settingsState } from "@/src/storage";
+import { getSettings } from "@/src/settings/state/appData";
 import { calculateNewTabIndex } from "@/src/tabs/position";
 import {
   handleBrowserStartup,
@@ -46,7 +46,7 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
   }
 
   try {
-    const settings = await settingsState.get();
+    const settings = await getSettings();
 
     // 現在はnewTabの設定をすべてのタブに適用（ブックマークからのタブも含む）
     const position = settings.newTab.position;
@@ -110,7 +110,7 @@ export const handleTabRemoved = async (
   }
 
   try {
-    const settings = await settingsState.get();
+    const settings = await getSettings();
     const activateTabSetting = settings.afterTabClosing.activateTab;
 
     // デフォルト設定の場合は、ブラウザのデフォルト動作に任せる

@@ -1,5 +1,5 @@
 import { setupActionHandlers } from "@/src/action/handler";
-import { setupStorageHandlers } from "@/src/storage";
+import { setupStorageHandlers } from "@/src/settings/state/appData";
 import { setupTabHandlers } from "@/src/tabs/handler";
 import { setupTestEnvironment } from "@/src/test/setup";
 
