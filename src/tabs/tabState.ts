@@ -34,7 +34,9 @@ export const tabSourceMapState = createMapState<number, number>("tabSourceMap");
 export const getPreviousActiveTabId = async (currentTabId?: number) => {
   const history = await tabActivationHistoryState.get();
 
-  if (history.length === 0) return null;
+  if (history.length === 0) {
+    return null;
+  }
 
   const lastEntry = history[history.length - 1];
 
@@ -49,7 +51,7 @@ export const getPreviousActiveTabId = async (currentTabId?: number) => {
   return lastEntry.tabId;
 };
 
-export const updateTabIndexCache = async (tabId: number): Promise<void> => {
+export const updateTabIndexCache = async (tabId: number) => {
   try {
     const tab = await chrome.tabs.get(tabId);
     if (tab) {
@@ -62,7 +64,7 @@ export const updateTabIndexCache = async (tabId: number): Promise<void> => {
   }
 };
 
-export const deleteFromTabIndexCache = async (tabId: number): Promise<void> => {
+export const deleteFromTabIndexCache = async (tabId: number) => {
   const cache = await tabIndexCacheState.get();
   cache.delete(tabId);
   await tabIndexCacheState.set(cache);
