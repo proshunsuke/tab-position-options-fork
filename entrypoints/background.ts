@@ -1,5 +1,6 @@
 import { setupStorageListener } from "@/src/storage";
 import { setupTabHandlers } from "@/src/tabs/handler";
+import { setupTestEnvironment } from "@/src/test/setup";
 
 export default defineBackground(() => {
   if (typeof chrome !== "undefined" && chrome.action) {
@@ -12,4 +13,7 @@ export default defineBackground(() => {
 
   setupStorageListener();
   setupTabHandlers();
+
+  // テスト環境のセットアップ
+  setupTestEnvironment();
 });

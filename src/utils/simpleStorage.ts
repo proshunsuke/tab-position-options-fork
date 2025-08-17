@@ -119,16 +119,3 @@ export const __testHelpers = {
     return Array.from(memoryCache.keys());
   },
 };
-
-// グローバルに公開（Service Worker内でアクセス可能にする）
-declare global {
-  interface Window {
-    __simpleStorageTestHelpers?: typeof __testHelpers;
-  }
-  // biome-ignore lint/suspicious/noExplicitAny: テスト用のグローバル変数のため
-  var __simpleStorageTestHelpers: any;
-}
-
-if (typeof globalThis !== "undefined") {
-  globalThis.__simpleStorageTestHelpers = __testHelpers;
-}

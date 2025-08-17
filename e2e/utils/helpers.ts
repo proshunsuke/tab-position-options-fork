@@ -125,11 +125,7 @@ export const clearExtensionStorage = async (serviceWorker: Worker) => {
   }, defaultSettings);
 };
 
-// グローバル型定義
-declare global {
-  // biome-ignore lint/suspicious/noExplicitAny: テスト用のグローバル変数のため
-  var __simpleStorageTestHelpers: any;
-}
+// グローバル型定義は src/test/types.d.ts で一元管理
 
 /**
  * Service Workerの再起動をシミュレート
@@ -138,14 +134,16 @@ declare global {
 export const simulateServiceWorkerRestart = async (serviceWorker: Worker): Promise<void> => {
   // メモリキャッシュをクリア
   await serviceWorker.evaluate(() => {
-    // simpleStorageのメモリキャッシュをクリア
-    if (globalThis.__simpleStorageTestHelpers) {
+    // simpleStorageのメモリキャッシュをクリア（後方互換性のため両方チェック）
+    if (globalThis.__testExports?.simpleStorage) {
+      globalThis.__testExports.simpleStorage.clearMemoryCache();
+    } else if (globalThis.__simpleStorageTestHelpers) {
       globalThis.__simpleStorageTestHelpers.clearMemoryCache();
     }
 
     // sessionRestoreDetectorの状態もリセット
-    if (globalThis.__testExports) {
-      globalThis.__testExports.defaultDetector.__testHelpers.resetState();
+    if (globalThis.__testExports?.sessionRestore) {
+      globalThis.__testExports.sessionRestore.defaultDetector.__testHelpers.resetState();
     }
   });
 
@@ -158,13 +156,17 @@ export const simulateServiceWorkerRestart = async (serviceWorker: Worker): Promi
  */
 export const getMemoryCacheState = async (serviceWorker: Worker) => {
   return serviceWorker.evaluate(() => {
-    if (globalThis.__simpleStorageTestHelpers) {
+    // 新しい構造を優先、後方互換性のためフォールバック
+    const helpers =
+      globalThis.__testExports?.simpleStorage || globalThis.__simpleStorageTestHelpers;
+
+    if (helpers) {
       return {
-        size: globalThis.__simpleStorageTestHelpers.getMemoryCacheSize(),
-        keys: globalThis.__simpleStorageTestHelpers.getMemoryCacheKeys(),
-        hasLastActiveTab: globalThis.__simpleStorageTestHelpers.hasInMemoryCache("lastActiveTabId"),
-        hasTabIndexCache: globalThis.__simpleStorageTestHelpers.hasInMemoryCache("tabIndexCache"),
-        hasSettings: globalThis.__simpleStorageTestHelpers.hasInMemoryCache("settings"),
+        size: helpers.getMemoryCacheSize(),
+        keys: helpers.getMemoryCacheKeys(),
+        hasLastActiveTab: helpers.hasInMemoryCache("lastActiveTabId"),
+        hasTabIndexCache: helpers.hasInMemoryCache("tabIndexCache"),
+        hasSettings: helpers.hasInMemoryCache("settings"),
       };
     }
     return null;
