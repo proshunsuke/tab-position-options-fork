@@ -30,14 +30,15 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
   }
   // chrome.tabs.getで最新のタブ情報を取得（openerTabIdを含む）
   if (tab.id) {
+    const tabId = tab.id; // TypeScript用に一時変数に保存
     try {
       // 更新されたタブ情報を使用
-      tab = await chrome.tabs.get(tab.id);
-    } catch (_err) {}
-  }
-
-  if (tab.id) {
-    await updateTabIndexCache(tab.id);
+      const updatedTab = await chrome.tabs.get(tabId);
+      tab = updatedTab;
+    } catch (_error) {
+      // タブが既に閉じられている場合は元のタブ情報を使用
+    }
+    await updateTabIndexCache(tabId);
   }
 
   // openerTabIdがある場合、ソース情報を記録
@@ -64,7 +65,7 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
       previousActiveTab = tabs.find(t => t.id === tab.openerTabId);
     } else {
       // 外部アプリケーションからのタブ（openerTabIdがなく、作成時にアクティブ）の場合
-      if (tab.active && tab.id) {
+      if (tab.active) {
         // getPreviousActiveTabIdに現在のタブIDを渡すだけ
         // メソッドがレースコンディションを自動判定して適切な前のタブを返す
         const previousTabId = await getPreviousActiveTabId(tab.id);
@@ -91,7 +92,9 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
       await chrome.tabs.move(tab.id, { index: newIndex });
       await updateTabIndexCache(tab.id);
     }
-  } catch (_error) {}
+  } catch (_error) {
+    // 設定の読み込みや移動に失敗した場合は無視
+  }
 };
 
 export const handleTabActivated = async (activeInfo: { tabId: number; windowId: number }) => {
@@ -155,6 +158,7 @@ export const handleTabRemoved = async (
       await chrome.tabs.update(nextTabId, { active: true });
     }
   } catch (_error) {
+    // エラーが発生してもクリーンアップは実行
     await cleanupTabData(tabId);
   }
 };

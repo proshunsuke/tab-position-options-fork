@@ -28,6 +28,4 @@ export const calculateNewTabIndex = (
     default:
       return undefined;
   }
-
-  return undefined;
 };
