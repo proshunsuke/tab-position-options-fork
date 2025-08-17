@@ -176,8 +176,5 @@ export const setupTabHandlers = () => {
     chrome.tabs.onRemoved.addListener(handleTabRemoved);
     chrome.tabs.onMoved.addListener(handleTabMoved);
     chrome.runtime.onStartup.addListener(handleBrowserStartup);
-
-    // 初期化処理は削除（Service Worker対応）
-    // キャッシュは各イベントハンドラー内で必要に応じて更新
   }
 };
