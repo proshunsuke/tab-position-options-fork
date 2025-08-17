@@ -1,6 +1,6 @@
 import type { BrowserContext, Worker } from "@playwright/test";
 import type { Settings } from "@/src/types";
-import { defaultSettings } from "@/src/types";
+import { DEFAULT_SETTINGS } from "@/src/types";
 
 /**
  * Service Workerが利用可能になるまで待機
@@ -189,7 +189,7 @@ export const clearExtensionStorage = async (serviceWorker: Worker) => {
 
     // デフォルト設定を復元
     await chrome.storage.local.set({ settings: defaultSettings });
-  }, defaultSettings);
+  }, DEFAULT_SETTINGS);
 };
 
 // グローバル型定義は src/test/types.d.ts で一元管理

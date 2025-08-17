@@ -90,6 +90,7 @@ export const createMapState = <K, V>(key: string, useSession = true) => {
 };
 
 // テスト用のヘルパー関数をエクスポート（本番環境では使用されない）
+// biome-ignore lint/style/useNamingConvention: Test-only export with intentional double underscore
 export const __testHelpers = {
   /**
    * メモリキャッシュをクリア（テスト用）

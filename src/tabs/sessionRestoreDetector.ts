@@ -35,7 +35,7 @@ export const createSessionRestoreDetector = (
   config: DetectorConfig = {},
 ): SessionRestoreDetector => {
   const timeProvider = config.timeProvider || (() => Date.now());
-  const RAPID_CREATION_THRESHOLD_MS = config.thresholdMs || 200;
+  const rapidCreationThresholdMs = config.thresholdMs || 200;
 
   // 状態を閉じ込める（クロージャ）
   const state: DetectorState = {
@@ -80,7 +80,7 @@ export const createSessionRestoreDetector = (
     state.lastTabCreationTime = now;
 
     // 間隔が閾値より長い場合、ユーザーによる手動作成と判断
-    if (interval >= RAPID_CREATION_THRESHOLD_MS) {
+    if (interval >= rapidCreationThresholdMs) {
       state.isStartupPhase = false;
       return false;
     }
