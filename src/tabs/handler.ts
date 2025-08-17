@@ -7,7 +7,7 @@ import {
 } from "@/src/tabs/sessionRestoreDetector";
 import { getPreviousActiveTabId, recordTabActivation } from "@/src/tabs/state/activationHistory";
 import {
-  tabIndexCacheState,
+  getTabIndex,
   updateAllTabIndexCache,
   updateTabIndexCache,
 } from "@/src/tabs/state/indexCache";
@@ -140,15 +140,7 @@ export const handleTabRemoved = async (
     }
 
     // キャッシュからタブのインデックスを取得
-    let cache = await tabIndexCacheState.get();
-
-    // キャッシュが空の場合は現在のタブ状態から構築
-    if (cache.size === 0) {
-      await updateAllTabIndexCache(removeInfo.windowId);
-      cache = await tabIndexCacheState.get();
-    }
-
-    const closedTabIndex = cache.get(tabId) ?? 0;
+    const closedTabIndex = (await getTabIndex(tabId, removeInfo.windowId)) ?? 0;
 
     const nextTabId = await determineNextActiveTab(
       tabId,
@@ -168,18 +160,11 @@ export const handleTabRemoved = async (
 };
 
 const handleTabMoved = async (
-  tabId: number,
+  _tabId: number,
   moveInfo: { windowId: number; fromIndex: number; toIndex: number },
 ) => {
-  await updateTabIndexCache(tabId);
   const tabs = await chrome.tabs.query({ windowId: moveInfo.windowId });
-  const cache = await tabIndexCacheState.get();
-  for (const tab of tabs) {
-    if (tab.id) {
-      cache.set(tab.id, tab.index);
-    }
-  }
-  await tabIndexCacheState.set(cache);
+  await updateAllTabIndexCache(moveInfo.windowId, tabs);
 };
 
 export const setupTabHandlers = () => {
