@@ -9,7 +9,7 @@ type Props = {
   onAfterTabClosingChange: (value: string) => void;
 };
 
-const afterTabClosingOptions: RadioOption<TabActivation>[] = [
+const AfterTabClosingOptions: RadioOption<TabActivation>[] = [
   { value: "first", label: "First tab" },
   { value: "last", label: "Last tab" },
   { value: "right", label: "Right tab" },
@@ -29,7 +29,7 @@ export const TabClosing: FC<Props> = ({ afterTabClosing, onAfterTabClosingChange
       >
         <RadioGroup
           name="afterTabClosing"
-          options={afterTabClosingOptions}
+          options={AfterTabClosingOptions}
           value={afterTabClosing}
           onChange={onAfterTabClosingChange}
         />

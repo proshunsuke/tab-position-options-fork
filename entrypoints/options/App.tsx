@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { TabBehavior } from "@/entrypoints/options/TabBehavior";
 import { TabClosing } from "@/entrypoints/options/TabClosing";
+import { getSettings, saveSettingsWithVersion } from "@/src/settings/state/appData";
 import type { TabActivation, TabPosition } from "@/src/types";
-import { APP_VERSION } from "@/src/version";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<"behavior" | "closing">("behavior");
@@ -13,16 +13,15 @@ export default function App() {
 
   // 起動時に保存済みの設定を読み込む
   useEffect(() => {
-    chrome.storage.local.get(["version", "settings"], result => {
-      if (result.settings) {
-        if (result.settings.newTab?.position) {
-          setNewTabPosition(result.settings.newTab.position);
-        }
-        if (result.settings.afterTabClosing?.activateTab) {
-          setAfterTabClosing(result.settings.afterTabClosing.activateTab);
-        }
+    void (async () => {
+      const settings = await getSettings();
+      if (settings.newTab?.position) {
+        setNewTabPosition(settings.newTab.position);
       }
-    });
+      if (settings.afterTabClosing?.activateTab) {
+        setAfterTabClosing(settings.afterTabClosing.activateTab);
+      }
+    })();
   }, []);
 
   const handleNewTabPositionChange = (value: string) => {
@@ -38,21 +37,14 @@ export default function App() {
     setSaveMessage("");
 
     try {
-      // 現在の設定を取得（他の設定を保持するため）
-      const result = await chrome.storage.local.get(["version", "settings"]);
-      const currentSettings = result.settings || {};
-
-      // 新しい設定を保存
-      await chrome.storage.local.set({
-        version: APP_VERSION,
-        settings: {
-          ...currentSettings,
-          newTab: {
-            position: newTabPosition,
-          },
-          afterTabClosing: {
-            activateTab: afterTabClosing,
-          },
+      const currentSettings = await getSettings();
+      await saveSettingsWithVersion({
+        ...currentSettings,
+        newTab: {
+          position: newTabPosition,
+        },
+        afterTabClosing: {
+          activateTab: afterTabClosing,
         },
       });
 

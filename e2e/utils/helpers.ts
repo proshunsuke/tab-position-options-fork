@@ -1,11 +1,11 @@
 import type { BrowserContext, Worker } from "@playwright/test";
 import type { Settings } from "@/src/types";
-import { defaultSettings } from "@/src/types";
+import { DEFAULT_SETTINGS } from "@/src/types";
 
 /**
  * Service Workerが利用可能になるまで待機
  */
-export const waitForServiceWorker = async (context: BrowserContext): Promise<Worker> => {
+export const waitForServiceWorker = async (context: BrowserContext) => {
   let [serviceWorker] = context.serviceWorkers();
   if (!serviceWorker) {
     serviceWorker = await context.waitForEvent("serviceworker");
@@ -189,7 +189,7 @@ export const clearExtensionStorage = async (serviceWorker: Worker) => {
 
     // デフォルト設定を復元
     await chrome.storage.local.set({ settings: defaultSettings });
-  }, defaultSettings);
+  }, DEFAULT_SETTINGS);
 };
 
 // グローバル型定義は src/test/types.d.ts で一元管理
@@ -198,7 +198,7 @@ export const clearExtensionStorage = async (serviceWorker: Worker) => {
  * Service Workerの再起動をシミュレート
  * メモリキャッシュをクリアして、ストレージからの再読み込みを強制
  */
-export const simulateServiceWorkerRestart = async (serviceWorker: Worker): Promise<void> => {
+export const simulateServiceWorkerRestart = async (serviceWorker: Worker) => {
   // メモリキャッシュをクリア
   await serviceWorker.evaluate(() => {
     // simpleStorageのメモリキャッシュをクリア（後方互換性のため両方チェック）

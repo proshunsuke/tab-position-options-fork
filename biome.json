@@ -31,7 +31,50 @@
         "noNonNullAssertion": "off",
         "useImportType": "error",
         "useNodejsImportProtocol": "off",
-        "useAsConstAssertion": "error"
+        "useAsConstAssertion": "error",
+        "useBlockStatements": "error",
+        "useFilenamingConvention": {
+          "level": "error",
+          "options": {
+            "filenameCases": ["camelCase"],
+            "strictCase": true,
+            "requireAscii": true
+          }
+        },
+        "useNamingConvention": {
+          "level": "error",
+          "options": {
+            "strictCase": true,
+            "conventions": [
+              {
+                "selector": {
+                  "kind": "function"
+                },
+                "formats": ["camelCase"]
+              },
+              {
+                "selector": {
+                  "kind": "const",
+                  "scope": "global"
+                },
+                "formats": ["CONSTANT_CASE", "camelCase"]
+              },
+              {
+                "selector": {
+                  "kind": "typeLike"
+                },
+                "formats": ["PascalCase"]
+              },
+              {
+                "selector": {
+                  "kind": "objectLiteralProperty"
+                },
+                "match": ".*",
+                "formats": []
+              }
+            ]
+          }
+        }
       },
       "suspicious": {
         "noExplicitAny": "error",
@@ -40,6 +83,9 @@
       "complexity": {
         "noBannedTypes": "error",
         "useArrowFunction": "error"
+      },
+      "performance": {
+        "noBarrelFile": "error"
       }
     }
   },
@@ -59,5 +105,116 @@
         "organizeImports": "on"
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["e2e/**/*.spec.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": {
+              "level": "error",
+              "options": {
+                "filenameCases": ["kebab-case"],
+                "strictCase": true,
+                "requireAscii": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["entrypoints/**/*.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": {
+              "level": "error",
+              "options": {
+                "filenameCases": ["PascalCase"],
+                "strictCase": true,
+                "requireAscii": true
+              }
+            },
+            "useNamingConvention": {
+              "level": "error",
+              "options": {
+                "strictCase": true,
+                "conventions": [
+                  {
+                    "selector": {
+                      "kind": "function"
+                    },
+                    "formats": ["PascalCase"]
+                  },
+                  {
+                    "selector": {
+                      "kind": "const",
+                      "scope": "global"
+                    },
+                    "formats": ["PascalCase"]
+                  },
+                  {
+                    "selector": {
+                      "kind": "typeLike"
+                    },
+                    "formats": ["PascalCase"]
+                  },
+                  {
+                    "selector": {
+                      "kind": "objectLiteralProperty"
+                    },
+                    "match": ".*",
+                    "formats": []
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["entrypoints/**/main.tsx", "entrypoints/**/index.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": {
+              "level": "error",
+              "options": {
+                "filenameCases": ["camelCase"],
+                "strictCase": true,
+                "requireAscii": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["e2e/fixtures.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNamingConvention": {
+              "level": "error",
+              "options": {
+                "strictCase": false,
+                "conventions": [
+                  {
+                    "selector": {
+                      "kind": "const",
+                      "scope": "global"
+                    },
+                    "formats": ["camelCase"]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

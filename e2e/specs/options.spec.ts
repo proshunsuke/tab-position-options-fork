@@ -1,6 +1,14 @@
 import { expect, test } from "@/e2e/fixtures";
+import { clearExtensionStorage } from "@/e2e/utils/helpers";
 
 test.describe("Options Page", () => {
+  test.beforeEach(async ({ context }) => {
+    const [serviceWorker] = context.serviceWorkers();
+    if (serviceWorker) {
+      await clearExtensionStorage(serviceWorker);
+    }
+  });
+
   test("should open options page in new tab from extension icon", async ({
     context,
     extensionId,

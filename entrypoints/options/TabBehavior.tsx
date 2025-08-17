@@ -9,7 +9,7 @@ type Props = {
   onNewTabPositionChange: (value: string) => void;
 };
 
-const newTabOptions: RadioOption<TabPosition>[] = [
+const NewTabOptions: RadioOption<TabPosition>[] = [
   { value: "first", label: "Always first" },
   { value: "last", label: "Always last" },
   { value: "right", label: "Right of current tab" },
@@ -26,7 +26,7 @@ export const TabBehavior: FC<Props> = ({ newTabPosition, onNewTabPositionChange 
       >
         <RadioGroup
           name="newTabPosition"
-          options={newTabOptions}
+          options={NewTabOptions}
           value={newTabPosition}
           onChange={onNewTabPositionChange}
         />

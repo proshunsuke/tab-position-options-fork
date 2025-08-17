@@ -19,7 +19,7 @@ export const createState = <T>(key: string, defaultValue: T, useSession = true) 
      * 値を取得
      * メモリ → ストレージ → デフォルト値の順で取得
      */
-    get: async (): Promise<T> => {
+    get: async () => {
       if (memoryCache.has(key)) {
         const cached = memoryCache.get(key) as T;
         return cached;
@@ -34,7 +34,9 @@ export const createState = <T>(key: string, defaultValue: T, useSession = true) 
           memoryCache.set(key, value);
           return value;
         }
-      } catch (_error) {}
+      } catch (_error) {
+        // ストレージアクセスエラーは無視してデフォルト値を返す
+      }
 
       return defaultValue;
     },
@@ -43,25 +45,29 @@ export const createState = <T>(key: string, defaultValue: T, useSession = true) 
      * 値を設定
      * メモリとストレージ両方に保存
      */
-    set: async (value: T): Promise<void> => {
+    set: async (value: T) => {
       memoryCache.set(key, value);
 
       try {
         const storage = useSession ? chrome.storage.session : chrome.storage.local;
         await storage.set({ [key]: value });
-      } catch (_error) {}
+      } catch (_error) {
+        // ストレージ保存エラーは無視（メモリキャッシュは更新済み）
+      }
     },
 
     /**
      * 値をクリア
      */
-    clear: async (): Promise<void> => {
+    clear: async () => {
       memoryCache.delete(key);
 
       try {
         const storage = useSession ? chrome.storage.session : chrome.storage.local;
         await storage.remove(key);
-      } catch (_error) {}
+      } catch (_error) {
+        // ストレージクリアエラーは無視（メモリキャッシュはクリア済み）
+      }
     },
   };
 };
@@ -74,22 +80,23 @@ export const createMapState = <K, V>(key: string, useSession = true) => {
   const state = createState<[K, V][]>(key, [], useSession);
 
   return {
-    get: async (): Promise<Map<K, V>> => {
+    get: async () => {
       const entries = await state.get();
       return new Map(entries);
     },
 
-    set: async (map: Map<K, V>): Promise<void> => {
+    set: async (map: Map<K, V>) => {
       await state.set(Array.from(map.entries()));
     },
 
-    clear: async (): Promise<void> => {
+    clear: async () => {
       await state.clear();
     },
   };
 };
 
 // テスト用のヘルパー関数をエクスポート（本番環境では使用されない）
+// biome-ignore lint/style/useNamingConvention: Test-only export with intentional double underscore
 export const __testHelpers = {
   /**
    * メモリキャッシュをクリア（テスト用）

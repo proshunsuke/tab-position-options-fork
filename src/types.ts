@@ -28,7 +28,7 @@ export type Settings = {
   };
 };
 
-export const defaultSettings: Settings = {
+export const DEFAULT_SETTINGS: Settings = {
   newTab: {
     position: "default",
   },

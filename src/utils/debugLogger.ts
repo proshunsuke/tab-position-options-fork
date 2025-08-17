@@ -97,13 +97,15 @@ export const debugError = (
 /**
  * すべてのログを取得
  */
-export const getLogs = async (): Promise<LogEntry[]> => {
+export const getLogs = async () => {
   try {
     const result = await chrome.storage.local.get(LOG_STORAGE_KEY);
-    return result[LOG_STORAGE_KEY] || [];
+    const logs: LogEntry[] = result[LOG_STORAGE_KEY] || [];
+    return logs;
   } catch (error) {
     console.error("Failed to get logs from storage:", error);
-    return [];
+    const emptyLogs: LogEntry[] = [];
+    return emptyLogs;
   }
 };
 
