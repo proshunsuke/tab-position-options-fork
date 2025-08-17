@@ -31,7 +31,8 @@
         "noNonNullAssertion": "off",
         "useImportType": "error",
         "useNodejsImportProtocol": "off",
-        "useAsConstAssertion": "error"
+        "useAsConstAssertion": "error",
+        "useBlockStatements": "error"
       },
       "suspicious": {
         "noExplicitAny": "error",
