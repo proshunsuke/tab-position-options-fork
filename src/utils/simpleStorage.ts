@@ -19,7 +19,7 @@ export const createState = <T>(key: string, defaultValue: T, useSession = true) 
      * 値を取得
      * メモリ → ストレージ → デフォルト値の順で取得
      */
-    get: async (): Promise<T> => {
+    get: async () => {
       if (memoryCache.has(key)) {
         const cached = memoryCache.get(key) as T;
         return cached;
@@ -43,7 +43,7 @@ export const createState = <T>(key: string, defaultValue: T, useSession = true) 
      * 値を設定
      * メモリとストレージ両方に保存
      */
-    set: async (value: T): Promise<void> => {
+    set: async (value: T) => {
       memoryCache.set(key, value);
 
       try {
@@ -55,7 +55,7 @@ export const createState = <T>(key: string, defaultValue: T, useSession = true) 
     /**
      * 値をクリア
      */
-    clear: async (): Promise<void> => {
+    clear: async () => {
       memoryCache.delete(key);
 
       try {
@@ -74,16 +74,16 @@ export const createMapState = <K, V>(key: string, useSession = true) => {
   const state = createState<[K, V][]>(key, [], useSession);
 
   return {
-    get: async (): Promise<Map<K, V>> => {
+    get: async () => {
       const entries = await state.get();
       return new Map(entries);
     },
 
-    set: async (map: Map<K, V>): Promise<void> => {
+    set: async (map: Map<K, V>) => {
       await state.set(Array.from(map.entries()));
     },
 
-    clear: async (): Promise<void> => {
+    clear: async () => {
       await state.clear();
     },
   };
