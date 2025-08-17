@@ -1,22 +1,18 @@
 import { settingsState } from "@/src/storage";
-import {
-  cleanupTabData,
-  determineNextActiveTab,
-  recordTabActivation,
-  recordTabSource,
-} from "@/src/tabs/closeHandler";
 import { calculateNewTabIndex } from "@/src/tabs/position";
 import {
   handleBrowserStartup,
   initSessionRestoreDetector,
   isSessionRestoreTab,
 } from "@/src/tabs/sessionRestoreDetector";
+import { getPreviousActiveTabId, recordTabActivation } from "@/src/tabs/state/activationHistory";
 import {
-  deleteFromTabIndexCache,
-  getPreviousActiveTabId,
   tabIndexCacheState,
+  updateAllTabIndexCache,
   updateTabIndexCache,
-} from "@/src/tabs/tabState";
+} from "@/src/tabs/state/indexCache";
+import { recordTabSource } from "@/src/tabs/state/sourceMap";
+import { cleanupTabData, determineNextActiveTab } from "@/src/tabs/tabClosing";
 
 export const handleNewTab = async (tab: chrome.tabs.Tab) => {
   // セッション復元によるタブかチェック
@@ -27,7 +23,7 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
     if (tab.id) {
       await updateTabIndexCache(tab.id);
       if (tab.openerTabId) {
-        recordTabSource(tab.id, tab.openerTabId);
+        await recordTabSource(tab.id, tab.openerTabId);
       }
     }
     return;
@@ -46,7 +42,7 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
 
   // openerTabIdがある場合、ソース情報を記録
   if (tab.id && tab.openerTabId) {
-    recordTabSource(tab.id, tab.openerTabId);
+    await recordTabSource(tab.id, tab.openerTabId);
   }
 
   try {
@@ -110,7 +106,6 @@ export const handleTabRemoved = async (
   // ウィンドウが閉じられた場合は何もしない
   if (removeInfo.isWindowClosing) {
     await cleanupTabData(tabId);
-    await deleteFromTabIndexCache(tabId);
     return;
   }
 
@@ -121,7 +116,6 @@ export const handleTabRemoved = async (
     // デフォルト設定の場合は、ブラウザのデフォルト動作に任せる
     if (activateTabSetting === "default") {
       await cleanupTabData(tabId);
-      await deleteFromTabIndexCache(tabId);
       return;
     }
 
@@ -142,7 +136,6 @@ export const handleTabRemoved = async (
 
     if (!wasLastActive) {
       await cleanupTabData(tabId);
-      await deleteFromTabIndexCache(tabId);
       return;
     }
 
@@ -165,14 +158,12 @@ export const handleTabRemoved = async (
     );
 
     await cleanupTabData(tabId);
-    await deleteFromTabIndexCache(tabId);
 
     if (nextTabId !== null) {
       await chrome.tabs.update(nextTabId, { active: true });
     }
   } catch (_error) {
     await cleanupTabData(tabId);
-    await deleteFromTabIndexCache(tabId);
   }
 };
 
@@ -188,20 +179,6 @@ const handleTabMoved = async (
       cache.set(tab.id, tab.index);
     }
   }
-  await tabIndexCacheState.set(cache);
-};
-
-const updateAllTabIndexCache = async (windowId?: number) => {
-  const query = windowId ? { windowId } : {};
-  const tabs = await chrome.tabs.query(query);
-  const cache = await tabIndexCacheState.get();
-
-  for (const tab of tabs) {
-    if (tab.id) {
-      cache.set(tab.id, tab.index);
-    }
-  }
-
   await tabIndexCacheState.set(cache);
 };
 
