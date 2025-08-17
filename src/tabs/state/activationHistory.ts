@@ -13,10 +13,7 @@ const MAX_HISTORY_SIZE = 50;
 /**
  * タブアクティベーション履歴の状態管理
  */
-export const tabActivationHistoryState = createState<TabActivationInfo[]>(
-  "tabActivationHistory",
-  [],
-);
+const tabActivationHistoryState = createState<TabActivationInfo[]>("tabActivationHistory", []);
 
 /**
  * タブのアクティベーションを記録

@@ -3,7 +3,7 @@ import { createMapState } from "@/src/utils/simpleStorage";
 /**
  * タブソースマップの状態管理
  */
-export const tabSourceMapState = createMapState<number, number>("tabSourceMap");
+const tabSourceMapState = createMapState<number, number>("tabSourceMap");
 
 /**
  * タブのソースを記録

@@ -46,11 +46,3 @@ export const updateAllTabIndexCache = async (windowId?: number) => {
 
   await tabIndexCacheState.set(cache);
 };
-
-/**
- * タブのインデックスを取得
- */
-export const getTabIndex = async (tabId: number) => {
-  const cache = await tabIndexCacheState.get();
-  return cache.get(tabId) ?? null;
-};
