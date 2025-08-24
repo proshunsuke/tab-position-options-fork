@@ -1,5 +1,3 @@
-import { createState } from "@/src/utils/simpleStorage";
-
 /**
  * タブのアクティベーション情報の型定義
  */
@@ -10,20 +8,67 @@ type TabActivationInfo = {
 
 const MAX_HISTORY_SIZE = 50;
 
+// デバウンス閾値（システムの自動処理では可能だが、人間の手動操作では困難）
+const DEBOUNCE_THRESHOLD_MS = 100;
+
 /**
  * タブアクティベーション履歴の状態管理
+ * グローバルメモリ状態として管理
  */
-const tabActivationHistoryState = createState<TabActivationInfo[]>("tabActivationHistory", []);
+let tabActivationHistoryState: TabActivationInfo[] = [];
+
+/**
+ * ストレージから状態を初期化
+ * Service Worker起動時に一度だけ呼び出される
+ */
+export const initializeActivationHistory = async () => {
+  const result = await chrome.storage.session.get("tabActivationHistory");
+  if (result.tabActivationHistory) {
+    tabActivationHistoryState = result.tabActivationHistory;
+  } else {
+    // 取れなかった場合はqueryからアクティブなタブを探して初期化
+    const activeTab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
+    if (activeTab.id) {
+      setState([{ tabId: activeTab.id, timestamp: Date.now() }]);
+    }
+  }
+};
+
+/**
+ * 同期的に状態を取得
+ */
+const getState = () => {
+  return tabActivationHistoryState;
+};
+
+/**
+ * 同期的に状態を設定
+ * メモリは即座に更新し、ストレージへは遅延保存
+ */
+const setState = (value: TabActivationInfo[]) => {
+  tabActivationHistoryState = value;
+
+  // ストレージへの遅延保存
+  Promise.resolve().then(() => {
+    chrome.storage.session.set({ tabActivationHistory: value }).catch(() => {});
+  });
+};
 
 /**
  * タブのアクティベーションを記録
  */
-export const recordTabActivation = async (tabId: number) => {
+export const recordTabActivation = (tabId: number) => {
   const timestamp = Date.now();
-  const history = await tabActivationHistoryState.get();
+  const history = getState();
 
-  // 既存のエントリを削除（重複を防ぐ）
-  const updatedHistory = history.filter(entry => entry.tabId !== tabId);
+  // 最後のエントリをチェック
+  const lastEntry = history.length > 0 ? history[history.length - 1] : null;
+
+  // 短時間内の連続アクティベーションの場合、それはChromeデフォルトの動作でアクティブにしたタブであるので、そのエントリを削除
+  let updatedHistory = history;
+  if (lastEntry && timestamp - lastEntry.timestamp < DEBOUNCE_THRESHOLD_MS) {
+    updatedHistory = history.slice(0, -1);
+  }
 
   // 新しいエントリを追加
   updatedHistory.push({ tabId, timestamp });
@@ -33,67 +78,71 @@ export const recordTabActivation = async (tabId: number) => {
     updatedHistory.shift();
   }
 
-  await tabActivationHistoryState.set(updatedHistory);
+  setState(updatedHistory);
+};
+
+/**
+ * 新規タブを元に前回アクティブだったタブIDを取得
+ */
+export const getLastActiveTabIdByNewTabId = (newTabId: number) => {
+  const lastActiveTabId = getLastActiveTabId();
+
+  // newTabIdが渡されて、それが履歴の最後と一致する場合
+  // → レースコンディション（onActivatedが先に発火）と判断
+  // → その前のタブを返す
+  if (lastActiveTabId === newTabId) {
+    const history = getState();
+    return history.length >= 2 ? history[history.length - 2].tabId : null;
+  }
+
+  // 通常ケース：履歴の最後を返す
+  return lastActiveTabId;
 };
 
 /**
  * 前回アクティブだったタブIDを取得
  */
-export const getPreviousActiveTabId = async (currentTabId?: number) => {
-  const history = await tabActivationHistoryState.get();
+export const getLastActiveTabId = () => {
+  const history = getState();
 
   if (history.length === 0) {
     return null;
   }
 
   const lastEntry = history[history.length - 1];
-
-  // currentTabIdが渡されて、それが履歴の最後と一致する場合
-  // → レースコンディション（onActivatedが先に発火）と判断
-  // → その前のタブを返す
-  if (currentTabId && lastEntry.tabId === currentTabId) {
-    return history.length >= 2 ? history[history.length - 2].tabId : null;
-  }
-
-  // 通常ケース：履歴の最後を返す
   return lastEntry.tabId;
 };
 
 /**
  * 特定のタブをアクティベーション履歴から削除
  */
-export const cleanupActivationHistory = async (tabId: number) => {
-  const history = await tabActivationHistoryState.get();
+export const cleanupActivationHistory = (tabId: number) => {
+  const history = getState();
   const updatedHistory = history.filter(entry => entry.tabId !== tabId);
-  await tabActivationHistoryState.set(updatedHistory);
+  setState(updatedHistory);
 };
 
 /**
  * アクティベーション履歴から利用可能なタブを検索
  */
-export const getTabFromActivationHistory = async (
+export const getTabFromActivationHistory = (
   excludeTabId: number,
   availableTabs: chrome.tabs.Tab[],
 ) => {
-  const history = await tabActivationHistoryState.get();
-
-  // 閉じたタブより前の履歴を逆順で検索
+  const history = getState();
   for (let i = history.length - 1; i >= 0; i--) {
     const entry = history[i];
-
-    // 閉じたタブに到達したら、それより前の履歴を探す
-    if (entry.tabId === excludeTabId) {
-      // 閉じたタブより前の履歴を探す
-      for (let j = i - 1; j >= 0; j--) {
-        const previousEntry = history[j];
-        if (availableTabs.some(tab => tab.id === previousEntry.tabId)) {
-          return previousEntry.tabId;
-        }
-      }
-      break;
+    if (entry.tabId !== excludeTabId && availableTabs.some(tab => tab.id === entry.tabId)) {
+      return entry.tabId;
     }
   }
-
-  // 閉じたタブが履歴にない、または前の履歴がない場合
   return null;
+};
+
+/**
+ * メモリをリセット（テスト用）
+ * @internal
+ */
+export const resetActivationHistory = () => {
+  tabActivationHistoryState = [];
 };
