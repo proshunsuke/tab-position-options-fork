@@ -165,6 +165,9 @@ Pull Requestの概要欄は**英語で**記載し、以下の情報を詳細に�
 - **Left of current tab**: 現在のタブの左側に開く
 - **Default**: ブラウザのデフォルト動作（デフォルト）
 
+**追加オプション**:
+- **New Tab Background**: 新規タブをバックグラウンドで開く（現在のタブのフォーカスを維持）
+
 ### 2. ローディングページ（Loading Page）設定
 新しいページを読み込む際のタブ位置（New Tabと同じオプション）
 ※ 現在は未実装（UI上で "Coming soon..." と表示）
@@ -249,7 +252,8 @@ Chrome Storage Localに保存されるデータは以下の構造を持ちます
   version: "0.0.1",  // package.jsonのバージョンと同期
   settings: {
     newTab: {
-      position: 'first' | 'last' | 'right' | 'left' | 'default'
+      position: 'first' | 'last' | 'right' | 'left' | 'default',
+      openInBackground: boolean
     },
     loadingPage: {
       position: 'first' | 'last' | 'right' | 'left' | 'default'
