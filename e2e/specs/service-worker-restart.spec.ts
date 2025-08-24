@@ -17,12 +17,7 @@ test.describe("Service Worker Restart Handling", () => {
     context,
     serviceWorker,
   }) => {
-    // Step 1: 左タブアクティベーション設定
-    await setExtensionSettings(context, {
-      afterTabClosing: { activateTab: "left" },
-    });
-
-    // Step 2: 3つのタブを作成
+    // 3つのタブを作成
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
 
@@ -35,9 +30,14 @@ test.describe("Service Worker Restart Handling", () => {
     const tab3 = await context.newPage();
     await tab3.goto("data:text/html,<h1>Tab 3</h1>");
 
-    // Step 3: 右端のタブ（tab3）をアクティブに
+    // 右端のタブ（tab3）をアクティブに
     await tab3.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
+
+    // 左タブアクティベーション設定
+    await setExtensionSettings(context, {
+      afterTabClosing: { activateTab: "left" },
+    });
 
     // 初期状態を確認
     const beforeRestartState = await getTabState(serviceWorker);
@@ -47,8 +47,7 @@ test.describe("Service Worker Restart Handling", () => {
     // メモリキャッシュが存在することを確認
     const cacheBeforeRestart = await getMemoryCacheState(serviceWorker);
     expect(cacheBeforeRestart).not.toBeNull();
-    expect(cacheBeforeRestart!.size).toBeGreaterThan(0);
-    expect(cacheBeforeRestart!.hasSettings).toBe(true);
+    expect(cacheBeforeRestart!.initializationState).toBe(true);
 
     // Step 4: Service Worker再起動をシミュレート（30秒経過を想定）
     await simulateServiceWorkerRestart(serviceWorker);
@@ -56,11 +55,7 @@ test.describe("Service Worker Restart Handling", () => {
     // メモリキャッシュがクリアされたことを確認
     const cacheAfterRestart = await getMemoryCacheState(serviceWorker);
     expect(cacheAfterRestart).not.toBeNull();
-    expect(cacheAfterRestart!.size).toBe(0);
-    expect(cacheAfterRestart!.keys.length).toBe(0);
-    expect(cacheAfterRestart!.hasSettings).toBe(false);
-    expect(cacheAfterRestart!.hasLastActiveTab).toBe(false);
-    expect(cacheAfterRestart!.hasTabIndexCache).toBe(false);
+    expect(cacheAfterRestart!.initializationState).toBe(false);
 
     // 再起動後も状態が維持されていることを確認
     const afterRestartState = await getTabState(serviceWorker);
@@ -82,18 +77,13 @@ test.describe("Service Worker Restart Handling", () => {
 
     // 操作後、メモリキャッシュが再構築されていることを確認
     const cacheAfterOperation = await getMemoryCacheState(serviceWorker);
-    expect(cacheAfterOperation!.size).toBeGreaterThan(0);
+    expect(cacheAfterOperation!.initializationState).toBe(true);
   });
 
   test("should preserve activation history after Service Worker restart", async ({
     context,
     serviceWorker,
   }) => {
-    // アクティベーション履歴を使用する設定
-    await setExtensionSettings(context, {
-      afterTabClosing: { activateTab: "inActivatedOrder" },
-    });
-
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
 
@@ -115,16 +105,21 @@ test.describe("Service Worker Restart Handling", () => {
     await pages[3].bringToFront();
     await new Promise(resolve => setTimeout(resolve, 100));
 
+    // アクティベーション履歴を使用する設定
+    await setExtensionSettings(context, {
+      afterTabClosing: { activateTab: "inActivatedOrder" },
+    });
+
     // メモリキャッシュが存在することを確認
     const cacheBeforeRestart = await getMemoryCacheState(serviceWorker);
-    expect(cacheBeforeRestart!.size).toBeGreaterThan(0);
+    expect(cacheBeforeRestart!.initializationState).toBe(true);
 
     // Service Worker再起動をシミュレート
     await simulateServiceWorkerRestart(serviceWorker);
 
     // メモリキャッシュがクリアされたことを確認
     const cacheAfterRestart = await getMemoryCacheState(serviceWorker);
-    expect(cacheAfterRestart!.size).toBe(0);
+    expect(cacheAfterRestart!.initializationState).toBe(false);
 
     // Tab4（現在アクティブ）を閉じる
     await closeActiveTabViaServiceWorker(serviceWorker);
@@ -144,11 +139,6 @@ test.describe("Service Worker Restart Handling", () => {
     context,
     serviceWorker,
   }) => {
-    // ソースタブ設定を使用
-    await setExtensionSettings(context, {
-      afterTabClosing: { activateTab: "sourceTab" },
-    });
-
     // 親タブを作成
     const parentTab = await context.newPage();
     await parentTab.goto("data:text/html,<h1>Parent Tab</h1>");
@@ -167,18 +157,23 @@ test.describe("Service Worker Restart Handling", () => {
       };
     });
 
+    // ソースタブ設定を使用
+    await setExtensionSettings(context, {
+      afterTabClosing: { activateTab: "sourceTab" },
+    });
+
     // メモリキャッシュが存在することを確認
     const cacheBeforeRestart = await getMemoryCacheState(serviceWorker);
-    expect(cacheBeforeRestart!.size).toBeGreaterThan(0);
-    expect(cacheBeforeRestart!.hasTabIndexCache).toBe(true);
+    expect(cacheBeforeRestart).not.toBeNull();
+    expect(cacheBeforeRestart!.initializationState).toBe(true);
 
     // Service Worker再起動をシミュレート
     await simulateServiceWorkerRestart(serviceWorker);
 
     // メモリキャッシュがクリアされたことを確認
     const cacheAfterRestart = await getMemoryCacheState(serviceWorker);
-    expect(cacheAfterRestart!.size).toBe(0);
-    expect(cacheAfterRestart!.hasTabIndexCache).toBe(false);
+    expect(cacheAfterRestart).not.toBeNull();
+    expect(cacheAfterRestart!.initializationState).toBe(false);
 
     // 子タブを閉じる
     await closeActiveTabViaServiceWorker(serviceWorker);
@@ -220,12 +215,12 @@ test.describe("Service Worker Restart Handling", () => {
 
     // 1回目の再起動
     const cache1Before = await getMemoryCacheState(serviceWorker);
-    expect(cache1Before!.size).toBeGreaterThan(0);
+    expect(cache1Before!.initializationState).toBe(true);
 
     await simulateServiceWorkerRestart(serviceWorker);
 
     const cache1After = await getMemoryCacheState(serviceWorker);
-    expect(cache1After!.size).toBe(0);
+    expect(cache1After!.initializationState).toBe(false);
 
     // Tab3を閉じる -> Tab4がアクティブになるはず
     await closeActiveTabViaServiceWorker(serviceWorker);
@@ -240,12 +235,12 @@ test.describe("Service Worker Restart Handling", () => {
 
     // 2回目の再起動
     const cache2Before = await getMemoryCacheState(serviceWorker);
-    expect(cache2Before!.size).toBeGreaterThan(0);
+    expect(cache2Before!.initializationState).toBe(true);
 
     await simulateServiceWorkerRestart(serviceWorker);
 
     const cache2After = await getMemoryCacheState(serviceWorker);
-    expect(cache2After!.size).toBe(0);
+    expect(cache2After!.initializationState).toBe(false);
 
     // Tab4を閉じる -> Tab5がアクティブになるはず
     await closeActiveTabViaServiceWorker(serviceWorker);

@@ -9,11 +9,6 @@ test.describe("Race Condition - Multiple Tab Closure", () => {
     context,
     serviceWorker,
   }) => {
-    // "Left Tab" アクティベーション動作を設定
-    await setExtensionSettings(context, {
-      afterTabClosing: { activateTab: "left" },
-    });
-
     // 複数タブを作成
     const pages = [];
     for (let i = 0; i < 6; i++) {
@@ -25,6 +20,11 @@ test.describe("Race Condition - Multiple Tab Closure", () => {
     // Tab 3 (pages[2]) をアクティブにする
     await pages[2].bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
+
+    // "Left Tab" アクティベーション動作を設定
+    await setExtensionSettings(context, {
+      afterTabClosing: { activateTab: "left" },
+    });
 
     // 初期タブ状態を取得
     const initialState = await serviceWorker.evaluate(async () => {
@@ -89,11 +89,6 @@ test.describe("Race Condition - Multiple Tab Closure", () => {
     context,
     serviceWorker,
   }) => {
-    // "In activated order" の動作を設定（アクティベーション履歴に依存）
-    await setExtensionSettings(context, {
-      afterTabClosing: { activateTab: "inActivatedOrder" },
-    });
-
     // タブを作成してアクティベーション履歴を構築
     const pages = [];
     for (let i = 0; i < 5; i++) {
@@ -111,6 +106,11 @@ test.describe("Race Condition - Multiple Tab Closure", () => {
     await new Promise(resolve => setTimeout(resolve, 100));
     await pages[1].bringToFront();
     await new Promise(resolve => setTimeout(resolve, 100));
+
+    // "In activated order" の動作を設定（アクティベーション履歴に依存）
+    await setExtensionSettings(context, {
+      afterTabClosing: { activateTab: "inActivatedOrder" },
+    });
 
     // 現在の状態を取得
     const initialState = await serviceWorker.evaluate(async () => {
@@ -155,10 +155,6 @@ test.describe("Race Condition - Multiple Tab Closure", () => {
   });
 
   test("should handle rapid successive tab closures", async ({ context, serviceWorker }) => {
-    await setExtensionSettings(context, {
-      afterTabClosing: { activateTab: "left" },
-    });
-
     // タブを作成
     const pages = [];
     for (let i = 0; i < 5; i++) {
@@ -170,6 +166,10 @@ test.describe("Race Condition - Multiple Tab Closure", () => {
     // 最後のタブをアクティブにする
     await pages[4].bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
+
+    await setExtensionSettings(context, {
+      afterTabClosing: { activateTab: "left" },
+    });
 
     // タブIDを取得
     const tabIds = await serviceWorker.evaluate(async () => {

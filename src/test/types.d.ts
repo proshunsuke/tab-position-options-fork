@@ -32,13 +32,16 @@ declare global {
     };
 
     /**
-     * ストレージヘルパー
+     * 状態関連
      */
-    simpleStorage: {
-      clearMemoryCache: () => void;
-      getMemoryCacheSize: () => number;
-      getMemoryCacheKeys: () => string[];
-      hasInMemoryCache: (key: string) => boolean;
+    states: {
+      resetActivationHistory: () => void;
+      resetIndexCache: () => void;
+      resetSourceMap: () => void;
+      resetTabSnapshotState: () => void;
+      resetAppDataState: () => void;
+      resetInitializationState: () => void;
+      getInitializationState: () => boolean;
     };
   }
 
@@ -55,7 +58,6 @@ declare global {
    */
   var __testExports: GlobalTestExports | undefined;
   var __testDetector: TestDetector | undefined;
-  var __simpleStorageTestHelpers: GlobalTestExports["simpleStorage"] | undefined;
 }
 
 export type { GlobalTestExports };

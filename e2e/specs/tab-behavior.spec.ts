@@ -11,8 +11,6 @@ test.describe("Tab Behavior - New Tab Position", () => {
     await clearExtensionStorage(serviceWorker);
   });
   test("should open new tab at first position", async ({ context, serviceWorker }) => {
-    await setExtensionSettings(context, { newTab: { position: "first" } });
-
     // 3つのタブを作成
     await context.newPage();
     await context.newPage();
@@ -20,6 +18,8 @@ test.describe("Tab Behavior - New Tab Position", () => {
 
     // tab3をアクティブに
     await tab3.bringToFront();
+
+    await setExtensionSettings(context, { newTab: { position: "first" } });
 
     const beforeState = await getTabState(serviceWorker);
     await createTabViaServiceWorker(serviceWorker);
@@ -36,8 +36,6 @@ test.describe("Tab Behavior - New Tab Position", () => {
   });
 
   test("should open new tab at last position", async ({ context, serviceWorker }) => {
-    await setExtensionSettings(context, { newTab: { position: "last" } });
-
     // 3つのタブを作成
     await context.newPage();
     const tab2 = await context.newPage();
@@ -45,6 +43,8 @@ test.describe("Tab Behavior - New Tab Position", () => {
 
     // tab2をアクティブに
     await tab2.bringToFront();
+
+    await setExtensionSettings(context, { newTab: { position: "last" } });
 
     const beforeState = await getTabState(serviceWorker);
     await createTabViaServiceWorker(serviceWorker);
@@ -61,8 +61,6 @@ test.describe("Tab Behavior - New Tab Position", () => {
   });
 
   test("should open new tab to the right of current tab", async ({ context, serviceWorker }) => {
-    await setExtensionSettings(context, { newTab: { position: "right" } });
-
     // 3つのタブを作成
     await context.newPage();
     const tab2 = await context.newPage();
@@ -70,6 +68,8 @@ test.describe("Tab Behavior - New Tab Position", () => {
 
     // tab2（インデックス1）をアクティブに
     await tab2.bringToFront();
+
+    await setExtensionSettings(context, { newTab: { position: "right" } });
 
     const beforeState = await getTabState(serviceWorker);
     await createTabViaServiceWorker(serviceWorker);
@@ -86,8 +86,6 @@ test.describe("Tab Behavior - New Tab Position", () => {
   });
 
   test("should open new tab to the left of current tab", async ({ context, serviceWorker }) => {
-    await setExtensionSettings(context, { newTab: { position: "left" } });
-
     // 3つのタブを作成
     await context.newPage();
     const tab2 = await context.newPage();
@@ -95,6 +93,8 @@ test.describe("Tab Behavior - New Tab Position", () => {
 
     // tab2（インデックス1）をアクティブに
     await tab2.bringToFront();
+
+    await setExtensionSettings(context, { newTab: { position: "left" } });
 
     const beforeState = await getTabState(serviceWorker);
     await createTabViaServiceWorker(serviceWorker);
@@ -111,8 +111,6 @@ test.describe("Tab Behavior - New Tab Position", () => {
   });
 
   test("should open new tab at browser default position", async ({ context, serviceWorker }) => {
-    await setExtensionSettings(context, { newTab: { position: "default" } });
-
     // 3つのタブを作成
     await context.newPage();
     const tab2 = await context.newPage();
@@ -120,6 +118,8 @@ test.describe("Tab Behavior - New Tab Position", () => {
 
     // tab2をアクティブに
     await tab2.bringToFront();
+
+    await setExtensionSettings(context, { newTab: { position: "default" } });
 
     const beforeState = await getTabState(serviceWorker);
     await createTabViaServiceWorker(serviceWorker);
@@ -138,14 +138,14 @@ test.describe("Tab Behavior - New Tab Position", () => {
 
   // エッジケースのテスト
   test("should open new tab to the left of first tab", async ({ context, serviceWorker }) => {
-    await setExtensionSettings(context, { newTab: { position: "left" } });
-
     // 2つのタブを作成
     const tab1 = await context.newPage();
     await context.newPage();
 
     // 最初のタブをアクティブに
     await tab1.bringToFront();
+
+    await setExtensionSettings(context, { newTab: { position: "left" } });
 
     const beforeState = await getTabState(serviceWorker);
     await createTabViaServiceWorker(serviceWorker);
@@ -162,8 +162,6 @@ test.describe("Tab Behavior - New Tab Position", () => {
   });
 
   test("should open new tab to the right of last tab", async ({ context, serviceWorker }) => {
-    await setExtensionSettings(context, { newTab: { position: "right" } });
-
     // 3つのタブを作成
     await context.newPage();
     await context.newPage();
@@ -171,6 +169,8 @@ test.describe("Tab Behavior - New Tab Position", () => {
 
     // 最後のタブをアクティブに
     await tab3.bringToFront();
+
+    await setExtensionSettings(context, { newTab: { position: "right" } });
 
     const beforeState = await getTabState(serviceWorker);
     await createTabViaServiceWorker(serviceWorker);
