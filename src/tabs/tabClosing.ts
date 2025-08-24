@@ -2,72 +2,64 @@ import {
   cleanupActivationHistory,
   getTabFromActivationHistory,
 } from "@/src/tabs/state/activationHistory";
-import { deleteFromTabIndexCache } from "@/src/tabs/state/indexCache";
+import { deleteTabIndex } from "@/src/tabs/state/indexCache";
 import { cleanupTabSource, getTabSource } from "@/src/tabs/state/sourceMap";
 import type { TabActivation } from "@/src/types";
 
 /**
  * タブクロージング時の全データクリーンアップ
  */
-export const cleanupTabData = async (tabId: number) => {
+export const cleanupTabData = (tabId: number) => {
   // 各ステートからタブデータを削除
-  await cleanupActivationHistory(tabId);
-  await cleanupTabSource(tabId);
-  await deleteFromTabIndexCache(tabId);
+  cleanupActivationHistory(tabId);
+  cleanupTabSource(tabId);
+  deleteTabIndex(tabId);
 };
 
 /**
  * 次にアクティブにするタブを決定
  */
-export const determineNextActiveTab = async (
+export const determineNextActiveTab = (
   closedTabId: number,
   closedTabIndex: number,
   activateTabSetting: TabActivation,
-  windowId: number,
+  tabs: chrome.tabs.Tab[],
 ) => {
-  const tabs = await chrome.tabs.query({ windowId });
-
-  if (tabs.length === 0) {
-    return null;
-  }
-
   switch (activateTabSetting) {
     case "first":
-      return tabs[0]?.id ?? null;
+      return tabs[0].id;
 
-    case "last":
-      return tabs[tabs.length - 1]?.id ?? null;
+    case "last": {
+      const lastTab = tabs[tabs.length - 1];
+      return lastTab.id === closedTabId ? null : lastTab.id;
+    }
 
-    case "left":
-      if (closedTabIndex > 0) {
-        const leftTab = tabs.find(tab => tab.index === closedTabIndex - 1);
-        return leftTab?.id ?? null;
+    case "left": {
+      if (closedTabIndex === 0) {
+        return null;
       }
-      return tabs[0]?.id ?? null;
+      const leftTab = tabs.find(tab => tab.index === closedTabIndex - 1);
+      return leftTab?.id ?? null;
+    }
 
     case "right": {
-      // タブが閉じられた後、右側のタブは同じインデックスを持つ
-      const rightTab = tabs.find(tab => tab.index === closedTabIndex);
-      if (rightTab) {
-        return rightTab.id ?? null;
-      }
-      return tabs[tabs.length - 1]?.id ?? null;
+      const rightTab = tabs.find(tab => tab.index === closedTabIndex + 1);
+      return rightTab?.id ?? null;
     }
 
     case "inActivatedOrder": {
-      const historyTab = await getTabFromActivationHistory(closedTabId, tabs);
-      return historyTab;
+      return getTabFromActivationHistory(closedTabId, tabs);
     }
 
     case "sourceTab":
-      return await getTabSource(closedTabId, tabs);
+      return getTabSource(closedTabId, tabs);
 
     case "sourceTabAndOrder": {
-      const sourceTab = await getTabSource(closedTabId, tabs);
+      const sourceTab = getTabSource(closedTabId, tabs);
       if (sourceTab !== null) {
         return sourceTab;
       }
-      return await getTabFromActivationHistory(closedTabId, tabs);
+      return getTabFromActivationHistory(closedTabId, tabs);
     }
 
     default:

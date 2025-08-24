@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { TabBehavior } from "@/entrypoints/options/TabBehavior";
 import { TabClosing } from "@/entrypoints/options/TabClosing";
-import { getSettings, saveSettingsWithVersion } from "@/src/settings/state/appData";
+import {
+  getSettings,
+  initializeAppData,
+  saveSettingsWithVersion,
+} from "@/src/settings/state/appData";
 import type { TabActivation, TabPosition } from "@/src/types";
 
 export default function App() {
@@ -14,7 +18,8 @@ export default function App() {
   // 起動時に保存済みの設定を読み込む
   useEffect(() => {
     void (async () => {
-      const settings = await getSettings();
+      await initializeAppData();
+      const settings = getSettings();
       if (settings.newTab?.position) {
         setNewTabPosition(settings.newTab.position);
       }
@@ -32,13 +37,13 @@ export default function App() {
     setAfterTabClosing(value as TabActivation);
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     setIsSaving(true);
     setSaveMessage("");
 
     try {
-      const currentSettings = await getSettings();
-      await saveSettingsWithVersion({
+      const currentSettings = getSettings();
+      saveSettingsWithVersion({
         ...currentSettings,
         newTab: {
           position: newTabPosition,

@@ -2,28 +2,20 @@ import type { TabPosition } from "@/src/types";
 
 export const calculateNewTabIndex = (
   position: TabPosition,
-  allTabs: chrome.tabs.Tab[],
-  activeTab?: chrome.tabs.Tab,
+  tabs: chrome.tabs.Tab[],
+  currentTabId: number,
 ) => {
   switch (position) {
     case "first":
       return 0;
 
-    case "last":
-      return allTabs.length - 1;
-
     case "left": {
-      if (activeTab && activeTab.index > 0) {
-        return activeTab.index;
-      }
-      break;
+      return tabs.find(tab => tab.id === currentTabId)?.index;
     }
 
     case "right": {
-      if (activeTab) {
-        return activeTab.index + 1;
-      }
-      break;
+      const currentTab = tabs.find(tab => tab.id === currentTabId);
+      return currentTab ? currentTab.index + 1 : undefined;
     }
     default:
       return undefined;

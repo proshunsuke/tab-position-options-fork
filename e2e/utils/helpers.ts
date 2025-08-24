@@ -201,11 +201,14 @@ export const clearExtensionStorage = async (serviceWorker: Worker) => {
 export const simulateServiceWorkerRestart = async (serviceWorker: Worker) => {
   // メモリキャッシュをクリア
   await serviceWorker.evaluate(() => {
-    // simpleStorageのメモリキャッシュをクリア（後方互換性のため両方チェック）
-    if (globalThis.__testExports?.simpleStorage) {
-      globalThis.__testExports.simpleStorage.clearMemoryCache();
-    } else if (globalThis.__simpleStorageTestHelpers) {
-      globalThis.__simpleStorageTestHelpers.clearMemoryCache();
+    // メモリキャッシュをクリア
+    if (globalThis.__testExports?.states) {
+      globalThis.__testExports.states.resetActivationHistory();
+      globalThis.__testExports.states.resetIndexCache();
+      globalThis.__testExports.states.resetSourceMap();
+      globalThis.__testExports.states.resetTabSnapshotState();
+      globalThis.__testExports.states.resetAppDataState();
+      globalThis.__testExports.states.resetInitializationState();
     }
 
     // sessionRestoreDetectorの状態もリセット
@@ -223,19 +226,8 @@ export const simulateServiceWorkerRestart = async (serviceWorker: Worker) => {
  */
 export const getMemoryCacheState = async (serviceWorker: Worker) => {
   return serviceWorker.evaluate(() => {
-    // 新しい構造を優先、後方互換性のためフォールバック
-    const helpers =
-      globalThis.__testExports?.simpleStorage || globalThis.__simpleStorageTestHelpers;
-
-    if (helpers) {
-      return {
-        size: helpers.getMemoryCacheSize(),
-        keys: helpers.getMemoryCacheKeys(),
-        hasLastActiveTab: helpers.hasInMemoryCache("lastActiveTabId"),
-        hasTabIndexCache: helpers.hasInMemoryCache("tabIndexCache"),
-        hasSettings: helpers.hasInMemoryCache("settings"),
-      };
-    }
-    return null;
+    return {
+      initializationState: globalThis.__testExports?.states.getInitializationState() || false,
+    };
   });
 };

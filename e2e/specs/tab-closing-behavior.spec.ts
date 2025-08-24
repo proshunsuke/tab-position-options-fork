@@ -11,9 +11,6 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     await clearExtensionStorage(serviceWorker);
   });
   test("should activate first tab after closing", async ({ context, serviceWorker }) => {
-    // 設定を先に変更
-    await setExtensionSettings(context, { afterTabClosing: { activateTab: "first" } });
-
     // 初期タブの状態を取得
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
@@ -25,6 +22,8 @@ test.describe("Tab Behavior - After Tab Closing", () => {
 
     // tab3をアクティブに
     await tab3.bringToFront();
+
+    await setExtensionSettings(context, { afterTabClosing: { activateTab: "first" } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -45,8 +44,6 @@ test.describe("Tab Behavior - After Tab Closing", () => {
   });
 
   test("should activate last tab after closing", async ({ context, serviceWorker }) => {
-    await setExtensionSettings(context, { afterTabClosing: { activateTab: "last" } });
-
     // 初期タブの状態を取得
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
@@ -58,6 +55,8 @@ test.describe("Tab Behavior - After Tab Closing", () => {
 
     // tab1をアクティブに
     await tab1.bringToFront();
+
+    await setExtensionSettings(context, { afterTabClosing: { activateTab: "last" } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -78,8 +77,6 @@ test.describe("Tab Behavior - After Tab Closing", () => {
   });
 
   test("should activate right tab after closing", async ({ context, serviceWorker }) => {
-    await setExtensionSettings(context, { afterTabClosing: { activateTab: "right" } });
-
     // 初期タブの状態を取得
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
@@ -91,6 +88,8 @@ test.describe("Tab Behavior - After Tab Closing", () => {
 
     // tab1をアクティブに
     await tab1.bringToFront();
+
+    await setExtensionSettings(context, { afterTabClosing: { activateTab: "right" } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -111,8 +110,6 @@ test.describe("Tab Behavior - After Tab Closing", () => {
   });
 
   test("should activate left tab after closing", async ({ context, serviceWorker }) => {
-    await setExtensionSettings(context, { afterTabClosing: { activateTab: "left" } });
-
     // 初期タブの状態を取得
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
@@ -124,6 +121,8 @@ test.describe("Tab Behavior - After Tab Closing", () => {
 
     // tab2をアクティブに
     await tab2.bringToFront();
+
+    await setExtensionSettings(context, { afterTabClosing: { activateTab: "left" } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -144,8 +143,6 @@ test.describe("Tab Behavior - After Tab Closing", () => {
   });
 
   test("should activate in activated order after closing", async ({ context, serviceWorker }) => {
-    await setExtensionSettings(context, { afterTabClosing: { activateTab: "inActivatedOrder" } });
-
     // 初期タブの状態を取得
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
@@ -155,29 +152,80 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     const tab2 = await context.newPage();
     const tab3 = await context.newPage();
     const tab4 = await context.newPage();
+    const tab5 = await context.newPage();
 
-    // 特定の順序でタブをアクティブ化: tab1 → tab3 → tab2 → tab4
+    // 特定の順序でタブをアクティブ化: tab1 → tab5 → tab2 → tab4 → tab3
     await tab1.bringToFront();
     await tab1.waitForTimeout(200);
-    await tab3.bringToFront();
-    await tab3.waitForTimeout(200);
+    await tab5.bringToFront();
+    await tab5.waitForTimeout(200);
     await tab2.bringToFront();
     await tab2.waitForTimeout(200);
     await tab4.bringToFront();
     await tab4.waitForTimeout(200);
+    await tab3.bringToFront();
+    await tab3.waitForTimeout(200);
+
+    // tab3をアクティブに
+    await tab3.bringToFront();
+
+    await setExtensionSettings(context, { afterTabClosing: { activateTab: "inActivatedOrder" } });
 
     const beforeState = await getTabState(serviceWorker);
-    expect(beforeState.totalTabs).toBe(initialTabCount + 4);
-    expect(beforeState.activeTabIndex).toBe(initialTabCount + 3); // tab4
+    expect(beforeState.totalTabs).toBe(initialTabCount + 5);
+    expect(beforeState.activeTabIndex).toBe(initialTabCount + 2); // tab3
 
     // Service Worker経由でタブを閉じる
     await closeActiveTabViaServiceWorker(serviceWorker);
 
-    // 最後にアクティブだったタブ（tab2）がアクティブになるべき
+    // 最後にアクティブだったタブ（tab4）がアクティブになるべき
+    // tab1, tab2, tab4(アクティブ), tab5
     await expect(async () => {
       const state = await getTabState(serviceWorker);
       expect(state.totalTabs).toBe(beforeState.totalTabs - 1);
+      expect(state.activeTabIndex).toBe(initialTabCount + 2); // tab4
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+
+    // Service Worker経由でタブを閉じる
+    await closeActiveTabViaServiceWorker(serviceWorker);
+
+    // 次に最後にアクティブだったタブ（tab2）がアクティブになるべき
+    // tab1, tab2(アクティブ), tab5
+    await expect(async () => {
+      const state = await getTabState(serviceWorker);
+      expect(state.totalTabs).toBe(beforeState.totalTabs - 2);
       expect(state.activeTabIndex).toBe(initialTabCount + 1); // tab2
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+
+    // Service Worker経由でタブを閉じる
+    await closeActiveTabViaServiceWorker(serviceWorker);
+
+    // 次に最後にアクティブだったタブ（tab5）がアクティブになるべき
+    // tab1, tab5(アクティブ)
+    await expect(async () => {
+      const state = await getTabState(serviceWorker);
+      expect(state.totalTabs).toBe(beforeState.totalTabs - 3);
+      expect(state.activeTabIndex).toBe(initialTabCount + 1); // tab5
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+
+    // Service Worker経由でタブを閉じる
+    await closeActiveTabViaServiceWorker(serviceWorker);
+
+    // 最後に残ったタブ（tab1）がアクティブになるべき
+    // tab1(アクティブ)
+    await expect(async () => {
+      const state = await getTabState(serviceWorker);
+      expect(state.totalTabs).toBe(beforeState.totalTabs - 4);
+      expect(state.activeTabIndex).toBe(initialTabCount); // tab1
     }).toPass({
       intervals: [100, 100, 100],
       timeout: 5000,
@@ -185,8 +233,6 @@ test.describe("Tab Behavior - After Tab Closing", () => {
   });
 
   test("should use browser default behavior after closing", async ({ context, serviceWorker }) => {
-    await setExtensionSettings(context, { afterTabClosing: { activateTab: "default" } });
-
     // 初期タブの状態を取得
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
@@ -198,6 +244,8 @@ test.describe("Tab Behavior - After Tab Closing", () => {
 
     // tab2をアクティブに
     await tab2.bringToFront();
+
+    await setExtensionSettings(context, { afterTabClosing: { activateTab: "default" } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -220,8 +268,6 @@ test.describe("Tab Behavior - After Tab Closing", () => {
 
   // エッジケースのテスト
   test("should activate left tab when closing first tab", async ({ context, serviceWorker }) => {
-    await setExtensionSettings(context, { afterTabClosing: { activateTab: "left" } });
-
     // 初期タブの状態を取得
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
@@ -233,6 +279,8 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     // 最初に作成したタブをアクティブに
     const pages = context.pages();
     await pages[initialTabCount].bringToFront();
+
+    await setExtensionSettings(context, { afterTabClosing: { activateTab: "left" } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 2);
@@ -254,8 +302,6 @@ test.describe("Tab Behavior - After Tab Closing", () => {
   });
 
   test("should activate right tab when closing last tab", async ({ context, serviceWorker }) => {
-    await setExtensionSettings(context, { afterTabClosing: { activateTab: "right" } });
-
     // 初期タブの状態を取得
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
@@ -266,6 +312,8 @@ test.describe("Tab Behavior - After Tab Closing", () => {
 
     // 最後のタブをアクティブに
     await tab2.bringToFront();
+
+    await setExtensionSettings(context, { afterTabClosing: { activateTab: "right" } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 2);
@@ -289,8 +337,6 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     context,
     serviceWorker,
   }) => {
-    await setExtensionSettings(context, { afterTabClosing: { activateTab: "left" } });
-
     // 初期タブの状態を取得
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
@@ -316,6 +362,8 @@ test.describe("Tab Behavior - After Tab Closing", () => {
     // Step 2: Tab Bをアクティブに
     await tabB.bringToFront();
     await tabB.waitForTimeout(200);
+
+    await setExtensionSettings(context, { afterTabClosing: { activateTab: "left" } });
 
     // Step 3: Tab Bのtarget="_blank"リンクを実際にクリック
     const newPagePromise = context.waitForEvent("page");

@@ -16,8 +16,6 @@ test.describe("External Tab Opening Behavior", () => {
     context,
     serviceWorker,
   }) => {
-    await setExtensionSettings(context, { newTab: { position: "right" } });
-
     // 初期タブの状態を取得
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
@@ -35,6 +33,8 @@ test.describe("External Tab Opening Behavior", () => {
     // tab2（インデックス1）をアクティブに
     await tab2.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
+
+    await setExtensionSettings(context, { newTab: { position: "right" } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -59,8 +59,6 @@ test.describe("External Tab Opening Behavior", () => {
     context,
     serviceWorker,
   }) => {
-    await setExtensionSettings(context, { newTab: { position: "left" } });
-
     // 初期タブの状態を取得
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
@@ -78,6 +76,8 @@ test.describe("External Tab Opening Behavior", () => {
     // tab2（インデックス1）をアクティブに
     await tab2.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
+
+    await setExtensionSettings(context, { newTab: { position: "left" } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -99,50 +99,6 @@ test.describe("External Tab Opening Behavior", () => {
   });
 
   test("should open external tab at first position", async ({ context, serviceWorker }) => {
-    await setExtensionSettings(context, { newTab: { position: "first" } });
-
-    // 初期タブの状態を取得
-    const initialState = await getTabState(serviceWorker);
-    const initialTabCount = initialState.totalTabs;
-
-    // 3つのタブを作成
-    const tab1 = await context.newPage();
-    await tab1.goto("data:text/html,<h1>Tab 1</h1>");
-
-    const tab2 = await context.newPage();
-    await tab2.goto("data:text/html,<h1>Tab 2</h1>");
-
-    const tab3 = await context.newPage();
-    await tab3.goto("data:text/html,<h1>Tab 3</h1>");
-
-    // tab2をアクティブに（first positionの影響でインデックス1にある）
-    await tab2.bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    const beforeState = await getTabState(serviceWorker);
-    expect(beforeState.totalTabs).toBe(initialTabCount + 3);
-    // first position設定により新規タブは常にindex:0に作成されるため、
-    // tab1→tab2→tab3の順で作成後: tab3(index:0), tab2(index:1), tab1(index:2)の配置
-    expect(beforeState.activeTabIndex).toBe(1);
-
-    // 外部タブを作成
-    const result = await createExternalTabViaServiceWorker(serviceWorker);
-    expect(result.openerTabId).toBeUndefined();
-
-    // 期待: 最初（インデックス0）に作成される
-    await expect(async () => {
-      const state = await getTabState(serviceWorker);
-      expect(state.totalTabs).toBe(beforeState.totalTabs + 1);
-      expect(state.activeTabIndex).toBe(0);
-    }).toPass({
-      intervals: [100, 100, 100],
-      timeout: 5000,
-    });
-  });
-
-  test("should open external tab at last position", async ({ context, serviceWorker }) => {
-    await setExtensionSettings(context, { newTab: { position: "last" } });
-
     // 初期タブの状態を取得
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
@@ -160,6 +116,48 @@ test.describe("External Tab Opening Behavior", () => {
     // tab2（インデックス1）をアクティブに
     await tab2.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
+
+    await setExtensionSettings(context, { newTab: { position: "first" } });
+
+    const beforeState = await getTabState(serviceWorker);
+    expect(beforeState.totalTabs).toBe(initialTabCount + 3);
+    expect(beforeState.activeTabIndex).toBe(initialTabCount + 1); // tab2
+
+    // 外部タブを作成
+    const result = await createExternalTabViaServiceWorker(serviceWorker);
+    expect(result.openerTabId).toBeUndefined();
+
+    // 期待: 最初（インデックス0）に作成される
+    await expect(async () => {
+      const state = await getTabState(serviceWorker);
+      expect(state.totalTabs).toBe(beforeState.totalTabs + 1);
+      expect(state.activeTabIndex).toBe(0);
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+  });
+
+  test("should open external tab at last position", async ({ context, serviceWorker }) => {
+    // 初期タブの状態を取得
+    const initialState = await getTabState(serviceWorker);
+    const initialTabCount = initialState.totalTabs;
+
+    // 3つのタブを作成
+    const tab1 = await context.newPage();
+    await tab1.goto("data:text/html,<h1>Tab 1</h1>");
+
+    const tab2 = await context.newPage();
+    await tab2.goto("data:text/html,<h1>Tab 2</h1>");
+
+    const tab3 = await context.newPage();
+    await tab3.goto("data:text/html,<h1>Tab 3</h1>");
+
+    // tab2（インデックス1）をアクティブに
+    await tab2.bringToFront();
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    await setExtensionSettings(context, { newTab: { position: "last" } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -181,8 +179,6 @@ test.describe("External Tab Opening Behavior", () => {
   });
 
   test("should open external tab from middle tab position", async ({ context, serviceWorker }) => {
-    await setExtensionSettings(context, { newTab: { position: "right" } });
-
     // 初期タブの状態を取得
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
@@ -207,6 +203,8 @@ test.describe("External Tab Opening Behavior", () => {
     await tab3.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
 
+    await setExtensionSettings(context, { newTab: { position: "right" } });
+
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 5);
     expect(beforeState.activeTabIndex).toBe(initialTabCount + 2); // tab3
@@ -230,8 +228,6 @@ test.describe("External Tab Opening Behavior", () => {
     context,
     serviceWorker,
   }) => {
-    await setExtensionSettings(context, { newTab: { position: "default" } });
-
     // 初期タブの状態を取得
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
@@ -249,6 +245,8 @@ test.describe("External Tab Opening Behavior", () => {
     // tab2をアクティブに
     await tab2.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
+
+    await setExtensionSettings(context, { newTab: { position: "default" } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -282,8 +280,6 @@ test.describe("External Tab Opening with Race Condition", () => {
     context,
     serviceWorker,
   }) => {
-    await setExtensionSettings(context, { newTab: { position: "right" } });
-
     // 初期タブの状態を取得
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
@@ -301,6 +297,8 @@ test.describe("External Tab Opening with Race Condition", () => {
     // tab2（インデックス1）をアクティブに
     await tab2.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
+
+    await setExtensionSettings(context, { newTab: { position: "right" } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -326,8 +324,6 @@ test.describe("External Tab Opening with Race Condition", () => {
     context,
     serviceWorker,
   }) => {
-    await setExtensionSettings(context, { newTab: { position: "left" } });
-
     // 初期タブの状態を取得
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
@@ -345,6 +341,8 @@ test.describe("External Tab Opening with Race Condition", () => {
     // tab2（インデックス1）をアクティブに
     await tab2.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
+
+    await setExtensionSettings(context, { newTab: { position: "left" } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -370,8 +368,6 @@ test.describe("External Tab Opening with Race Condition", () => {
     context,
     serviceWorker,
   }) => {
-    await setExtensionSettings(context, { newTab: { position: "first" } });
-
     // 初期タブの状態を取得
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
@@ -389,6 +385,8 @@ test.describe("External Tab Opening with Race Condition", () => {
     // tab2をアクティブに
     await tab2.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
+
+    await setExtensionSettings(context, { newTab: { position: "first" } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -413,8 +411,6 @@ test.describe("External Tab Opening with Race Condition", () => {
     context,
     serviceWorker,
   }) => {
-    await setExtensionSettings(context, { newTab: { position: "last" } });
-
     // 初期タブの状態を取得
     const initialState = await getTabState(serviceWorker);
     const initialTabCount = initialState.totalTabs;
@@ -432,6 +428,8 @@ test.describe("External Tab Opening with Race Condition", () => {
     // tab2（インデックス1）をアクティブに
     await tab2.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
+
+    await setExtensionSettings(context, { newTab: { position: "last" } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);

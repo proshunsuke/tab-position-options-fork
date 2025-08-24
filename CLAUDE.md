@@ -21,11 +21,26 @@ Tab Position Options Chrome拡張機能の再実装プロジェクト。Chrome M
 ```
 tab-position-options-fork/
 ├── entrypoints/             # WXTエントリーポイント
-│   ├── background.ts        # Service Worker
+│   ├── background.ts        # Service Worker (状態初期化を含む)
 │   └── options/            # 設定画面
 ├── src/
+│   ├── state/              # 状態管理の初期化
+│   │   └── initializer.ts  # Service Worker ライフサイクル管理
 │   ├── tabs/               # タブ操作ロジック
-│   ├── storage.ts          # ストレージ管理
+│   │   ├── handleNewTab.ts      # 新規タブハンドラー
+│   │   ├── handleTabActivated.ts # タブアクティベーションハンドラー
+│   │   ├── handleTabMoved.ts     # タブ移動ハンドラー
+│   │   ├── handleTabRemoved.ts   # タブ削除ハンドラー
+│   │   ├── handler.ts            # ハンドラー設定
+│   │   ├── state/               # タブ状態管理
+│   │   │   ├── activationHistory.ts # アクティベーション履歴
+│   │   │   ├── indexCache.ts        # インデックスキャッシュ
+│   │   │   ├── sourceMap.ts         # タブソースマップ
+│   │   │   └── tabSnapshot.ts       # タブスナップショット
+│   │   └── tabClosing.ts        # タブクローズ処理
+│   ├── settings/           # 設定管理
+│   │   └── state/          # 設定状態管理
+│   │       └── appData.ts  # アプリケーション設定（同期的管理）
 │   └── types.ts            # 型定義
 ├── assets/                 # 静的アセット
 ├── public/                 # 公開リソース
@@ -262,22 +277,32 @@ Chrome Storage Localに保存されるデータは以下の構造を持ちます
 
 ### 1. タブ位置制御のアーキテクチャ
 
+**同期的ステート管理**
+- メモリファーストの同期的読み取りで即座の応答
+- ストレージへの遅延書き込み（非ブロッキング）
+- Service Worker 30秒再起動時の自動状態復元
+
 **イベント駆動型の設計**
 - chrome.tabs APIのイベントリスナーを使用
-- 設定に基づいて動的にタブ位置を調整
-- 非同期処理による高速な応答
+- 各ハンドラーは独立したモジュールに分割
+- すべてのハンドラーで初期化状態をチェック
 
 **タブ操作の最適化**
-- バッチ処理による複数タブの効率的な管理
-- タブグループAPIとの互換性確保
-- ウィンドウ間のタブ移動への対応
+- タブスナップショットによるchrome.tabs.query()の呼び出し削減
+- 100msデバウンスによるレースコンディション対策
+- 並列初期化（Promise.all）による高速起動
 
 ### 2. 設定管理システム
 
+**メモリファーストパターン**
+- グローバルメモリでの設定状態保持
+- 同期的なgetSettingsによる即座のアクセス
+- Promise.resolve().then()による遅延永続化
+
 **リアクティブな設定更新**
-- Reactの状態管理（useState）を使用した設定の管理
+- Reactの状態管理（useState）を使用した設定画面
 - chrome.storage.onChangedリスナーによる即座の反映
-- 設定画面とバックグラウンドスクリプトの同期
+- Service Worker起動時の自動初期化
 
 **UIコンポーネントの設計**
 - ラジオボタングループによる排他的選択の実装
@@ -295,6 +320,65 @@ Chrome Storage Localに保存されるデータは以下の構造を持ちます
 - コンソールログによる動作追跡
 - 設定値の検証とバリデーション
 - Service Workerのライフサイクル管理
+
+## ステート管理アーキテクチャ
+
+### 同期的ステート管理の原則
+
+**メモリファーストアプローチ**
+1. **メモリファースト**: すべての読み取りは同期的にメモリから実行
+2. **遅延永続化**: ストレージへの書き込みは非ブロッキングで実行
+3. **自動初期化**: Service Worker再起動時に自動的に状態を復元
+4. **レースコンディション対策**: 100msのデバウンス処理で連続イベントを制御
+
+### 管理されるステート
+
+**タブ関連ステート** (`src/tabs/state/`)
+- `activationHistory`: タブのアクティベーション履歴（最大50件）
+  - タブをアクティブにした順序を記録
+  - タブクローズ時の次タブ決定に使用
+- `indexCache`: タブのインデックス情報
+  - タブIDとインデックスのマッピング
+  - タブ位置計算の高速化
+- `sourceMap`: タブの開元関係（openerTabId）
+  - どのタブから開かれたかを記録
+  - Source Tab設定で使用
+- `tabSnapshot`: 現在のタブ状態のキャッシュ
+  - chrome.tabs.query()の呼び出しを削減
+  - パフォーマンス向上
+
+**設定ステート** (`src/settings/state/`)
+- `appData`: アプリケーション設定とバージョン
+  - chrome.storage.localに永続化
+  - Options画面とService Worker間で同期
+
+### Service Worker ライフサイクル管理
+
+**30秒再起動への対応**
+```typescript
+// src/state/initializer.ts
+export const initializeAllStates = async () => {
+  if (isInitialized) return; // 既に初期化済み
+  
+  await Promise.all([
+    initializeActivationHistory(),
+    initializeIndexCache(),
+    initializeSourceMap(),
+    initializeAppData(),
+    initializeTabSnapshot(),
+  ]);
+  
+  markInitialized();
+};
+
+// 各ハンドラーでの使用
+export const handleNewTab = async (tab: chrome.tabs.Tab) => {
+  if (needsInitialization()) {
+    await initializeAllStates();
+  }
+  // 以降、同期的に処理
+};
+```
 
 ## オリジナル拡張機能の仕様
 
@@ -341,6 +425,36 @@ Chrome Storage Localに保存されるデータは以下の構造を持ちます
    - 型定義には`interface`ではなく`type`を使用
    - 定数は大文字のスネークケース（UPPER_SNAKE_CASE）で定義
    - インポートは相対パスではなく`@/`エイリアスを使用した絶対パスで記述
+
+8. **ステート管理パターン**
+   すべてのステートモジュールは以下の同期的パターンに従う：
+
+   ```typescript
+   // グローバルメモリ状態
+   let state: Type = defaultValue;
+
+   // 初期化（Service Worker起動時に一度だけ）
+   export const initializeState = async () => {
+     const result = await chrome.storage.session.get('key');
+     state = result.key || defaultValue;
+   };
+
+   // 同期的な読み取り
+   export const getState = () => state;
+
+   // 同期的な書き込み（メモリ即座更新 + ストレージ遅延保存）
+   const setState = (value: Type) => {
+     state = value;
+     Promise.resolve().then(() => {
+       chrome.storage.session.set({ key: value }).catch(() => {});
+     });
+   };
+   ```
+
+9. **Service Worker 再起動対応**
+   - すべてのイベントハンドラーの先頭で `needsInitialization()` をチェック
+   - 必要に応じて `initializeAllStates()` を呼び出し
+   - レースコンディション対策として100msのデバウンス処理を実装
 
 ## デバッグログの仕込み方
 
