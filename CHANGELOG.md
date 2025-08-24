@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.6
+- Significantly improved performance for all tab operations
+
 ## 0.0.5
 - Fixed tab position settings not being applied when opening links from external applications
 
