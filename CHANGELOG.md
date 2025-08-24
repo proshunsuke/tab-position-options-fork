@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.0
+- Added "New Tab Background" option to open new tabs in the background while keeping the current tab active
+
 ## 0.0.6
 - Significantly improved performance for all tab operations
 

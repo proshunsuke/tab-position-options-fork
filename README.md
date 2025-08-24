@@ -72,6 +72,9 @@ Choose where new tabs open when you press Ctrl/Cmd+T or click the + button:
 - **⬅️ Left of Current** - New tabs open to the left of your active tab
 - **⚪ Default** - Use Chrome's default behavior
 
+**Additional Option:**
+- **🔇 Background** - Open new tabs in the background without switching focus
+
 ### Tab Closing Behavior
 
 Control which tab becomes active after closing a tab:
@@ -89,6 +92,7 @@ This is an early release focusing on core functionality. Some features from the 
 
 ### ✅ Implemented
 - **New Tab Position** - Full control over where new tabs open
+- **New Tab Background** - Open tabs without losing focus on current tab
 - **Tab Closing Behavior** - Smart tab activation after closing
 
 ### 🚧 Coming Soon
