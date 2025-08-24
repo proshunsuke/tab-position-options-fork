@@ -34,7 +34,7 @@ test.describe("External Tab Opening Behavior", () => {
     await tab2.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
 
-    await setExtensionSettings(context, { newTab: { position: "right" } });
+    await setExtensionSettings(context, { newTab: { position: "right", openInBackground: false } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -77,7 +77,7 @@ test.describe("External Tab Opening Behavior", () => {
     await tab2.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
 
-    await setExtensionSettings(context, { newTab: { position: "left" } });
+    await setExtensionSettings(context, { newTab: { position: "left", openInBackground: false } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -117,7 +117,7 @@ test.describe("External Tab Opening Behavior", () => {
     await tab2.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
 
-    await setExtensionSettings(context, { newTab: { position: "first" } });
+    await setExtensionSettings(context, { newTab: { position: "first", openInBackground: false } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -157,7 +157,7 @@ test.describe("External Tab Opening Behavior", () => {
     await tab2.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
 
-    await setExtensionSettings(context, { newTab: { position: "last" } });
+    await setExtensionSettings(context, { newTab: { position: "last", openInBackground: false } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -203,7 +203,7 @@ test.describe("External Tab Opening Behavior", () => {
     await tab3.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
 
-    await setExtensionSettings(context, { newTab: { position: "right" } });
+    await setExtensionSettings(context, { newTab: { position: "right", openInBackground: false } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 5);
@@ -246,7 +246,9 @@ test.describe("External Tab Opening Behavior", () => {
     await tab2.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
 
-    await setExtensionSettings(context, { newTab: { position: "default" } });
+    await setExtensionSettings(context, {
+      newTab: { position: "default", openInBackground: false },
+    });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -298,7 +300,7 @@ test.describe("External Tab Opening with Race Condition", () => {
     await tab2.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
 
-    await setExtensionSettings(context, { newTab: { position: "right" } });
+    await setExtensionSettings(context, { newTab: { position: "right", openInBackground: false } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -342,7 +344,7 @@ test.describe("External Tab Opening with Race Condition", () => {
     await tab2.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
 
-    await setExtensionSettings(context, { newTab: { position: "left" } });
+    await setExtensionSettings(context, { newTab: { position: "left", openInBackground: false } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -386,7 +388,7 @@ test.describe("External Tab Opening with Race Condition", () => {
     await tab2.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
 
-    await setExtensionSettings(context, { newTab: { position: "first" } });
+    await setExtensionSettings(context, { newTab: { position: "first", openInBackground: false } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);
@@ -429,7 +431,7 @@ test.describe("External Tab Opening with Race Condition", () => {
     await tab2.bringToFront();
     await new Promise(resolve => setTimeout(resolve, 200));
 
-    await setExtensionSettings(context, { newTab: { position: "last" } });
+    await setExtensionSettings(context, { newTab: { position: "last", openInBackground: false } });
 
     const beforeState = await getTabState(serviceWorker);
     expect(beforeState.totalTabs).toBe(initialTabCount + 3);

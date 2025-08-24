@@ -16,6 +16,9 @@ test.describe("Settings Storage", () => {
     // Tab Behaviorタブ
     await optionsPage.click('button:has-text("Tab Behavior")');
     await optionsPage.locator('input[value="first"]').click();
+    // New Tab Backgroundチェックボックスを有効にする
+    const backgroundCheckbox = optionsPage.locator('input[name="openInBackground"]');
+    await backgroundCheckbox.check();
 
     // Tab Closingタブ
     await optionsPage.click('button:has-text("Tab Closing")');
@@ -33,7 +36,7 @@ test.describe("Settings Storage", () => {
 
     // デフォルト設定とマージされた状態を期待
     expect(savedSettings).toEqual({
-      newTab: { position: "first" },
+      newTab: { position: "first", openInBackground: true },
       afterTabClosing: { activateTab: "inActivatedOrder" },
       loadingPage: { position: "default" },
       tabOnActivate: { behavior: "default" },
@@ -94,5 +97,57 @@ test.describe("Settings Storage", () => {
 
       expect(savedSettings.afterTabClosing.activateTab).toBe(option);
     }
+  });
+
+  test("should handle New Tab Background checkbox correctly", async ({ context, extensionId }) => {
+    const optionsPage = await context.newPage();
+    await optionsPage.goto(`chrome-extension://${extensionId}/options.html`);
+    await optionsPage.waitForLoadState("networkidle");
+
+    // Tab Behaviorタブに移動
+    await optionsPage.click('button:has-text("Tab Behavior")');
+
+    const backgroundCheckbox = optionsPage.locator('input[name="openInBackground"]');
+
+    // デフォルトでは無効になっているはず
+    await expect(backgroundCheckbox).not.toBeChecked();
+
+    // チェックボックスを有効にする
+    await backgroundCheckbox.check();
+
+    // 保存
+    await optionsPage.click('button:has-text("Save")');
+    await expect(optionsPage.locator("text=Settings saved successfully")).toBeVisible();
+
+    // 設定が保存されたことを確認
+    let savedSettings = await optionsPage.evaluate(async () => {
+      const result = await chrome.storage.local.get(["settings"]);
+      return result.settings;
+    });
+    expect(savedSettings.newTab.openInBackground).toBe(true);
+
+    // ページをリロードして設定が永続化されていることを確認
+    await optionsPage.reload();
+    await optionsPage.waitForLoadState("networkidle");
+    await optionsPage.click('button:has-text("Tab Behavior")');
+    await expect(backgroundCheckbox).toBeChecked();
+
+    // チェックボックスを無効にする
+    await backgroundCheckbox.uncheck();
+    await optionsPage.click('button:has-text("Save")');
+    await expect(optionsPage.locator("text=Settings saved successfully")).toBeVisible();
+
+    // 設定が更新されたことを確認
+    savedSettings = await optionsPage.evaluate(async () => {
+      const result = await chrome.storage.local.get(["settings"]);
+      return result.settings;
+    });
+    expect(savedSettings.newTab.openInBackground).toBe(false);
+
+    // 再度リロードして設定が永続化されていることを確認
+    await optionsPage.reload();
+    await optionsPage.waitForLoadState("networkidle");
+    await optionsPage.click('button:has-text("Tab Behavior")');
+    await expect(backgroundCheckbox).not.toBeChecked();
   });
 });
