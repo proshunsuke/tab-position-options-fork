@@ -2,7 +2,91 @@
 
 ## Overview
 
-Tab Position Options is a Chrome extension that provides comprehensive control over tab behavior and positioning. This document describes the complete behavior specification of the original extension based on the actual implementation.
+Tab Position Options is a Chrome extension that provides comprehensive control over tab behavior and positioning. This document describes the complete behavior specification, architectural design, and implementation considerations of the original extension based on the actual implementation analysis.
+
+## Architecture Overview
+
+### Component Structure
+
+The extension consists of three main components that work together:
+
+1. **Background Script (Persistent Background Page)**
+   - Central hub for all tab management logic
+   - Maintains persistent state across browser sessions
+   - Handles all Chrome API events and coordinates responses
+   - Manages complex state including tab activation history and parent-child relationships
+
+2. **Content Script**
+   - Injected into web pages to handle link behavior modification
+   - Monitors DOM changes to dynamically update link behaviors
+   - Communicates with background script for URL pattern matching
+   - Handles click events for forced tab opening behaviors
+
+3. **Options Page**
+   - User interface for configuration management
+   - Directly writes to Chrome Storage API
+   - Provides import/export functionality for settings portability
+
+### Data Flow and Communication
+
+The extension uses a message-passing architecture where:
+- Content scripts request configuration from the background script on page load
+- Background script maintains authoritative state for all tab operations
+- Options page changes are immediately reflected through storage listeners
+- All components react to Chrome Storage changes for real-time updates
+
+## Core Concepts and Design Philosophy
+
+### Tab Activation History Management
+
+The extension maintains a sophisticated activation history system:
+
+**Purpose**: Enable intelligent tab switching when closing tabs, particularly for "In activated order" and "Source tab" options.
+
+**Key Concepts**:
+- Each window maintains an independent activation order list
+- The list tracks the sequence in which tabs were activated (focused)
+- Most recently activated tabs appear at the end of the list
+- The currently active tab is always the last entry
+
+**Implementation Considerations**:
+- Must handle tab movements between windows
+- Requires cleanup when tabs are closed or detached
+- Performance impact with many tabs must be considered
+- Race conditions during rapid tab switching need special handling
+
+### Parent-Child Tab Relationships
+
+The extension tracks which tab opened which (opener relationships):
+
+**Purpose**: Support "Source tab (Open link)" functionality for returning to the originating tab when a child tab is closed.
+
+**Tracking Mechanisms**:
+- Monitors `chrome.webNavigation.onCreatedNavigationTarget` events
+- Maintains mapping of child tab ID to parent tab ID (sourceTabId)
+- Relationships are stored in memory only and not persisted
+- Cleans up relationships when tabs are closed
+
+**Behavior**:
+- When closing a tab with tabfocus=7 (Source tab only), switches to parent tab if it exists
+- When closing a tab with tabfocus=8 (Source tab & In activated order), tries parent tab first, then falls back to activation order
+- If parent tab no longer exists, falls back to default behavior or activation order
+
+### Window-Specific State Management
+
+Each browser window maintains independent state:
+
+**Rationale**: Users often use multiple windows for different tasks, requiring separate tab management contexts.
+
+**Managed State per Window**:
+- Tab activation order
+- Currently active tab
+- Recent tab removal flags for determining next active tab
+
+**Synchronization Challenges**:
+- State must be initialized when new windows are created
+- Window focus changes don't affect internal window state
+- Popup windows require special handling for conversion to tabs
 
 ## Settings Categories
 
@@ -27,16 +111,17 @@ Controls the position where new tabs are opened when using browser's new tab but
 
 ### 2. Loading Page
 
-Controls where tabs open when loading new pages from links or programmatic navigation. This feature allows URL-specific tab positioning rules.
+Controls where tabs are positioned when navigating to specific URLs. This feature works with both direct navigation and server redirects.
 
 #### Features:
-- **Matching URLs**: URL patterns with position rules
-  - Each URL can be set to open in:
-    - **Always last**: At the end of the tab bar
-    - **Always middle**: In the middle of existing tabs
-    - **Always first**: At the beginning of the tab bar
+- **Matching URLs**: URL patterns with position rules (loadingurl)
+  - Each URL can be set to position the tab at:
+    - **Always last**: At the end of the tab bar (sel: "last")
+    - **Always middle**: In the middle of existing tabs (sel: "middle")
+    - **Always first**: At the beginning of the tab bar (sel: "first")
   - Multiple URL patterns can be configured
-  - Patterns are matched against the target URL being loaded
+  - Patterns are matched against the navigation target URL
+  - Also matches against original URL for server redirects
 
 ### 3. Activate Tab After Tab Closing
 
@@ -57,26 +142,26 @@ Determines which tab becomes active when the current tab is closed.
 Controls the positioning behavior when tabs are activated (brought to focus).
 
 #### Options:
-- **Default**: No special positioning behavior
-- **Last**: Moves the activated tab to the end of the tab bar
-- **First**: Moves the activated tab to the beginning of the tab bar
+- **Default**: No special positioning behavior (onactbutton1)
+- **Last**: Moves the activated tab to the end of the tab bar (onactbutton2)
+- **First**: Moves the activated tab to the beginning of the tab bar (onactbutton3)
 
 ### 5. External Links
 
 Controls how external links (links to different domains) are handled.
 
 #### Features:
-- **External Links in New Tab**: Main checkbox to enable the feature
+- **External Links in New Tab**: Main checkbox to enable the feature (exlnk)
   - When enabled, links to external domains open in new tabs instead of the current tab
-- **Matching URLs**: Exception and override rules
+- **Matching URLs**: Exception and override rules (expexlnkurl)
   - URL patterns with specific behaviors:
-    - **Except (Page URL)**: Excludes the page URL from external link handling
-    - **Force New Tab (Page URL)**: Forces links from this page to open in new tabs
-    - **Force Background Tab (Page URL)**: Forces links from this page to open in background tabs
-    - **Force Current Tab (Page URL)**: Forces links from this page to open in the current tab
-    - **Force New Tab (A tag href)**: Forces specific link URLs to open in new tabs
-    - **Force Background Tab (A tag href)**: Forces specific link URLs to open in background tabs
-    - **Force Current Tab (A tag href)**: Forces specific link URLs to open in the current tab
+    - **Except (Page URL)**: Excludes pages matching this URL from external link handling (sel: "except")
+    - **Force New Tab (Page URL)**: Forces all links from pages matching this URL to open in new tabs (sel: "forcenew")
+    - **Force Background Tab (Page URL)**: Forces all links from pages matching this URL to open in background tabs (sel: "forcebg")
+    - **Force Current Tab (Page URL)**: Forces all links from pages matching this URL to open in the current tab (sel: "forcecrnt")
+    - **Force New Tab (A tag href)**: Forces links with hrefs matching this URL to open in new tabs (sel: "forcenewa")
+    - **Force Background Tab (A tag href)**: Forces links with hrefs matching this URL to open in background tabs (sel: "forcebga")
+    - **Force Current Tab (A tag href)**: Forces links with hrefs matching this URL to open in the current tab (sel: "forcecrnta")
 
 ### 6. Pop-up
 
@@ -188,32 +273,159 @@ Each URL list section features:
 - Gray background for list items
 - Auto-scrolling containers when lists exceed visible area
 
+## External Link Processing Mechanism
+
+### Content Script Operation
+
+The content script implements a sophisticated link monitoring system:
+
+**Initial Processing**:
+- Connects to background script on DOMContentLoaded event
+- Reconnects on window load event
+- Additional connection attempts at 400ms, 800ms, and 1200ms after load
+- Scans all links and applies URL pattern rules from configuration
+- Modifies link behavior based on matching rules
+
+**Dynamic DOM Monitoring**:
+- Uses MutationObserver to detect new links added to the page (10ms delay after initial setup)
+- Monitors both childList and subtree changes
+- Processes dynamically loaded content (AJAX, React, etc.)
+- Maintains consistent behavior across page updates
+- Also monitors target attribute changes on individual links
+
+**Link Behavior Modification Strategies**:
+
+1. **Target Attribute Control**: Modifies or removes the `target` attribute to control default browser behavior
+2. **Event Handler Injection**: Attaches click handlers for forced behaviors that preventDefault and manually open tabs
+3. **Priority-Based Rule Application**: Processes multiple matching rules with specific precedence
+
+**URL Pattern Matching Hierarchy**:
+- Exact URL matches take precedence
+- Domain-level rules apply next
+- Page URL rules vs. link href rules have different scopes
+- RegExp patterns provide flexible matching
+
+### Storage Management Strategy
+
+The extension implements a sophisticated storage system to handle Chrome's sync limitations:
+
+**Quota Management**:
+- Chrome Sync API has strict quotas (102,400 bytes total, 8,192 bytes per item)
+- Extension monitors storage usage before writes
+- Implements automatic chunking for large data sets
+
+**Data Chunking Algorithm**:
+- URL lists are split into chunks when they exceed per-item limits
+- Each chunk is stored with a numeric suffix
+- Reconstruction happens transparently on read
+
+**Fallback Strategy**:
+- When sync quota is exceeded, falls back to local storage
+- Maintains a flag to indicate storage mode
+- Attempts to migrate back to sync storage when possible
+
+**Backward Compatibility**:
+- Supports migration from older storage formats
+- Handles both chunked and non-chunked data
+- Preserves user settings during extension updates
+
+## Event Processing Considerations
+
+### Race Condition Handling
+
+The extension addresses several race conditions:
+
+**Tab Closing Race Condition**:
+- Problem: Multiple tab close events in rapid succession can cause incorrect tab activation
+- Solution: Implements a debounce mechanism with a flag and timer system
+- Timing: Uses a 180ms window to batch related close events
+
+**Tab Creation and Positioning**:
+- Problem: Tab position calculations may use stale window state
+- Solution: Refreshes window object after each operation
+- Consideration: Balance between accuracy and performance
+
+### Event Sequencing
+
+Critical event ordering that must be maintained:
+
+1. **Tab Creation Flow**:
+   - `onCreated` → Position calculation → Move operation → State update
+   - Background/foreground decision must happen before positioning
+
+2. **Tab Removal Flow**:
+   - `onRemoved` → Activation history cleanup → Next tab selection → Focus change
+   - Parent-child relationship cleanup must occur
+
+3. **Navigation Flow**:
+   - `onBeforeNavigate` → Store original URL → `onCommitted` → Check for redirects
+   - Redirect detection requires correlation between events
+
+### Popup Window Handling
+
+Special considerations for popup windows:
+
+**Detection**:
+- Monitors window creation with type "popup"
+- Must distinguish between user popups and extension popups
+
+**Conversion Timing**:
+- Popup to tab conversion happens after window creation
+- Requires tracking the previously focused normal window
+- Must handle cases where conversion is rejected
+
+**Exception Management**:
+- URL-based exceptions prevent conversion
+- Must check exception list before attempting conversion
+- Handles both successful and failed conversions gracefully
+
 ## Technical Implementation Details
 
-### Event Handling
+### Chrome API Event Handling
 
-The extension listens for:
-- Tab creation events
-- Tab removal events  
-- Tab activation events
-- Navigation events
-- Window popup requests
+The extension coordinates multiple Chrome APIs:
 
-### URL Pattern Matching
+**Essential Events**:
+- `chrome.tabs.*`: Core tab manipulation and monitoring
+- `chrome.windows.*`: Window state and focus tracking
+- `chrome.webNavigation.*`: Navigation tracking for parent-child relationships and redirects
+- `chrome.storage.*`: Configuration persistence and synchronization
+- `chrome.runtime.*`: Message passing between components
+- `chrome.commands.*`: Keyboard shortcut handling
 
-URL patterns in the extension:
-- Support partial domain matching
-- Are case-insensitive
-- Match against full URLs including protocol
-- Process rules in the order they are defined
+### State Persistence Strategies
 
-### Performance Considerations
+**In-Memory State**:
+- Tab activation history (performance-critical)
+- Window-tab relationships (frequently accessed)
+- Temporary flags for race condition handling
 
-The original extension:
-- Maintains tab activation history in memory
-- Processes URL rules synchronously
-- Updates settings immediately on change
-- Reloads configuration from storage on startup
+**Persistent Storage**:
+- User configuration settings
+- URL pattern rules
+- Feature toggles
+
+**Session-Based State**:
+- Recent tab removal flags
+- Redirect tracking information
+- Parent-child tab mappings
+
+### Performance Optimization Techniques
+
+**Batch Operations**:
+- Groups multiple tab operations when possible
+- Delays non-critical updates to reduce API calls
+- Implements write coalescing for storage operations
+
+**Caching Strategies**:
+- Caches window and tab states to reduce queries
+- Implements TTL for cached data
+- Invalidates cache on relevant events
+
+**Efficient Data Structures**:
+- Uses object maps for O(1) lookups
+- Maintains sorted arrays for ordered operations
+- Implements cleanup routines to prevent memory leaks
 
 ## Default Behaviors
 
@@ -224,11 +436,44 @@ When no custom settings are configured:
 - Popups open as separate windows
 - No URL-specific rules are applied
 
+## Special Behaviors and Edge Cases
+
+### Pinned Tab Handling
+
+- Pinned tabs always appear before regular tabs in Chrome
+- When "Always first" is selected, new tabs are placed after pinned tabs
+- Tab sorting operations (Alt+T, Alt+U) unpin all tabs before sorting
+
+### Browser Startup and Installation Behavior
+
+- Extension opens the options page automatically on first installation
+- Extension initializes with a 600ms delay after window load event
+- Tab and window states are cached for performance optimization
+- Settings are loaded from Chrome Storage Sync API on startup
+- Falls back to local storage if sync quota is exceeded
+- Attempts to migrate old storage format to new chunked format if needed
+
+### Redirect Handling
+
+- Extension tracks original URLs before redirects occur
+- Server redirects are detected via `server_redirect` transition qualifier
+- URL matching rules apply to the original URL, not the redirected URL
+- Redirect tracking information is cleaned up when tabs are closed
+
+### Tab Movement and Timing
+
+- Tab activation events have a 1ms delay before processing
+- Tab closing events use a 180ms debounce window for race condition prevention
+- Tab on Activate movement has a 260ms delay after activation
+- Window object is refreshed after tab operations to maintain accuracy
+
 ## Limitations and Notes
 
-1. **Loading Page** feature appears to be partially implemented in the UI but may not be fully functional
+1. **Loading Page** feature is implemented and works with navigation events but has limited UI exposure
 2. **Tab on Activate** feature moves tabs when they are focused, which can be disorienting
-3. URL pattern matching is basic string matching, not regex or glob patterns
-4. Settings sync may fail if too many URL rules are configured due to Chrome sync quota limits
+3. URL pattern matching uses partial string matching and regular expressions internally
+4. Settings sync may fail if too many URL rules are configured due to Chrome Storage Sync API quota (102,400 bytes total, 8,192 bytes per item)
 5. The extension requires the "tabs" permission to function
 6. Keyboard shortcuts are global and may conflict with other extensions or applications
+7. The extension does not persist tab activation history across browser restarts
+8. Tab IDs and parent-child relationships are lost when browser restarts
