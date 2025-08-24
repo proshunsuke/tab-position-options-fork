@@ -11,6 +11,7 @@ import type { TabActivation, TabPosition } from "@/src/types";
 export default function App() {
   const [activeTab, setActiveTab] = useState<"behavior" | "closing">("behavior");
   const [newTabPosition, setNewTabPosition] = useState<TabPosition>("default");
+  const [openInBackground, setOpenInBackground] = useState(false);
   const [afterTabClosing, setAfterTabClosing] = useState<TabActivation>("default");
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
@@ -23,6 +24,9 @@ export default function App() {
       if (settings.newTab?.position) {
         setNewTabPosition(settings.newTab.position);
       }
+      if (settings.newTab?.openInBackground !== undefined) {
+        setOpenInBackground(settings.newTab.openInBackground);
+      }
       if (settings.afterTabClosing?.activateTab) {
         setAfterTabClosing(settings.afterTabClosing.activateTab);
       }
@@ -31,6 +35,10 @@ export default function App() {
 
   const handleNewTabPositionChange = (value: string) => {
     setNewTabPosition(value as TabPosition);
+  };
+
+  const handleOpenInBackgroundChange = (checked: boolean) => {
+    setOpenInBackground(checked);
   };
 
   const handleAfterTabClosingChange = (value: string) => {
@@ -47,6 +55,7 @@ export default function App() {
         ...currentSettings,
         newTab: {
           position: newTabPosition,
+          openInBackground,
         },
         afterTabClosing: {
           activateTab: afterTabClosing,
@@ -104,6 +113,8 @@ export default function App() {
               <TabBehavior
                 newTabPosition={newTabPosition}
                 onNewTabPositionChange={handleNewTabPositionChange}
+                openInBackground={openInBackground}
+                onOpenInBackgroundChange={handleOpenInBackgroundChange}
               />
             )}
 
