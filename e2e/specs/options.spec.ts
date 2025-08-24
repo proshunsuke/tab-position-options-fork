@@ -77,6 +77,9 @@ test.describe("Options Page", () => {
     // Tab Behaviorタブの内容を確認
     await optionsPage.click('button:has-text("Tab Behavior")');
     await expect(optionsPage.locator('h2:has-text("New Tab")')).toBeVisible();
+    // New Tab Backgroundチェックボックスの存在を確認
+    await expect(optionsPage.locator('label:has-text("New Tab Background")')).toBeVisible();
+    await expect(optionsPage.locator('input[name="openInBackground"]')).toBeVisible();
 
     // Tab Closingタブの内容を確認
     await optionsPage.click('button:has-text("Tab Closing")');

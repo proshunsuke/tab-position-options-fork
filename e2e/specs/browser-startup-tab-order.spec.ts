@@ -12,7 +12,7 @@ test.describe("Browser Startup Tab Order", () => {
   }) => {
     // "Always first" 設定を適用
     await setExtensionSettings(context, {
-      newTab: { position: "first" },
+      newTab: { position: "first", openInBackground: false },
     });
 
     // Service Worker内でセッション復元をシミュレート
@@ -81,7 +81,7 @@ test.describe("Browser Startup Tab Order", () => {
   }) => {
     // "Always last" 設定を適用
     await setExtensionSettings(context, {
-      newTab: { position: "last" },
+      newTab: { position: "last", openInBackground: false },
     });
 
     // Service Worker内でセッション復元をシミュレート
@@ -164,7 +164,7 @@ test.describe("Browser Startup Tab Order", () => {
 
     // "Always first" 設定
     await setExtensionSettings(context, {
-      newTab: { position: "first" },
+      newTab: { position: "first", openInBackground: false },
     });
 
     // ブラウザ起動をシミュレート
@@ -229,7 +229,7 @@ test.describe("Browser Startup Tab Order", () => {
   }) => {
     // "Right of current tab" 設定
     await setExtensionSettings(context, {
-      newTab: { position: "right" },
+      newTab: { position: "right", openInBackground: false },
     });
 
     // セッション復元を開始

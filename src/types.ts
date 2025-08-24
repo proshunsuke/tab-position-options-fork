@@ -13,6 +13,7 @@ export type TabOnActivateBehavior = "default" | "last" | "first";
 export type Settings = {
   newTab: {
     position: TabPosition;
+    openInBackground: boolean;
   };
   loadingPage: {
     position: TabPosition;
@@ -31,6 +32,7 @@ export type Settings = {
 export const DEFAULT_SETTINGS: Settings = {
   newTab: {
     position: "default",
+    openInBackground: false,
   },
   loadingPage: {
     position: "default",
