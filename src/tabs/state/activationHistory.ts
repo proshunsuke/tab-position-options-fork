@@ -6,6 +6,10 @@ type TabActivationInfo = {
   timestamp: number;
 };
 
+type ActivationHistoryStorage = {
+  tabActivationHistory?: TabActivationInfo[];
+};
+
 const MAX_HISTORY_SIZE = 50;
 
 // デバウンス閾値（システムの自動処理では可能だが、人間の手動操作では困難）
@@ -22,7 +26,7 @@ let tabActivationHistoryState: TabActivationInfo[] = [];
  * Service Worker起動時に一度だけ呼び出される
  */
 export const initializeActivationHistory = async () => {
-  const result = await chrome.storage.session.get("tabActivationHistory");
+  const result = await chrome.storage.session.get<ActivationHistoryStorage>("tabActivationHistory");
   if (result.tabActivationHistory) {
     tabActivationHistoryState = result.tabActivationHistory;
   } else {

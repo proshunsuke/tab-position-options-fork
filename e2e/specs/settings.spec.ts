@@ -1,5 +1,6 @@
 import { expect, test } from "@/e2e/fixtures";
 import { clearExtensionStorage } from "@/e2e/utils/helpers";
+import type { Settings } from "@/src/types";
 
 test.describe("Settings Storage", () => {
   test.beforeEach(async ({ serviceWorker }) => {
@@ -29,10 +30,10 @@ test.describe("Settings Storage", () => {
     await expect(optionsPage.locator("text=Settings saved successfully")).toBeVisible();
 
     // chrome.storage.localから直接設定を確認
-    const savedSettings = await optionsPage.evaluate(async () => {
+    const savedSettings = (await optionsPage.evaluate(async () => {
       const result = await chrome.storage.local.get(["settings"]);
       return result.settings;
-    });
+    })) as Settings;
 
     // デフォルト設定とマージされた状態を期待
     expect(savedSettings).toEqual({
@@ -58,10 +59,10 @@ test.describe("Settings Storage", () => {
       await expect(optionsPage.locator("text=Settings saved successfully")).toBeVisible();
 
       // 設定が保存されたことを確認
-      const savedSettings = await optionsPage.evaluate(async () => {
+      const savedSettings = (await optionsPage.evaluate(async () => {
         const result = await chrome.storage.local.get(["settings"]);
         return result.settings;
-      });
+      })) as Settings;
 
       expect(savedSettings.newTab.position).toBe(position);
     }
@@ -90,10 +91,10 @@ test.describe("Settings Storage", () => {
       await expect(optionsPage.locator("text=Settings saved successfully")).toBeVisible();
 
       // 設定が保存されたことを確認
-      const savedSettings = await optionsPage.evaluate(async () => {
+      const savedSettings = (await optionsPage.evaluate(async () => {
         const result = await chrome.storage.local.get(["settings"]);
         return result.settings;
-      });
+      })) as Settings;
 
       expect(savedSettings.afterTabClosing.activateTab).toBe(option);
     }
@@ -120,10 +121,10 @@ test.describe("Settings Storage", () => {
     await expect(optionsPage.locator("text=Settings saved successfully")).toBeVisible();
 
     // 設定が保存されたことを確認
-    let savedSettings = await optionsPage.evaluate(async () => {
+    let savedSettings = (await optionsPage.evaluate(async () => {
       const result = await chrome.storage.local.get(["settings"]);
       return result.settings;
-    });
+    })) as Settings;
     expect(savedSettings.newTab.openInBackground).toBe(true);
 
     // ページをリロードして設定が永続化されていることを確認
@@ -138,10 +139,10 @@ test.describe("Settings Storage", () => {
     await expect(optionsPage.locator("text=Settings saved successfully")).toBeVisible();
 
     // 設定が更新されたことを確認
-    savedSettings = await optionsPage.evaluate(async () => {
+    savedSettings = (await optionsPage.evaluate(async () => {
       const result = await chrome.storage.local.get(["settings"]);
       return result.settings;
-    });
+    })) as Settings;
     expect(savedSettings.newTab.openInBackground).toBe(false);
 
     // 再度リロードして設定が永続化されていることを確認

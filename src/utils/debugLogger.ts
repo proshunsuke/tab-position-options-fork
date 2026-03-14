@@ -15,6 +15,10 @@ type LogEntry = {
 const MAX_LOG_ENTRIES = 1000; // 最大ログエントリ数
 const LOG_STORAGE_KEY = "debug_logs";
 
+type DebugLogStorage = {
+  [LOG_STORAGE_KEY]?: LogEntry[];
+};
+
 /**
  * ログをStorage Localに保存
  */
@@ -27,8 +31,8 @@ export const saveLog = async (
 ) => {
   try {
     // 現在のログを取得
-    const result = await chrome.storage.local.get(LOG_STORAGE_KEY);
-    const logs: LogEntry[] = result[LOG_STORAGE_KEY] || [];
+    const result = await chrome.storage.local.get<DebugLogStorage>(LOG_STORAGE_KEY);
+    const logs = result[LOG_STORAGE_KEY] ?? [];
 
     // 新しいログエントリを作成
     const newEntry: LogEntry = {
@@ -99,8 +103,8 @@ export const debugError = (
  */
 export const getLogs = async () => {
   try {
-    const result = await chrome.storage.local.get(LOG_STORAGE_KEY);
-    const logs: LogEntry[] = result[LOG_STORAGE_KEY] || [];
+    const result = await chrome.storage.local.get<DebugLogStorage>(LOG_STORAGE_KEY);
+    const logs = result[LOG_STORAGE_KEY] ?? [];
     return logs;
   } catch (error) {
     console.error("Failed to get logs from storage:", error);

@@ -1,3 +1,9 @@
+type TabIndexCacheEntries = Array<[number, number]>;
+
+type IndexCacheStorage = {
+  tabIndexCache?: TabIndexCacheEntries;
+};
+
 /**
  * タブインデックスの状態管理
  * グローバルメモリ状態として管理
@@ -9,7 +15,7 @@ let tabIndexCacheState: Map<number, number> = new Map();
  * Service Worker起動時に一度だけ呼び出される
  */
 export const initializeIndexCache = async () => {
-  const result = await chrome.storage.session.get("tabIndexCache");
+  const result = await chrome.storage.session.get<IndexCacheStorage>("tabIndexCache");
   if (result.tabIndexCache) {
     const entries = result.tabIndexCache;
     tabIndexCacheState = new Map(entries);
