@@ -22,13 +22,17 @@ type ServiceWorkerLikeGlobal = WorkerGlobalScope & {
   };
 };
 
+const SERVICE_WORKER_WAIT_TIMEOUT_MS = 30_000;
+
 /**
  * Service Workerが利用可能になるまで待機
  */
 export const waitForServiceWorker = async (context: BrowserContext) => {
   let [serviceWorker] = context.serviceWorkers();
   if (!serviceWorker) {
-    serviceWorker = await context.waitForEvent("serviceworker");
+    serviceWorker = await context.waitForEvent("serviceworker", {
+      timeout: SERVICE_WORKER_WAIT_TIMEOUT_MS,
+    });
   }
 
   // Service Workerがアクティブになるまで待機
@@ -61,7 +65,9 @@ export const setExtensionSettings = async (
   // Service Workerを取得
   let [serviceWorker] = context.serviceWorkers();
   if (!serviceWorker) {
-    serviceWorker = await context.waitForEvent("serviceworker");
+    serviceWorker = await context.waitForEvent("serviceworker", {
+      timeout: SERVICE_WORKER_WAIT_TIMEOUT_MS,
+    });
   }
 
   // Service Worker内で設定を保存
