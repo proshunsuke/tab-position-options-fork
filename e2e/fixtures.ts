@@ -15,11 +15,13 @@ export const test = base.extend<TestFixtures>({
     // 拡張機能のパス（WXTのビルド出力）
     const pathToExtension = path.join(process.cwd(), "dist", "chrome-mv3");
 
-    // ユーザーデータディレクトリの作成
-    const userDataDir = path.join(process.cwd(), "test-results", "chrome-user-data");
-    if (!fs.existsSync(userDataDir)) {
-      fs.mkdirSync(userDataDir, { recursive: true });
+    // テストごとに分離したプロフィールを使用して、状態リークを防ぐ
+    const userDataRootDir = path.join(process.cwd(), "test-results");
+    if (!fs.existsSync(userDataRootDir)) {
+      fs.mkdirSync(userDataRootDir, { recursive: true });
     }
+
+    const userDataDir = fs.mkdtempSync(path.join(userDataRootDir, "chrome-user-data-"));
 
     // 永続的なコンテキストでブラウザを起動
     const context = await chromium.launchPersistentContext(userDataDir, {
@@ -29,8 +31,12 @@ export const test = base.extend<TestFixtures>({
       ],
     });
 
-    await use(context);
-    await context.close();
+    try {
+      await use(context);
+    } finally {
+      await context.close();
+      fs.rmSync(userDataDir, { recursive: true, force: true });
+    }
   },
 
   extensionId: async ({ context }, use) => {

@@ -2,6 +2,12 @@ import type { BrowserContext, Worker } from "@playwright/test";
 import type { Settings } from "@/src/types";
 import { DEFAULT_SETTINGS } from "@/src/types";
 
+type ServiceWorkerLikeGlobal = WorkerGlobalScope & {
+  registration: {
+    active: ServiceWorker | null;
+  };
+};
+
 /**
  * Service Workerが利用可能になるまで待機
  */
@@ -14,12 +20,11 @@ export const waitForServiceWorker = async (context: BrowserContext) => {
   // Service Workerがアクティブになるまで待機
   await serviceWorker.evaluate(() => {
     return new Promise<void>(resolve => {
-      // @ts-ignore
-      if (self.serviceWorker && self.serviceWorker.state !== "activated") {
-        // @ts-ignore
-        self.serviceWorker.addEventListener("statechange", () => {
-          // @ts-ignore
-          if (self.serviceWorker.state === "activated") {
+      const serviceWorkerGlobal = self as unknown as ServiceWorkerLikeGlobal;
+      const activeWorker = serviceWorkerGlobal.registration.active;
+      if (activeWorker && activeWorker.state !== "activated") {
+        activeWorker.addEventListener("statechange", () => {
+          if (activeWorker.state === "activated") {
             resolve();
           }
         });

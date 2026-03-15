@@ -1,3 +1,7 @@
+type TabSnapshotStorage = {
+  tabSnapshot?: chrome.tabs.Tab[];
+};
+
 /**
  * タブスナップショットの状態管理
  * グローバルメモリ状態として管理
@@ -9,7 +13,7 @@ let tabSnapshotState: chrome.tabs.Tab[] = [];
  * Service Worker起動時に一度だけ呼び出される
  */
 export const initializeTabSnapshot = async () => {
-  const result = await chrome.storage.session.get("tabSnapshot");
+  const result = await chrome.storage.session.get<TabSnapshotStorage>("tabSnapshot");
   if (result.tabSnapshot) {
     tabSnapshotState = result.tabSnapshot;
   } else {

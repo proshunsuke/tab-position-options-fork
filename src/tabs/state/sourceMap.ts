@@ -1,3 +1,9 @@
+type TabSourceMapEntries = Array<[number, number]>;
+
+type SourceMapStorage = {
+  tabSourceMap?: TabSourceMapEntries;
+};
+
 /**
  * タブソースマップの状態管理
  * グローバルメモリ状態として管理
@@ -9,7 +15,7 @@ let tabSourceMapState: Map<number, number> = new Map();
  * Service Worker起動時に一度だけ呼び出される
  */
 export const initializeSourceMap = async () => {
-  const result = await chrome.storage.session.get("tabSourceMap");
+  const result = await chrome.storage.session.get<SourceMapStorage>("tabSourceMap");
   const entries = result.tabSourceMap || [];
   tabSourceMapState = new Map(entries);
 };

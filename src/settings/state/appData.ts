@@ -2,6 +2,11 @@ import type { Settings } from "@/src/types";
 import { DEFAULT_SETTINGS } from "@/src/types";
 import { APP_VERSION } from "@/src/version";
 
+type AppDataStorage = {
+  settings?: Settings;
+  version?: string;
+};
+
 /**
  * 設定の状態管理（chrome.storage.localの"settings"キー）
  * グローバルメモリ状態として管理
@@ -20,9 +25,9 @@ let versionState: string = APP_VERSION;
  */
 export const initializeAppData = async () => {
   try {
-    const result = await chrome.storage.local.get(["settings", "version"]);
-    settingsState = result.settings || DEFAULT_SETTINGS;
-    versionState = result.version || APP_VERSION;
+    const result = await chrome.storage.local.get<AppDataStorage>(["settings", "version"]);
+    settingsState = result.settings ?? DEFAULT_SETTINGS;
+    versionState = result.version ?? APP_VERSION;
   } catch {
     settingsState = DEFAULT_SETTINGS;
     versionState = APP_VERSION;
