@@ -36,8 +36,8 @@ declare global {
      */
     states: {
       resetActivationHistory: () => void;
-      resetIndexCache: () => void;
-      resetSourceMap: () => void;
+      resetNewTabSourceTransition: () => void;
+      resetPendingCloseTransition: () => void;
       resetTabSnapshotState: () => void;
       resetAppDataState: () => void;
       resetInitializationState: () => void;

@@ -5,8 +5,6 @@
 
 import { initializeAppData } from "@/src/settings/state/appData";
 import { initializeActivationHistory } from "@/src/tabs/state/activationHistory";
-import { initializeIndexCache } from "@/src/tabs/state/indexCache";
-import { initializeSourceMap } from "@/src/tabs/state/sourceMap";
 import { initializeTabSnapshot } from "@/src/tabs/state/tabSnapshot";
 
 /**
@@ -41,13 +39,7 @@ export const initializeAllStates = async () => {
     return; // 既に初期化済み
   }
   // 全ステートを並行して初期化（高速化のため）
-  await Promise.all([
-    initializeActivationHistory(),
-    initializeIndexCache(),
-    initializeSourceMap(),
-    initializeAppData(),
-    initializeTabSnapshot(),
-  ]);
+  await Promise.all([initializeActivationHistory(), initializeAppData(), initializeTabSnapshot()]);
 
   // 初期化完了をマーク
   markInitialized();

@@ -1,48 +1,86 @@
 import { getSettings } from "@/src/settings/state/appData";
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
-import { getLastActiveTabId } from "@/src/tabs/state/activationHistory";
-import { getTabIndex } from "@/src/tabs/state/indexCache";
-import { getTabSnapshot, updateTabSnapshot } from "@/src/tabs/state/tabSnapshot";
-import { cleanupTabData, determineNextActiveTab } from "@/src/tabs/tabClosing";
+import { getActivationHistory } from "@/src/tabs/state/activationHistory";
+import { consumePendingCloseTransition } from "@/src/tabs/state/pendingCloseTransition";
+import {
+  getActiveTabSnapshot,
+  getStoredTabSnapshot,
+  getTabSnapshot,
+  getTabSnapshotById,
+  removeTabFromSnapshot,
+  setActiveTabInSnapshot,
+} from "@/src/tabs/state/tabSnapshot";
+import {
+  cleanupTabData,
+  determineNextActiveTab,
+  determineNextActiveTabWithoutClosedTab,
+} from "@/src/tabs/tabClosing";
 
 export const handleTabRemoved = async (
   tabId: number,
-  _removeInfo: { windowId: number; isWindowClosing: boolean },
+  removeInfo: { windowId: number; isWindowClosing: boolean },
 ) => {
-  // Service Worker初期化チェック
-  if (needsInitialization()) {
+  const shouldInitialize = needsInitialization();
+  if (shouldInitialize) {
     await initializeAllStates();
   }
 
-  const nextActiveTabId = getNextActiveTabId(tabId);
-  if (nextActiveTabId) {
-    chrome.tabs.update(nextActiveTabId, { active: true }).finally(() => {
-      cleanupTabData(tabId);
-      updateTabSnapshot();
-    });
-  } else {
-    cleanupTabData(tabId);
-    updateTabSnapshot();
-  }
-};
-
-const getNextActiveTabId = (tabId: number) => {
+  const windowId = removeInfo.windowId;
   const settings = getSettings();
-  const activateTabSetting = settings.afterTabClosing.activateTab;
+  const tabs = getTabSnapshot(windowId);
+  const closedTab = getTabSnapshotById(windowId, tabId);
+  const storedTabs =
+    shouldInitialize && closedTab === null ? await getStoredTabSnapshot(windowId) : [];
+  const tabsBeforeRemoval = closedTab === null && storedTabs.length > 0 ? storedTabs : tabs;
+  const closedTabBeforeRemoval = closedTab ?? storedTabs.find(tab => tab.id === tabId) ?? null;
+  const currentActiveTab = getActiveTabSnapshot(windowId);
+  const pendingCloseTransition = consumePendingCloseTransition(
+    windowId,
+    tabId,
+    currentActiveTab?.id ?? null,
+  );
+  // Service Worker 再起動直後だけは pendingCloseTransition が空でも、
+  // 保存済み snapshot の active フラグを補助情報として扱う。
+  const isClosedActiveTab =
+    pendingCloseTransition !== null ||
+    (shouldInitialize && closedTabBeforeRemoval?.active === true);
+  const activationHistory = pendingCloseTransition?.historyBefore ?? getActivationHistory(windowId);
+  const shouldHandleMissingClosedTab =
+    closedTabBeforeRemoval === null &&
+    activationHistory.at(-1) === tabId &&
+    settings.afterTabClosing.activateTab !== "default";
 
-  // デフォルト設定の場合は、ブラウザのデフォルト動作に任せる
-  if (activateTabSetting === "default") {
-    return undefined;
+  const nextActiveTabId =
+    closedTabBeforeRemoval &&
+    isClosedActiveTab &&
+    settings.afterTabClosing.activateTab !== "default"
+      ? determineNextActiveTab(
+          closedTabBeforeRemoval,
+          settings.afterTabClosing.activateTab,
+          tabsBeforeRemoval,
+          activationHistory,
+        )
+      : shouldHandleMissingClosedTab
+        ? determineNextActiveTabWithoutClosedTab(
+            tabId,
+            settings.afterTabClosing.activateTab,
+            tabsBeforeRemoval,
+            activationHistory,
+          )
+        : null;
+
+  cleanupTabData(windowId, tabId);
+  removeTabFromSnapshot(windowId, tabId);
+
+  if (nextActiveTabId !== null) {
+    if (shouldInitialize) {
+      setTimeout(() => {
+        setActiveTabInSnapshot(windowId, nextActiveTabId);
+        void chrome.tabs.update(nextActiveTabId, { active: true });
+      }, 0);
+    } else {
+      setActiveTabInSnapshot(windowId, nextActiveTabId);
+      void chrome.tabs.update(nextActiveTabId, { active: true });
+    }
   }
-
-  // 閉じたタブがアクティブでない場合は何もしない
-  const lastActiveTabId = getLastActiveTabId();
-  if (lastActiveTabId !== tabId) {
-    return undefined;
-  }
-
-  const tabs = getTabSnapshot();
-  const closedTabIndex = getTabIndex(tabId) ?? 0;
-
-  return determineNextActiveTab(tabId, closedTabIndex, activateTabSetting, tabs);
 };
