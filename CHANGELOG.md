@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0
+- Fixed tab closing behavior on Chrome 146 to keep the configured activation order working reliably
+- Updated the extension to work with the latest development toolchain and browser support
+
 ## 0.1.0
 - Added "New Tab Background" option to open new tabs in the background while keeping the current tab active
 
