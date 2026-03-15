@@ -1,8 +1,9 @@
+import type { TabSnapshot } from "@/src/tabs/state/tabSnapshot";
 import type { TabPosition } from "@/src/types";
 
 export const calculateNewTabIndex = (
   position: TabPosition,
-  tabs: chrome.tabs.Tab[],
+  tabs: TabSnapshot[],
   currentTabId: number,
 ) => {
   switch (position) {

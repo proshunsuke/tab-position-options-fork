@@ -209,8 +209,7 @@ export const simulateServiceWorkerRestart = async (serviceWorker: Worker) => {
     // メモリキャッシュをクリア
     if (globalThis.__testExports?.states) {
       globalThis.__testExports.states.resetActivationHistory();
-      globalThis.__testExports.states.resetIndexCache();
-      globalThis.__testExports.states.resetSourceMap();
+      globalThis.__testExports.states.resetActiveTransition();
       globalThis.__testExports.states.resetTabSnapshotState();
       globalThis.__testExports.states.resetAppDataState();
       globalThis.__testExports.states.resetInitializationState();

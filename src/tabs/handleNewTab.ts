@@ -3,20 +3,16 @@ import { initializeAllStates, needsInitialization } from "@/src/state/initialize
 import { calculateNewTabIndex } from "@/src/tabs/position";
 import { isSessionRestoreTab } from "@/src/tabs/sessionRestoreDetector";
 import { getLastActiveTabIdByNewTabId } from "@/src/tabs/state/activationHistory";
-import { setTabIndex } from "@/src/tabs/state/indexCache";
-import { recordTabSource } from "@/src/tabs/state/sourceMap";
-import { getTabSnapshot, updateTabSnapshot } from "@/src/tabs/state/tabSnapshot";
+import { addTabToSnapshot, getTabSnapshot, moveTabInSnapshot } from "@/src/tabs/state/tabSnapshot";
 import type { TabPosition } from "@/src/types";
 
 export const handleNewTab = async (tab: chrome.tabs.Tab) => {
-  // Service Worker初期化チェック
   if (needsInitialization()) {
     await initializeAllStates();
   }
 
   const tabId = tab.id;
   const tabIndex = tab.index;
-  const tabOpenerTabId = tab.openerTabId;
 
   if (!tabId) {
     return;
@@ -24,27 +20,13 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
 
   const settings = getSettings();
   const lastActiveTabId = getLastActiveTabIdByNewTabId(tabId);
+  addTabToSnapshot(tab);
 
-  // バックグラウンドで開く場合は先にフォーカスを戻す
   if (settings.newTab.openInBackground && lastActiveTabId) {
-    chrome.tabs.update(lastActiveTabId, { active: true }).finally(() => {
-      positionTabAndUpdateStates(
-        settings.newTab.position,
-        tabId,
-        tabIndex,
-        lastActiveTabId,
-        tabOpenerTabId,
-      );
-    });
-  } else {
-    positionTabAndUpdateStates(
-      settings.newTab.position,
-      tabId,
-      tabIndex,
-      lastActiveTabId,
-      tabOpenerTabId,
-    );
+    void chrome.tabs.update(lastActiveTabId, { active: true });
   }
+
+  positionTabAndUpdateStates(settings.newTab.position, tabId, tabIndex, lastActiveTabId);
 };
 
 /**
@@ -55,15 +37,11 @@ const positionTabAndUpdateStates = (
   tabId: number,
   tabIndex: number,
   lastActiveTabId: number | null,
-  tabOpenerTabId?: number,
 ) => {
   const newIndex = getNewIndex(position, lastActiveTabId, tabIndex);
   if (newIndex !== tabIndex) {
-    chrome.tabs.move(tabId, { index: newIndex }).finally(() => {
-      updateStates(tabId, newIndex, tabOpenerTabId);
-    });
-  } else {
-    updateStates(tabId, newIndex, tabOpenerTabId);
+    moveTabInSnapshot(tabId, newIndex);
+    void chrome.tabs.move(tabId, { index: newIndex });
   }
 };
 
@@ -88,16 +66,4 @@ const getNewIndex = (position: TabPosition, lastActiveTabId: number | null, inde
   }
   const tabs = getTabSnapshot();
   return calculateNewTabIndex(position, tabs, lastActiveTabId) ?? index;
-};
-
-/**
- * ステートの更新処理をまとめる
- * ステート更新はハンドラーの最後に一度だけ行う
- */
-const updateStates = (tabId: number, newIndex: number, tabOpenerTabId?: number) => {
-  setTabIndex(tabId, newIndex);
-  if (tabOpenerTabId) {
-    recordTabSource(tabId, tabOpenerTabId);
-  }
-  updateTabSnapshot();
 };

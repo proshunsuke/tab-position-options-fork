@@ -1,15 +1,15 @@
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
-import { recordTabActivation } from "@/src/tabs/state/activationHistory";
-import { setTabIndexFromChrome } from "@/src/tabs/state/indexCache";
-import { updateTabSnapshot } from "@/src/tabs/state/tabSnapshot";
+import { getActivationHistory, recordTabActivation } from "@/src/tabs/state/activationHistory";
+import { recordActiveTransition } from "@/src/tabs/state/activeTransition";
+import { getActiveTabSnapshot, setActiveTabInSnapshot } from "@/src/tabs/state/tabSnapshot";
 
 export const handleTabActivated = async (activeInfo: { tabId: number; windowId: number }) => {
-  // Service Worker初期化チェック
   if (needsInitialization()) {
     await initializeAllStates();
   }
 
+  const previousActiveTabId = getActiveTabSnapshot()?.id ?? null;
+  recordActiveTransition(previousActiveTabId, activeInfo.tabId, getActivationHistory());
+  setActiveTabInSnapshot(activeInfo.tabId);
   recordTabActivation(activeInfo.tabId);
-  setTabIndexFromChrome(activeInfo.tabId);
-  updateTabSnapshot();
 };

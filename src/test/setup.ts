@@ -9,8 +9,7 @@ import { handleNewTab } from "@/src/tabs/handleNewTab";
 import { handleTabActivated } from "@/src/tabs/handleTabActivated";
 import { createSessionRestoreDetector, defaultDetector } from "@/src/tabs/sessionRestoreDetector";
 import { resetActivationHistory } from "@/src/tabs/state/activationHistory";
-import { resetIndexCache } from "@/src/tabs/state/indexCache";
-import { resetSourceMap } from "@/src/tabs/state/sourceMap";
+import { resetActiveTransition } from "@/src/tabs/state/activeTransition";
 import { resetTabSnapshotState } from "@/src/tabs/state/tabSnapshot";
 import type { GlobalTestExports } from "./types";
 
@@ -48,8 +47,7 @@ export const setupTestEnvironment = () => {
 
       states: {
         resetActivationHistory: resetActivationHistory,
-        resetIndexCache: resetIndexCache,
-        resetSourceMap: resetSourceMap,
+        resetActiveTransition: resetActiveTransition,
         resetTabSnapshotState: resetTabSnapshotState,
         resetAppDataState: resetAppDataState,
         resetInitializationState: resetInitializationState,
