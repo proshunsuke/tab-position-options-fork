@@ -2,6 +2,7 @@ import { expect, test } from "@/e2e/fixtures";
 import {
   clearExtensionStorage,
   closeActiveTabViaServiceWorker,
+  getCurrentWindowTabs,
   getTabState,
   setExtensionSettings,
 } from "@/e2e/utils/helpers";
@@ -327,6 +328,44 @@ test.describe("Tab Behavior - After Tab Closing", () => {
       const state = await getTabState(serviceWorker);
       expect(state.totalTabs).toBe(beforeState.totalTabs - 1);
       expect(state.activeTabIndex).toBe(beforeState.activeTabIndex - 1); // 左側のタブ
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+  });
+
+  test("should keep the current tab active when closing a previously active background tab", async ({
+    context,
+    serviceWorker,
+  }) => {
+    const initialState = await getTabState(serviceWorker);
+    const initialTabCount = initialState.totalTabs;
+
+    const tabA = await context.newPage();
+    const tabB = await context.newPage();
+    await context.newPage();
+
+    await tabA.bringToFront();
+    await tabA.waitForTimeout(200);
+
+    await setExtensionSettings(context, { afterTabClosing: { activateTab: "last" } });
+
+    const beforeTabs = await getCurrentWindowTabs(serviceWorker);
+    const closedTabState = beforeTabs[initialTabCount];
+    const currentTabState = beforeTabs[initialTabCount + 1];
+    if (!closedTabState || !currentTabState) {
+      throw new Error("Expected tabs for the reproduction scenario were not found");
+    }
+    expect(beforeTabs.find(tab => tab.active)?.id).toBe(closedTabState.id);
+
+    await tabB.bringToFront();
+    await tabB.waitForTimeout(50);
+    await tabA.close();
+
+    await expect(async () => {
+      const currentTabs = await getCurrentWindowTabs(serviceWorker);
+      expect(currentTabs).toHaveLength(beforeTabs.length - 1);
+      expect(currentTabs.find(tab => tab.active)?.id).toBe(currentTabState.id);
     }).toPass({
       intervals: [100, 100, 100],
       timeout: 5000,

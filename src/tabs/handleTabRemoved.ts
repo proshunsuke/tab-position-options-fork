@@ -1,10 +1,7 @@
 import { getSettings } from "@/src/settings/state/appData";
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
 import { getActivationHistory } from "@/src/tabs/state/activationHistory";
-import {
-  clearActiveTransition,
-  getRecentActiveTransition,
-} from "@/src/tabs/state/activeTransition";
+import { consumePendingCloseTransition } from "@/src/tabs/state/pendingCloseTransition";
 import {
   getActiveTabSnapshot,
   getStoredTabSnapshot,
@@ -36,15 +33,18 @@ export const handleTabRemoved = async (
     shouldInitialize && closedTab === null ? await getStoredTabSnapshot(windowId) : [];
   const tabsBeforeRemoval = closedTab === null && storedTabs.length > 0 ? storedTabs : tabs;
   const closedTabBeforeRemoval = closedTab ?? storedTabs.find(tab => tab.id === tabId) ?? null;
-  const activeTransition = getRecentActiveTransition(windowId);
   const currentActiveTab = getActiveTabSnapshot(windowId);
+  const pendingCloseTransition = consumePendingCloseTransition(
+    windowId,
+    tabId,
+    currentActiveTab?.id ?? null,
+  );
+  // Service Worker 再起動直後だけは pendingCloseTransition が空でも、
+  // 保存済み snapshot の active フラグを補助情報として扱う。
   const isClosedActiveTab =
-    closedTabBeforeRemoval?.active === true ||
-    (activeTransition?.fromTabId === tabId && currentActiveTab?.id === activeTransition.toTabId);
-  const activationHistory =
-    activeTransition?.fromTabId === tabId
-      ? activeTransition.historyBefore
-      : getActivationHistory(windowId);
+    pendingCloseTransition !== null ||
+    (shouldInitialize && closedTabBeforeRemoval?.active === true);
+  const activationHistory = pendingCloseTransition?.historyBefore ?? getActivationHistory(windowId);
   const shouldHandleMissingClosedTab =
     closedTabBeforeRemoval === null &&
     activationHistory.at(-1) === tabId &&
@@ -82,9 +82,5 @@ export const handleTabRemoved = async (
       setActiveTabInSnapshot(windowId, nextActiveTabId);
       void chrome.tabs.update(nextActiveTabId, { active: true });
     }
-  }
-
-  if (activeTransition?.fromTabId === tabId || activeTransition?.toTabId === tabId) {
-    clearActiveTransition(windowId);
   }
 };
