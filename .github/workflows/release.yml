@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
     
     steps:
       - name: Checkout code
@@ -63,6 +64,77 @@ jobs:
           ZIP_FILE="dist/tab-position-options-fork-${{ env.VERSION }}-chrome.zip"
           echo "ZIP_FILE=$ZIP_FILE" >> $GITHUB_ENV
       
+      - name: Authenticate to Google Cloud
+        id: google_auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+          create_credentials_file: false
+          export_environment_variables: false
+
+      - name: Upload to Chrome Web Store (Draft)
+        env:
+          ACCESS_TOKEN: ${{ steps.google_auth.outputs.access_token }}
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CHROME_PUBLISHER_ID: ${{ secrets.CHROME_PUBLISHER_ID }}
+        run: |
+          ITEM_NAME="publishers/${CHROME_PUBLISHER_ID}/items/${CHROME_EXTENSION_ID}"
+          UPLOAD_ENDPOINT="https://chromewebstore.googleapis.com/upload/v2/${ITEM_NAME}:upload"
+          STATUS_ENDPOINT="https://chromewebstore.googleapis.com/v2/${ITEM_NAME}:fetchStatus"
+          UPLOAD_RESPONSE_FILE=$(mktemp)
+
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+            -X POST \
+            -T "${ZIP_FILE}" \
+            "${UPLOAD_ENDPOINT}" \
+            -o "${UPLOAD_RESPONSE_FILE}"
+
+          cat "${UPLOAD_RESPONSE_FILE}"
+
+          UPLOAD_STATE=$(node -e "const fs = require('node:fs'); const response = JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); process.stdout.write(response.uploadState ?? '');" "${UPLOAD_RESPONSE_FILE}")
+
+          if [ "${UPLOAD_STATE}" = "SUCCEEDED" ]; then
+            exit 0
+          fi
+
+          if [ "${UPLOAD_STATE}" != "IN_PROGRESS" ]; then
+            echo "Unexpected upload state: ${UPLOAD_STATE}" >&2
+            exit 1
+          fi
+
+          for attempt in $(seq 1 12); do
+            sleep 5
+
+            STATUS_RESPONSE_FILE=$(mktemp)
+
+            curl --fail-with-body --silent --show-error \
+              -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+              "${STATUS_ENDPOINT}" \
+              -o "${STATUS_RESPONSE_FILE}"
+
+            cat "${STATUS_RESPONSE_FILE}"
+
+            LAST_ASYNC_UPLOAD_STATE=$(node -e "const fs = require('node:fs'); const response = JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); process.stdout.write(response.lastAsyncUploadState ?? '');" "${STATUS_RESPONSE_FILE}")
+
+            if [ "${LAST_ASYNC_UPLOAD_STATE}" = "SUCCEEDED" ]; then
+              exit 0
+            fi
+
+            if [ "${LAST_ASYNC_UPLOAD_STATE}" = "IN_PROGRESS" ]; then
+              continue
+            fi
+
+            echo "Unexpected async upload state: ${LAST_ASYNC_UPLOAD_STATE}" >&2
+            exit 1
+          done
+
+          echo "Timed out waiting for Chrome Web Store draft upload to finish." >&2
+          exit 1
+
       - name: Create Release
         id: create_release
         uses: ncipollo/release-action@v1
@@ -90,16 +162,6 @@ jobs:
           draft: false
           prerelease: false
           artifacts: ${{ env.ZIP_FILE }}
-      
-      - name: Upload to Chrome Web Store (Draft)
-        uses: mnao305/chrome-extension-upload@v5.0.0
-        with:
-          file-path: ${{ env.ZIP_FILE }}
-          extension-id: ${{ secrets.CHROME_EXTENSION_ID }}
-          client-id: ${{ secrets.CHROME_CLIENT_ID }}
-          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
-          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
-          publish: false  # 下書きとして保存
       
       - name: Summary
         run: |
