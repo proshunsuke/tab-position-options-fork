@@ -3,6 +3,7 @@ import { initializeAllStates, needsInitialization } from "@/src/state/initialize
 import { calculateNewTabIndex } from "@/src/tabs/position";
 import { isSessionRestoreTab } from "@/src/tabs/sessionRestoreDetector";
 import { getLastActiveTabIdByNewTabId } from "@/src/tabs/state/activationHistory";
+import { getRecentActiveTransition } from "@/src/tabs/state/activeTransition";
 import { addTabToSnapshot, getTabSnapshot, moveTabInSnapshot } from "@/src/tabs/state/tabSnapshot";
 import type { TabPosition } from "@/src/types";
 
@@ -20,7 +21,7 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
   }
 
   const settings = getSettings();
-  const lastActiveTabId = getLastActiveTabIdByNewTabId(windowId, tabId);
+  const lastActiveTabId = getSourceTabId(windowId, tab);
   addTabToSnapshot(tab);
 
   if (settings.newTab.openInBackground && lastActiveTabId) {
@@ -45,6 +46,24 @@ const positionTabAndUpdateStates = (
     moveTabInSnapshot(windowId, tabId, newIndex);
     void chrome.tabs.move(tabId, { index: newIndex });
   }
+};
+
+const getSourceTabId = (windowId: number, tab: chrome.tabs.Tab) => {
+  const openerTabId = tab.openerTabId;
+  if (openerTabId && getTabSnapshot(windowId).some(snapshot => snapshot.id === openerTabId)) {
+    return openerTabId;
+  }
+
+  const activeTransition = getRecentActiveTransition(windowId);
+  if (activeTransition && activeTransition.toTabId === tab.id) {
+    return activeTransition.fromTabId;
+  }
+
+  if (!tab.id) {
+    return null;
+  }
+
+  return getLastActiveTabIdByNewTabId(windowId, tab.id);
 };
 
 /**

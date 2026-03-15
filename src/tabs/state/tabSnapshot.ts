@@ -21,7 +21,14 @@ const getWindowKey = (windowId: number) => {
   return String(windowId);
 };
 
-const normalizeIndexes = (tabs: TabSnapshot[]) => {
+const reindexTabs = (tabs: TabSnapshot[]) => {
+  return [...tabs].map((tab, index) => ({
+    ...tab,
+    index,
+  }));
+};
+
+const sortAndReindexTabs = (tabs: TabSnapshot[]) => {
   return [...tabs]
     .sort((left, right) => left.index - right.index)
     .map((tab, index) => ({
@@ -30,10 +37,18 @@ const normalizeIndexes = (tabs: TabSnapshot[]) => {
     }));
 };
 
-const normalizeState = (state: WindowScopedTabSnapshot) => {
+const reindexState = (state: WindowScopedTabSnapshot) => {
   return Object.fromEntries(
     Object.entries(state)
-      .map(([windowId, tabs]) => [windowId, normalizeIndexes(tabs)])
+      .map(([windowId, tabs]) => [windowId, reindexTabs(tabs)])
+      .filter((entry): entry is [string, TabSnapshot[]] => entry[1].length > 0),
+  );
+};
+
+const sortAndReindexState = (state: WindowScopedTabSnapshot) => {
+  return Object.fromEntries(
+    Object.entries(state)
+      .map(([windowId, tabs]) => [windowId, sortAndReindexTabs(tabs)])
       .filter((entry): entry is [string, TabSnapshot[]] => entry[1].length > 0),
   );
 };
@@ -76,7 +91,7 @@ const groupTabsByWindow = (tabs: chrome.tabs.Tab[]) => {
     groupedTabs[windowKey].push(snapshot);
   }
 
-  return normalizeState(groupedTabs);
+  return sortAndReindexState(groupedTabs);
 };
 
 const getWindowIds = (tabs: chrome.tabs.Tab[]) => {
@@ -88,7 +103,7 @@ const getWindowIds = (tabs: chrome.tabs.Tab[]) => {
  * メモリは即座に更新し、ストレージへは遅延保存
  */
 const setState = (value: WindowScopedTabSnapshot) => {
-  tabSnapshotState = normalizeState(value);
+  tabSnapshotState = reindexState(value);
 
   Promise.resolve().then(() => {
     chrome.storage.session.set({ tabSnapshot: tabSnapshotState }).catch(() => {});
@@ -105,7 +120,7 @@ export const initializeTabSnapshot = async () => {
     chrome.tabs.query({}),
   ]);
   const currentState = groupTabsByWindow(tabs);
-  const savedState = normalizeState(result.tabSnapshot ?? {});
+  const savedState = sortAndReindexState(result.tabSnapshot ?? {});
   const openWindowIds = getWindowIds(tabs);
   const restoredState = Object.fromEntries(
     Object.entries(savedState).filter(([windowId]) => openWindowIds.has(Number(windowId))),
@@ -128,7 +143,7 @@ export const getTabSnapshot = (windowId: number) => {
 
 export const getStoredTabSnapshot = async (windowId: number) => {
   const result = await chrome.storage.session.get<TabSnapshotStorage>("tabSnapshot");
-  const savedState = normalizeState(result.tabSnapshot ?? {});
+  const savedState = sortAndReindexState(result.tabSnapshot ?? {});
   return savedState[getWindowKey(windowId)] ?? [];
 };
 
@@ -154,7 +169,7 @@ export const addTabToSnapshot = (tab: chrome.tabs.Tab) => {
   tabs.splice(insertIndex, 0, nextTab);
   setState({
     ...tabSnapshotState,
-    [windowKey]: setActiveTabId(normalizeIndexes(tabs), nextTab.active ? nextTab.id : undefined),
+    [windowKey]: setActiveTabId(reindexTabs(tabs), nextTab.active ? nextTab.id : undefined),
   });
 };
 
@@ -188,7 +203,7 @@ export const moveTabInSnapshot = (windowId: number, tabId: number, toIndex: numb
 
   setState({
     ...tabSnapshotState,
-    [windowKey]: normalizeIndexes(tabs),
+    [windowKey]: reindexTabs(tabs),
   });
 };
 

@@ -2,6 +2,7 @@ import { expect, test } from "@/e2e/fixtures";
 import {
   clearExtensionStorage,
   createTabViaServiceWorker,
+  getCurrentWindowTabs,
   getTabState,
   setExtensionSettings,
 } from "@/e2e/utils/helpers";
@@ -182,6 +183,57 @@ test.describe("Tab Behavior - New Tab Position", () => {
       const state = await getTabState(serviceWorker);
       expect(state.totalTabs).toBe(beforeState.totalTabs + 1);
       expect(state.activeTabIndex).toBe(beforeState.activeTabIndex + 1);
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 3000,
+    });
+  });
+
+  test("should keep opening consecutive new tabs immediately to the right of the current tab", async ({
+    context,
+    serviceWorker,
+  }) => {
+    // 3つのタブを作成
+    await context.newPage();
+    const tab2 = await context.newPage();
+    await context.newPage();
+
+    // tab2（インデックス1）をアクティブに
+    await tab2.bringToFront();
+
+    await setExtensionSettings(context, { newTab: { position: "right", openInBackground: false } });
+
+    const beforeTabs = await getCurrentWindowTabs(serviceWorker);
+    const activeTabIndex = beforeTabs.findIndex(tab => tab.active);
+    expect(activeTabIndex).toBeGreaterThanOrEqual(0);
+
+    const firstNewTab = await createTabViaServiceWorker(serviceWorker);
+    const expectedAfterFirstOpen = [
+      ...beforeTabs.slice(0, activeTabIndex + 1).map(tab => tab.id),
+      firstNewTab.newTabId!,
+      ...beforeTabs.slice(activeTabIndex + 1).map(tab => tab.id),
+    ];
+
+    await expect(async () => {
+      const tabs = await getCurrentWindowTabs(serviceWorker);
+      expect(tabs.map(tab => tab.id)).toEqual(expectedAfterFirstOpen);
+      expect(tabs.findIndex(tab => tab.active)).toBe(activeTabIndex + 1);
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 3000,
+    });
+
+    const secondNewTab = await createTabViaServiceWorker(serviceWorker);
+    const expectedAfterSecondOpen = [
+      ...expectedAfterFirstOpen.slice(0, activeTabIndex + 2),
+      secondNewTab.newTabId!,
+      ...expectedAfterFirstOpen.slice(activeTabIndex + 2),
+    ];
+
+    await expect(async () => {
+      const tabs = await getCurrentWindowTabs(serviceWorker);
+      expect(tabs.map(tab => tab.id)).toEqual(expectedAfterSecondOpen);
+      expect(tabs.findIndex(tab => tab.active)).toBe(activeTabIndex + 2);
     }).toPass({
       intervals: [100, 100, 100],
       timeout: 3000,

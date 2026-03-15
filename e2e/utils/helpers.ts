@@ -9,6 +9,13 @@ type WindowTabState = {
   activeTabId: number | null;
 };
 
+type CurrentWindowTab = {
+  id: number;
+  index: number;
+  active: boolean;
+  openerTabId?: number;
+};
+
 type ServiceWorkerLikeGlobal = WorkerGlobalScope & {
   registration: {
     active: ServiceWorker | null;
@@ -74,6 +81,24 @@ export const getTabState = async (serviceWorker: Worker) =>
       totalTabs: tabs.length,
       activeTabIndex: activeTab?.index ?? -1,
     };
+  });
+
+export const getCurrentWindowTabs = async (serviceWorker: Worker) =>
+  serviceWorker.evaluate(async () => {
+    const tabs = (await chrome.tabs.query({ currentWindow: true })).sort(
+      (left, right) => left.index - right.index,
+    );
+
+    return tabs
+      .filter((tab): tab is chrome.tabs.Tab & { id: number } => tab.id !== undefined)
+      .map(tab => {
+        return {
+          id: tab.id,
+          index: tab.index,
+          active: tab.active,
+          openerTabId: tab.openerTabId,
+        } satisfies CurrentWindowTab;
+      });
   });
 
 export const getCurrentWindowId = async (serviceWorker: Worker) =>
