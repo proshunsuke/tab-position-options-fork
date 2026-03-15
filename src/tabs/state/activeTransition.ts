@@ -2,43 +2,63 @@ type ActiveTransition = {
   fromTabId: number | null;
   toTabId: number;
   historyBefore: number[];
-  timestamp: number;
+  expiresAt: number;
 };
 
 const CLOSE_TRANSITION_WINDOW_MS = 100;
 
-let activeTransitionState: ActiveTransition | null = null;
+let activeTransitionState: Record<string, ActiveTransition> = {};
+
+const getWindowKey = (windowId: number) => {
+  return String(windowId);
+};
 
 export const recordActiveTransition = (
+  windowId: number,
   fromTabId: number | null,
   toTabId: number,
   historyBefore: number[],
+  windowMs = CLOSE_TRANSITION_WINDOW_MS,
 ) => {
   activeTransitionState = {
-    fromTabId,
-    toTabId,
-    historyBefore,
-    timestamp: Date.now(),
+    ...activeTransitionState,
+    [getWindowKey(windowId)]: {
+      fromTabId,
+      toTabId,
+      historyBefore,
+      expiresAt: Date.now() + windowMs,
+    },
   };
 };
 
-export const getRecentActiveTransition = () => {
-  if (!activeTransitionState) {
+export const getRecentActiveTransition = (windowId: number) => {
+  const windowKey = getWindowKey(windowId);
+  const transition = activeTransitionState[windowKey];
+  if (!transition) {
     return null;
   }
 
-  if (Date.now() - activeTransitionState.timestamp > CLOSE_TRANSITION_WINDOW_MS) {
-    activeTransitionState = null;
+  if (Date.now() > transition.expiresAt) {
+    const nextState = {
+      ...activeTransitionState,
+    };
+    delete nextState[windowKey];
+    activeTransitionState = nextState;
     return null;
   }
 
-  return activeTransitionState;
+  return transition;
 };
 
-export const clearActiveTransition = () => {
-  activeTransitionState = null;
+export const clearActiveTransition = (windowId: number) => {
+  const windowKey = getWindowKey(windowId);
+  const nextState = {
+    ...activeTransitionState,
+  };
+  delete nextState[windowKey];
+  activeTransitionState = nextState;
 };
 
 export const resetActiveTransition = () => {
-  activeTransitionState = null;
+  activeTransitionState = {};
 };

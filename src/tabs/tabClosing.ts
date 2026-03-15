@@ -8,8 +8,8 @@ import type { TabActivation } from "@/src/types";
 /**
  * タブクロージング時の全データクリーンアップ
  */
-export const cleanupTabData = (tabId: number) => {
-  cleanupActivationHistory(tabId);
+export const cleanupTabData = (windowId: number, tabId: number) => {
+  cleanupActivationHistory(windowId, tabId);
 };
 
 /**
@@ -64,6 +64,27 @@ export const determineNextActiveTab = (
       }
       return getTabFromActivationHistory(remainingTabs, [closedTab.id], activationHistory);
     }
+
+    default:
+      return null;
+  }
+};
+
+export const determineNextActiveTabWithoutClosedTab = (
+  closedTabId: number,
+  activateTabSetting: TabActivation,
+  remainingTabs: TabSnapshot[],
+  activationHistory: number[],
+) => {
+  switch (activateTabSetting) {
+    case "first":
+      return remainingTabs[0]?.id ?? null;
+
+    case "last":
+      return remainingTabs.at(-1)?.id ?? null;
+
+    case "inActivatedOrder":
+      return getTabFromActivationHistory(remainingTabs, [closedTabId], activationHistory);
 
     default:
       return null;

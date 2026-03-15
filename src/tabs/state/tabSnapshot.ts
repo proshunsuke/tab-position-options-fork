@@ -6,14 +6,20 @@ export type TabSnapshot = {
 };
 
 type TabSnapshotStorage = {
-  tabSnapshot?: TabSnapshot[];
+  tabSnapshot?: WindowScopedTabSnapshot;
 };
+
+type WindowScopedTabSnapshot = Record<string, TabSnapshot[]>;
 
 /**
  * タブスナップショットの状態管理
  * グローバルメモリ状態として管理
  */
-let tabSnapshotState: TabSnapshot[] = [];
+let tabSnapshotState: WindowScopedTabSnapshot = {};
+
+const getWindowKey = (windowId: number) => {
+  return String(windowId);
+};
 
 const normalizeIndexes = (tabs: TabSnapshot[]) => {
   return [...tabs]
@@ -22,6 +28,14 @@ const normalizeIndexes = (tabs: TabSnapshot[]) => {
       ...tab,
       index,
     }));
+};
+
+const normalizeState = (state: WindowScopedTabSnapshot) => {
+  return Object.fromEntries(
+    Object.entries(state)
+      .map(([windowId, tabs]) => [windowId, normalizeIndexes(tabs)])
+      .filter((entry): entry is [string, TabSnapshot[]] => entry[1].length > 0),
+  );
 };
 
 const setActiveTabId = (tabs: TabSnapshot[], activeTabId?: number) => {
@@ -48,12 +62,33 @@ const toTabSnapshot = (tab: chrome.tabs.Tab) => {
   } as TabSnapshot;
 };
 
+const groupTabsByWindow = (tabs: chrome.tabs.Tab[]) => {
+  const groupedTabs: WindowScopedTabSnapshot = {};
+
+  for (const tab of tabs) {
+    const snapshot = toTabSnapshot(tab);
+    if (!snapshot) {
+      continue;
+    }
+
+    const windowKey = getWindowKey(tab.windowId);
+    groupedTabs[windowKey] ??= [];
+    groupedTabs[windowKey].push(snapshot);
+  }
+
+  return normalizeState(groupedTabs);
+};
+
+const getWindowIds = (tabs: chrome.tabs.Tab[]) => {
+  return new Set(tabs.map(tab => tab.windowId));
+};
+
 /**
  * 同期的に状態を設定
  * メモリは即座に更新し、ストレージへは遅延保存
  */
-const setState = (value: TabSnapshot[]) => {
-  tabSnapshotState = normalizeIndexes(value);
+const setState = (value: WindowScopedTabSnapshot) => {
+  tabSnapshotState = normalizeState(value);
 
   Promise.resolve().then(() => {
     chrome.storage.session.set({ tabSnapshot: tabSnapshotState }).catch(() => {});
@@ -65,29 +100,44 @@ const setState = (value: TabSnapshot[]) => {
  * Service Worker起動時に一度だけ呼び出される
  */
 export const initializeTabSnapshot = async () => {
-  const result = await chrome.storage.session.get<TabSnapshotStorage>("tabSnapshot");
-  if (result.tabSnapshot && result.tabSnapshot.length > 0) {
-    setState(result.tabSnapshot);
-    return;
-  }
+  const [result, tabs] = await Promise.all([
+    chrome.storage.session.get<TabSnapshotStorage>("tabSnapshot"),
+    chrome.tabs.query({}),
+  ]);
+  const currentState = groupTabsByWindow(tabs);
+  const savedState = normalizeState(result.tabSnapshot ?? {});
+  const openWindowIds = getWindowIds(tabs);
+  const restoredState = Object.fromEntries(
+    Object.entries(savedState).filter(([windowId]) => openWindowIds.has(Number(windowId))),
+  );
 
-  const tabs = await chrome.tabs.query({ currentWindow: true });
-  setState(tabs.map(toTabSnapshot).filter((tab): tab is TabSnapshot => tab !== null));
+  // Service Worker 再起動直後の最初のイベントでは、保存済みスナップショットのほうが
+  // イベント発火前の並び順を保持しているため、同一 window ではそれを優先する。
+  setState({
+    ...currentState,
+    ...restoredState,
+  });
 };
 
 /**
  * 同期的に状態を取得
  */
-export const getTabSnapshot = () => {
-  return tabSnapshotState;
+export const getTabSnapshot = (windowId: number) => {
+  return tabSnapshotState[getWindowKey(windowId)] ?? [];
 };
 
-export const getTabSnapshotById = (tabId: number) => {
-  return getTabSnapshot().find(tab => tab.id === tabId) ?? null;
+export const getStoredTabSnapshot = async (windowId: number) => {
+  const result = await chrome.storage.session.get<TabSnapshotStorage>("tabSnapshot");
+  const savedState = normalizeState(result.tabSnapshot ?? {});
+  return savedState[getWindowKey(windowId)] ?? [];
 };
 
-export const getActiveTabSnapshot = () => {
-  return getTabSnapshot().find(tab => tab.active) ?? null;
+export const getTabSnapshotById = (windowId: number, tabId: number) => {
+  return getTabSnapshot(windowId).find(tab => tab.id === tabId) ?? null;
+};
+
+export const getActiveTabSnapshot = (windowId: number) => {
+  return getTabSnapshot(windowId).find(tab => tab.active) ?? null;
 };
 
 export const addTabToSnapshot = (tab: chrome.tabs.Tab) => {
@@ -96,29 +146,37 @@ export const addTabToSnapshot = (tab: chrome.tabs.Tab) => {
     return;
   }
 
-  const tabs = getTabSnapshot().filter(entry => entry.id !== nextTab.id);
+  const windowId = tab.windowId;
+  const windowKey = getWindowKey(windowId);
+  const tabs = getTabSnapshot(windowId).filter(entry => entry.id !== nextTab.id);
   const insertIndex = Math.max(0, Math.min(nextTab.index, tabs.length));
 
   tabs.splice(insertIndex, 0, nextTab);
-  setState(setActiveTabId(normalizeIndexes(tabs), nextTab.active ? nextTab.id : undefined));
+  setState({
+    ...tabSnapshotState,
+    [windowKey]: setActiveTabId(normalizeIndexes(tabs), nextTab.active ? nextTab.id : undefined),
+  });
 };
 
-export const setActiveTabInSnapshot = (tabId: number) => {
-  const tabs = getTabSnapshot();
+export const setActiveTabInSnapshot = (windowId: number, tabId: number) => {
+  const windowKey = getWindowKey(windowId);
+  const tabs = getTabSnapshot(windowId);
   if (!tabs.some(tab => tab.id === tabId)) {
     return;
   }
 
-  setState(
-    tabs.map(tab => ({
+  setState({
+    ...tabSnapshotState,
+    [windowKey]: tabs.map(tab => ({
       ...tab,
       active: tab.id === tabId,
     })),
-  );
+  });
 };
 
-export const moveTabInSnapshot = (tabId: number, toIndex: number) => {
-  const tabs = [...getTabSnapshot()];
+export const moveTabInSnapshot = (windowId: number, tabId: number, toIndex: number) => {
+  const windowKey = getWindowKey(windowId);
+  const tabs = [...getTabSnapshot(windowId)];
   const currentIndex = tabs.findIndex(tab => tab.id === tabId);
   if (currentIndex === -1) {
     return;
@@ -128,17 +186,32 @@ export const moveTabInSnapshot = (tabId: number, toIndex: number) => {
   const insertIndex = Math.max(0, Math.min(toIndex, tabs.length));
   tabs.splice(insertIndex, 0, tab);
 
-  setState(normalizeIndexes(tabs));
+  setState({
+    ...tabSnapshotState,
+    [windowKey]: normalizeIndexes(tabs),
+  });
 };
 
-export const removeTabFromSnapshot = (tabId: number) => {
-  const tabs = getTabSnapshot();
+export const removeTabFromSnapshot = (windowId: number, tabId: number) => {
+  const windowKey = getWindowKey(windowId);
+  const tabs = getTabSnapshot(windowId);
   const removedTab = tabs.find(tab => tab.id === tabId) ?? null;
   if (!removedTab) {
     return null;
   }
 
-  setState(tabs.filter(tab => tab.id !== tabId));
+  const remainingTabs = tabs.filter(tab => tab.id !== tabId);
+  const nextState = {
+    ...tabSnapshotState,
+  };
+
+  if (remainingTabs.length === 0) {
+    delete nextState[windowKey];
+  } else {
+    nextState[windowKey] = remainingTabs;
+  }
+
+  setState(nextState);
   return removedTab;
 };
 
@@ -147,5 +220,5 @@ export const removeTabFromSnapshot = (tabId: number) => {
  * @internal
  */
 export const resetTabSnapshotState = () => {
-  tabSnapshotState = [];
+  tabSnapshotState = {};
 };

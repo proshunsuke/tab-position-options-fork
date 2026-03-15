@@ -9,5 +9,5 @@ export const handleTabMoved = async (
     await initializeAllStates();
   }
 
-  moveTabInSnapshot(tabId, moveInfo.toIndex);
+  moveTabInSnapshot(moveInfo.windowId, tabId, moveInfo.toIndex);
 };

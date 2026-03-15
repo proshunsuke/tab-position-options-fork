@@ -13,20 +13,21 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
 
   const tabId = tab.id;
   const tabIndex = tab.index;
+  const windowId = tab.windowId;
 
   if (!tabId) {
     return;
   }
 
   const settings = getSettings();
-  const lastActiveTabId = getLastActiveTabIdByNewTabId(tabId);
+  const lastActiveTabId = getLastActiveTabIdByNewTabId(windowId, tabId);
   addTabToSnapshot(tab);
 
   if (settings.newTab.openInBackground && lastActiveTabId) {
     void chrome.tabs.update(lastActiveTabId, { active: true });
   }
 
-  positionTabAndUpdateStates(settings.newTab.position, tabId, tabIndex, lastActiveTabId);
+  positionTabAndUpdateStates(settings.newTab.position, windowId, tabId, tabIndex, lastActiveTabId);
 };
 
 /**
@@ -34,13 +35,14 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
  */
 const positionTabAndUpdateStates = (
   position: TabPosition,
+  windowId: number,
   tabId: number,
   tabIndex: number,
   lastActiveTabId: number | null,
 ) => {
-  const newIndex = getNewIndex(position, lastActiveTabId, tabIndex);
+  const newIndex = getNewIndex(position, windowId, lastActiveTabId, tabIndex);
   if (newIndex !== tabIndex) {
-    moveTabInSnapshot(tabId, newIndex);
+    moveTabInSnapshot(windowId, tabId, newIndex);
     void chrome.tabs.move(tabId, { index: newIndex });
   }
 };
@@ -48,7 +50,12 @@ const positionTabAndUpdateStates = (
 /**
  * 設定を元に新規タブのあるべき位置を計算して返す
  */
-const getNewIndex = (position: TabPosition, lastActiveTabId: number | null, index: number) => {
+const getNewIndex = (
+  position: TabPosition,
+  windowId: number,
+  lastActiveTabId: number | null,
+  index: number,
+) => {
   // セッション復元によるタブかチェック
   const isSessionRestore = isSessionRestoreTab();
   if (isSessionRestore) {
@@ -64,6 +71,6 @@ const getNewIndex = (position: TabPosition, lastActiveTabId: number | null, inde
   if (lastActiveTabId === null) {
     return index;
   }
-  const tabs = getTabSnapshot();
+  const tabs = getTabSnapshot(windowId);
   return calculateNewTabIndex(position, tabs, lastActiveTabId) ?? index;
 };

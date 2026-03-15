@@ -7,51 +7,84 @@ import {
 } from "@/src/tabs/state/activeTransition";
 import {
   getActiveTabSnapshot,
+  getStoredTabSnapshot,
   getTabSnapshot,
   getTabSnapshotById,
   removeTabFromSnapshot,
   setActiveTabInSnapshot,
 } from "@/src/tabs/state/tabSnapshot";
-import { cleanupTabData, determineNextActiveTab } from "@/src/tabs/tabClosing";
+import {
+  cleanupTabData,
+  determineNextActiveTab,
+  determineNextActiveTabWithoutClosedTab,
+} from "@/src/tabs/tabClosing";
 
 export const handleTabRemoved = async (
   tabId: number,
-  _removeInfo: { windowId: number; isWindowClosing: boolean },
+  removeInfo: { windowId: number; isWindowClosing: boolean },
 ) => {
-  if (needsInitialization()) {
+  const shouldInitialize = needsInitialization();
+  if (shouldInitialize) {
     await initializeAllStates();
   }
 
+  const windowId = removeInfo.windowId;
   const settings = getSettings();
-  const tabs = getTabSnapshot();
-  const closedTab = getTabSnapshotById(tabId);
-  const activeTransition = getRecentActiveTransition();
-  const currentActiveTab = getActiveTabSnapshot();
+  const tabs = getTabSnapshot(windowId);
+  const closedTab = getTabSnapshotById(windowId, tabId);
+  const storedTabs =
+    shouldInitialize && closedTab === null ? await getStoredTabSnapshot(windowId) : [];
+  const tabsBeforeRemoval = closedTab === null && storedTabs.length > 0 ? storedTabs : tabs;
+  const closedTabBeforeRemoval = closedTab ?? storedTabs.find(tab => tab.id === tabId) ?? null;
+  const activeTransition = getRecentActiveTransition(windowId);
+  const currentActiveTab = getActiveTabSnapshot(windowId);
   const isClosedActiveTab =
-    closedTab?.active === true ||
+    closedTabBeforeRemoval?.active === true ||
     (activeTransition?.fromTabId === tabId && currentActiveTab?.id === activeTransition.toTabId);
   const activationHistory =
-    activeTransition?.fromTabId === tabId ? activeTransition.historyBefore : getActivationHistory();
+    activeTransition?.fromTabId === tabId
+      ? activeTransition.historyBefore
+      : getActivationHistory(windowId);
+  const shouldHandleMissingClosedTab =
+    closedTabBeforeRemoval === null &&
+    activationHistory.at(-1) === tabId &&
+    settings.afterTabClosing.activateTab !== "default";
 
   const nextActiveTabId =
-    closedTab && isClosedActiveTab && settings.afterTabClosing.activateTab !== "default"
+    closedTabBeforeRemoval &&
+    isClosedActiveTab &&
+    settings.afterTabClosing.activateTab !== "default"
       ? determineNextActiveTab(
-          closedTab,
+          closedTabBeforeRemoval,
           settings.afterTabClosing.activateTab,
-          tabs,
+          tabsBeforeRemoval,
           activationHistory,
         )
-      : null;
+      : shouldHandleMissingClosedTab
+        ? determineNextActiveTabWithoutClosedTab(
+            tabId,
+            settings.afterTabClosing.activateTab,
+            tabsBeforeRemoval,
+            activationHistory,
+          )
+        : null;
 
-  cleanupTabData(tabId);
-  removeTabFromSnapshot(tabId);
+  cleanupTabData(windowId, tabId);
+  removeTabFromSnapshot(windowId, tabId);
 
   if (nextActiveTabId !== null) {
-    setActiveTabInSnapshot(nextActiveTabId);
-    void chrome.tabs.update(nextActiveTabId, { active: true });
+    if (shouldInitialize) {
+      setTimeout(() => {
+        setActiveTabInSnapshot(windowId, nextActiveTabId);
+        void chrome.tabs.update(nextActiveTabId, { active: true });
+      }, 0);
+    } else {
+      setActiveTabInSnapshot(windowId, nextActiveTabId);
+      void chrome.tabs.update(nextActiveTabId, { active: true });
+    }
   }
 
   if (activeTransition?.fromTabId === tabId || activeTransition?.toTabId === tabId) {
-    clearActiveTransition();
+    clearActiveTransition(windowId);
   }
 };

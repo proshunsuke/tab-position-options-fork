@@ -2,6 +2,13 @@ import type { BrowserContext, Worker } from "@playwright/test";
 import type { Settings } from "@/src/types";
 import { DEFAULT_SETTINGS } from "@/src/types";
 
+type WindowTabState = {
+  windowId: number;
+  totalTabs: number;
+  activeTabIndex: number;
+  activeTabId: number | null;
+};
+
 type ServiceWorkerLikeGlobal = WorkerGlobalScope & {
   registration: {
     active: ServiceWorker | null;
@@ -68,6 +75,134 @@ export const getTabState = async (serviceWorker: Worker) =>
       activeTabIndex: activeTab?.index ?? -1,
     };
   });
+
+export const getCurrentWindowId = async (serviceWorker: Worker) =>
+  serviceWorker.evaluate(async () => {
+    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    return activeTab?.windowId ?? null;
+  });
+
+export const getWindowTabState = async (serviceWorker: Worker, windowId: number) =>
+  serviceWorker.evaluate(async windowId => {
+    const tabs = (await chrome.tabs.query({ windowId })).sort(
+      (left, right) => left.index - right.index,
+    );
+    const activeTab = tabs.find(tab => tab.active);
+
+    return {
+      windowId,
+      totalTabs: tabs.length,
+      activeTabIndex: activeTab?.index ?? -1,
+      activeTabId: activeTab?.id ?? null,
+    } satisfies WindowTabState;
+  }, windowId);
+
+export const createTabsInWindow = async (serviceWorker: Worker, windowId: number, count: number) =>
+  serviceWorker.evaluate(
+    async ({ windowId, count }) => {
+      const createdTabIds: number[] = [];
+
+      for (let index = 0; index < count; index++) {
+        const tab = await chrome.tabs.create({
+          windowId,
+          url: "about:blank",
+          active: false,
+        });
+
+        if (tab.id) {
+          createdTabIds.push(tab.id);
+        }
+      }
+
+      return createdTabIds;
+    },
+    { windowId, count },
+  );
+
+export const createWindowWithTabs = async (serviceWorker: Worker, totalTabs: number) =>
+  serviceWorker.evaluate(async totalTabs => {
+    const createdWindow = await chrome.windows.create({
+      url: "about:blank",
+      focused: false,
+    });
+
+    if (!createdWindow?.id) {
+      throw new Error("Failed to create browser window");
+    }
+
+    for (let index = 1; index < totalTabs; index++) {
+      await chrome.tabs.create({
+        windowId: createdWindow.id,
+        url: "about:blank",
+        active: false,
+      });
+    }
+
+    return {
+      windowId: createdWindow.id,
+    };
+  }, totalTabs);
+
+export const activateTabByIndexInWindow = async (
+  serviceWorker: Worker,
+  windowId: number,
+  tabIndex: number,
+) =>
+  serviceWorker.evaluate(
+    async ({ windowId, tabIndex }) => {
+      const tabs = (await chrome.tabs.query({ windowId })).sort(
+        (left, right) => left.index - right.index,
+      );
+      const targetTab = tabs.find(tab => tab.index === tabIndex);
+
+      if (!targetTab?.id) {
+        throw new Error(`Tab not found: windowId=${windowId}, tabIndex=${tabIndex}`);
+      }
+
+      await chrome.tabs.update(targetTab.id, { active: true });
+      return targetTab.id;
+    },
+    { windowId, tabIndex },
+  );
+
+export const createTabInWindow = async (
+  serviceWorker: Worker,
+  windowId: number,
+  options: {
+    active?: boolean;
+    useActiveTabAsOpener?: boolean;
+  } = {},
+) =>
+  serviceWorker.evaluate(
+    async ({ windowId, options }) => {
+      const tabs = await chrome.tabs.query({ windowId });
+      const activeTab = tabs.find(tab => tab.active);
+      const newTab = await chrome.tabs.create({
+        windowId,
+        url: "about:blank",
+        active: options.active ?? true,
+        openerTabId: options.useActiveTabAsOpener ? activeTab?.id : undefined,
+      });
+
+      return {
+        newTabId: newTab.id ?? null,
+        newTabIndex: newTab.index,
+        openerTabId: newTab.openerTabId,
+        windowId: newTab.windowId,
+      };
+    },
+    { windowId, options },
+  );
+
+export const closeActiveTabInWindow = async (serviceWorker: Worker, windowId: number) =>
+  serviceWorker.evaluate(async windowId => {
+    const [activeTab] = await chrome.tabs.query({ active: true, windowId });
+    if (activeTab?.id) {
+      await chrome.tabs.remove(activeTab.id);
+      return true;
+    }
+    return false;
+  }, windowId);
 
 /**
  * Service Worker経由で新しいタブを作成する
