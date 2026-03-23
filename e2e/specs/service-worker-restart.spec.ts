@@ -1,7 +1,12 @@
 import { expect, test } from "@/e2e/fixtures";
 import {
+  activateTabByIndexInWindow,
   clearExtensionStorage,
   closeActiveTabViaServiceWorker,
+  createTabInWindow,
+  createTabsInWindow,
+  getCurrentWindowId,
+  getCurrentWindowTabs,
   getMemoryCacheState,
   getTabState,
   setExtensionSettings,
@@ -249,5 +254,153 @@ test.describe("Service Worker Restart Handling", () => {
       const state = await getTabState(serviceWorker);
       expect(state.activeTabIndex).toBe(initialTabCount + 2); // Tab5の新しいインデックス
     }).toPass({ timeout: 5000 });
+  });
+
+  test("should restore live tab order instead of stale session snapshot after Service Worker restart", async ({
+    context,
+    serviceWorker,
+  }) => {
+    const windowId = await getCurrentWindowId(serviceWorker);
+    if (windowId === null) {
+      throw new Error("Current window not found");
+    }
+
+    await createTabsInWindow(serviceWorker, windowId, 3);
+    await activateTabByIndexInWindow(serviceWorker, windowId, 1);
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    await setExtensionSettings(context, {
+      newTab: { position: "right", openInBackground: false },
+    });
+
+    const beforeTabs = await getCurrentWindowTabs(serviceWorker);
+    expect(beforeTabs).toHaveLength(4);
+
+    const activeTabIndex = beforeTabs.findIndex(tab => tab.active);
+    expect(activeTabIndex).toBe(1);
+
+    const activeTab = beforeTabs[activeTabIndex];
+    const staleSnapshot = [
+      beforeTabs[0],
+      {
+        id: 999_999_001,
+        index: 1,
+        active: false,
+      },
+      ...beforeTabs.slice(1).map(tab => ({
+        ...tab,
+        index: tab.index + 1,
+      })),
+    ];
+
+    await serviceWorker.evaluate(
+      async ({ windowId, staleSnapshot, activeTabId }) => {
+        await chrome.storage.session.set({
+          tabSnapshot: {
+            [String(windowId)]: staleSnapshot,
+          },
+          tabActivationHistory: {
+            [String(windowId)]: [activeTabId],
+          },
+        });
+      },
+      {
+        windowId,
+        staleSnapshot,
+        activeTabId: activeTab.id,
+      },
+    );
+
+    await simulateServiceWorkerRestart(serviceWorker);
+
+    const createdTab = await createTabInWindow(serviceWorker, windowId, {
+      active: true,
+      useActiveTabAsOpener: true,
+    });
+
+    const expectedTabIds = [
+      ...beforeTabs.slice(0, activeTabIndex + 1).map(tab => tab.id),
+      createdTab.newTabId!,
+      ...beforeTabs.slice(activeTabIndex + 1).map(tab => tab.id),
+    ];
+
+    await expect(async () => {
+      const tabs = await getCurrentWindowTabs(serviceWorker);
+      expect(tabs.map(tab => tab.id)).toEqual(expectedTabIds);
+      expect(tabs.findIndex(tab => tab.active)).toBe(activeTabIndex + 1);
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+  });
+
+  test("should normalize activation history to the live active tab after Service Worker restart", async ({
+    context,
+    serviceWorker,
+  }) => {
+    const windowId = await getCurrentWindowId(serviceWorker);
+    if (windowId === null) {
+      throw new Error("Current window not found");
+    }
+
+    await createTabsInWindow(serviceWorker, windowId, 3);
+    await activateTabByIndexInWindow(serviceWorker, windowId, 1);
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    await setExtensionSettings(context, {
+      newTab: { position: "right", openInBackground: false },
+    });
+
+    const beforeTabs = await getCurrentWindowTabs(serviceWorker);
+    expect(beforeTabs).toHaveLength(4);
+
+    const activeTabIndex = beforeTabs.findIndex(tab => tab.active);
+    expect(activeTabIndex).toBe(1);
+
+    const activeTab = beforeTabs[activeTabIndex];
+    const staleHistoryTab = beforeTabs.at(-1);
+    if (!staleHistoryTab?.id) {
+      throw new Error("Stale history tab not found");
+    }
+
+    await serviceWorker.evaluate(
+      async ({ windowId, tabs, staleHistoryTabId }) => {
+        await chrome.storage.session.set({
+          tabSnapshot: {
+            [String(windowId)]: tabs,
+          },
+          tabActivationHistory: {
+            [String(windowId)]: [staleHistoryTabId],
+          },
+        });
+      },
+      {
+        windowId,
+        tabs: beforeTabs,
+        staleHistoryTabId: staleHistoryTab.id,
+      },
+    );
+
+    await simulateServiceWorkerRestart(serviceWorker);
+
+    const createdTab = await createTabInWindow(serviceWorker, windowId, {
+      active: true,
+    });
+
+    const expectedTabIds = [
+      ...beforeTabs.slice(0, activeTabIndex + 1).map(tab => tab.id),
+      createdTab.newTabId!,
+      ...beforeTabs.slice(activeTabIndex + 1).map(tab => tab.id),
+    ];
+
+    await expect(async () => {
+      const tabs = await getCurrentWindowTabs(serviceWorker);
+      expect(tabs.map(tab => tab.id)).toEqual(expectedTabIds);
+      expect(tabs.findIndex(tab => tab.active)).toBe(activeTabIndex + 1);
+      expect(tabs[activeTabIndex]?.id).toBe(activeTab.id);
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
   });
 });

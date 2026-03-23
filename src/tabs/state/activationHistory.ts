@@ -11,6 +11,7 @@ const MAX_HISTORY_SIZE = 50;
  * グローバルメモリ状態として管理
  */
 let tabActivationHistoryState: Record<string, number[]> = {};
+let restoredActivationHistoryState: Record<string, number[]> = {};
 let pendingStorageWrite = Promise.resolve();
 
 const getWindowKey = (windowId: number) => {
@@ -43,6 +44,7 @@ export const initializeActivationHistory = async () => {
   ]);
 
   const savedHistory = result.tabActivationHistory ?? {};
+  restoredActivationHistoryState = savedHistory;
   const availableTabIdsByWindow = new Map<number, Set<number>>();
   const activeTabIdsByWindow = new Map<number, number>();
 
@@ -69,12 +71,13 @@ export const initializeActivationHistory = async () => {
         );
         const activeTabId = activeTabIdsByWindow.get(windowId);
 
-        if (filteredHistory.length > 0) {
-          return [windowKey, filteredHistory];
-        }
+        const normalizedHistory =
+          activeTabId === undefined
+            ? filteredHistory
+            : [...filteredHistory.filter(tabId => tabId !== activeTabId), activeTabId];
 
-        if (activeTabId) {
-          return [windowKey, [activeTabId]];
+        if (normalizedHistory.length > 0) {
+          return [windowKey, normalizedHistory];
         }
 
         return null;
@@ -139,6 +142,10 @@ export const getActivationHistory = (windowId: number) => {
   return [...(getState()[getWindowKey(windowId)] ?? [])];
 };
 
+export const getRestoredActivationHistory = (windowId: number) => {
+  return [...(restoredActivationHistoryState[getWindowKey(windowId)] ?? [])];
+};
+
 /**
  * アクティベーション履歴から利用可能なタブを検索
  */
@@ -174,5 +181,6 @@ export const cleanupActivationHistory = (windowId: number, tabId: number) => {
  */
 export const resetActivationHistory = () => {
   tabActivationHistoryState = {};
+  restoredActivationHistoryState = {};
   pendingStorageWrite = Promise.resolve();
 };

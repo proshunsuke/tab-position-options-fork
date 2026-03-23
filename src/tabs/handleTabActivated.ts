@@ -1,8 +1,17 @@
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
-import { getActivationHistory, recordTabActivation } from "@/src/tabs/state/activationHistory";
+import {
+  getActivationHistory,
+  getRestoredActivationHistory,
+  recordTabActivation,
+} from "@/src/tabs/state/activationHistory";
 import { recordNewTabSourceTransition } from "@/src/tabs/state/newTabSourceTransition";
 import { recordPendingCloseTransition } from "@/src/tabs/state/pendingCloseTransition";
-import { getActiveTabSnapshot, setActiveTabInSnapshot } from "@/src/tabs/state/tabSnapshot";
+import {
+  getActiveTabSnapshot,
+  getRestoredTabSnapshot,
+  refreshWindowTabSnapshot,
+  setActiveTabInSnapshot,
+} from "@/src/tabs/state/tabSnapshot";
 
 const INITIALIZATION_NEW_TAB_SOURCE_TRANSITION_WINDOW_MS = 1000;
 
@@ -13,8 +22,22 @@ export const handleTabActivated = async (activeInfo: { tabId: number; windowId: 
   }
 
   const activationHistory = getActivationHistory(activeInfo.windowId);
-  const previousActiveTabId =
-    getActiveTabSnapshot(activeInfo.windowId)?.id ?? activationHistory.at(-1) ?? null;
+  const storedActivationHistory = shouldInitialize
+    ? getRestoredActivationHistory(activeInfo.windowId)
+    : [];
+  const previousActiveTabId = shouldInitialize
+    ? getPreviousActiveTabIdOnInitialization(
+        activeInfo.windowId,
+        activeInfo.tabId,
+        activationHistory,
+        storedActivationHistory,
+      )
+    : (getActiveTabSnapshot(activeInfo.windowId)?.id ?? activationHistory.at(-1) ?? null);
+  const transitionHistory =
+    shouldInitialize && storedActivationHistory.length > 0
+      ? storedActivationHistory
+      : activationHistory;
+
   recordNewTabSourceTransition(
     activeInfo.windowId,
     previousActiveTabId,
@@ -25,8 +48,39 @@ export const handleTabActivated = async (activeInfo: { tabId: number; windowId: 
     activeInfo.windowId,
     previousActiveTabId,
     activeInfo.tabId,
-    activationHistory,
+    transitionHistory,
   );
   setActiveTabInSnapshot(activeInfo.windowId, activeInfo.tabId);
   recordTabActivation(activeInfo.windowId, activeInfo.tabId);
+  void refreshWindowTabSnapshot(activeInfo.windowId);
+};
+
+const getPreviousActiveTabIdOnInitialization = (
+  windowId: number,
+  activatedTabId: number,
+  activationHistory: number[],
+  storedActivationHistory: number[],
+) => {
+  const storedTabs = getRestoredTabSnapshot(windowId);
+  const storedActiveTabId = storedTabs.find(tab => tab.active)?.id ?? null;
+  if (storedActiveTabId !== null && storedActiveTabId !== activatedTabId) {
+    return storedActiveTabId;
+  }
+
+  const historyLastTabId = activationHistory.at(-1) ?? null;
+  if (historyLastTabId !== null && historyLastTabId !== activatedTabId) {
+    return historyLastTabId;
+  }
+
+  const liveActiveTabId = getActiveTabSnapshot(windowId)?.id ?? null;
+  if (liveActiveTabId !== null && liveActiveTabId !== activatedTabId) {
+    return liveActiveTabId;
+  }
+
+  const storedHistoryLastTabId = storedActivationHistory.at(-1) ?? null;
+  if (storedHistoryLastTabId !== null && storedHistoryLastTabId !== activatedTabId) {
+    return storedHistoryLastTabId;
+  }
+
+  return liveActiveTabId ?? historyLastTabId ?? storedHistoryLastTabId;
 };
