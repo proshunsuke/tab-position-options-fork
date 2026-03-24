@@ -358,23 +358,10 @@ test.describe("Service Worker Restart Handling", () => {
     expect(activeTabIndex).toBe(1);
 
     const activeTab = beforeTabs[activeTabIndex];
-    const staleSnapshot = beforeTabs.map((tab, index) => {
-      if (index === activeTabIndex) {
-        return {
-          ...tab,
-          active: false,
-        };
-      }
-
-      if (index === beforeTabs.length - 1) {
-        return {
-          ...tab,
-          active: true,
-        };
-      }
-
-      return tab;
-    });
+    const staleSnapshot = beforeTabs.map((tab, index) => ({
+      ...tab,
+      active: index === beforeTabs.length - 1,
+    }));
 
     await serviceWorker.evaluate(
       async ({ windowId, staleSnapshot, activeTabId }) => {
