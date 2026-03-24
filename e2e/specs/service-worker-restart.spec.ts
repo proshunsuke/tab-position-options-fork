@@ -47,7 +47,7 @@ test.describe("Service Worker Restart Handling", () => {
 
     // 左タブアクティベーション設定
     await setExtensionSettings(context, {
-      afterTabClosing: { activateTab: "first" },
+      afterTabClosing: { activateTab: "left" },
     });
 
     // 初期状態を確認
