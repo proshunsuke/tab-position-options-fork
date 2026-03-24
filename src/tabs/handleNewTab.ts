@@ -98,8 +98,9 @@ const getSourceTabId = (windowId: number, tab: chrome.tabs.Tab, shouldInitialize
   }
 
   if (shouldInitialize) {
+    const liveTabIds = new Set(getTabSnapshot(windowId).map(snapshot => snapshot.id));
     const restoredActiveTabId = getRestoredTabSnapshot(windowId).find(
-      snapshot => snapshot.active,
+      snapshot => snapshot.active && liveTabIds.has(snapshot.id),
     )?.id;
     if (restoredActiveTabId !== undefined && restoredActiveTabId !== tab.id) {
       return restoredActiveTabId;

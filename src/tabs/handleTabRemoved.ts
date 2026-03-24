@@ -158,8 +158,8 @@ const isClosedActiveTabOnInitialization = (
   }
 
   const storedHistoryLastTabId = storedHistoryBeforeRemoval.at(-1) ?? null;
-  if (storedHistoryLastTabId !== null) {
-    return storedHistoryLastTabId === removedTabId;
+  if (storedHistoryLastTabId === removedTabId) {
+    return true;
   }
 
   return getStoredActiveTabId(tabsBeforeRemoval) === removedTabId;

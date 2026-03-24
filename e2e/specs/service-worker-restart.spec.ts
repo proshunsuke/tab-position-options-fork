@@ -12,6 +12,7 @@ import {
   getMemoryCacheState,
   getServiceWorkerUnhandledRejections,
   getTabState,
+  getWindowTabState,
   resetServiceWorkerTabQueryCalls,
   resetServiceWorkerUnhandledRejections,
   setExtensionSettings,
@@ -473,6 +474,101 @@ test.describe("Service Worker Restart Handling", () => {
     });
   });
 
+  test("should ignore restored source tabs that are no longer in the live window after Service Worker restart", async ({
+    context,
+    serviceWorker,
+  }) => {
+    const currentWindowId = await getCurrentWindowId(serviceWorker);
+    expect(currentWindowId).not.toBeNull();
+
+    await createTabsInWindow(serviceWorker, currentWindowId!, 3);
+    await activateTabByIndexInWindow(serviceWorker, currentWindowId!, 1);
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const secondaryWindow = await serviceWorker.evaluate(async () => {
+      const createdWindow = await chrome.windows.create({
+        url: "about:blank",
+        focused: false,
+      });
+
+      if (!createdWindow?.id) {
+        throw new Error("Failed to create browser window");
+      }
+
+      await chrome.tabs.create({
+        windowId: createdWindow.id,
+        url: "about:blank",
+        active: false,
+      });
+
+      const tabs = (await chrome.tabs.query({ windowId: createdWindow.id })).sort(
+        (left, right) => left.index - right.index,
+      );
+
+      const foreignActiveTab = tabs[0];
+      const currentActiveTab = tabs[1];
+
+      await chrome.tabs.update(currentActiveTab.id!, { active: true });
+
+      return {
+        windowId: createdWindow.id,
+        foreignActiveTabId: foreignActiveTab.id!,
+        expectedActiveTabId: currentActiveTab.id!,
+      };
+    });
+
+    await setExtensionSettings(context, {
+      newTab: { position: "right", openInBackground: true },
+    });
+
+    const beforeTabs = await getCurrentWindowTabs(serviceWorker);
+    const activeTabIndex = beforeTabs.findIndex(tab => tab.active);
+    expect(activeTabIndex).toBe(1);
+
+    const staleSnapshot = [
+      ...beforeTabs.map(tab => ({
+        ...tab,
+        active: false,
+      })),
+      {
+        id: secondaryWindow.foreignActiveTabId,
+        index: beforeTabs.length,
+        active: true,
+      },
+    ];
+
+    await serviceWorker.evaluate(
+      async ({ windowId, staleSnapshot }) => {
+        await chrome.storage.session.set({
+          tabSnapshot: {
+            [String(windowId)]: staleSnapshot,
+          },
+          tabActivationHistory: {
+            [String(windowId)]: [],
+          },
+        });
+      },
+      {
+        windowId: currentWindowId!,
+        staleSnapshot,
+      },
+    );
+
+    await simulateServiceWorkerRestart(serviceWorker);
+
+    await createTabInWindow(serviceWorker, currentWindowId!, {
+      active: true,
+    });
+
+    await expect(async () => {
+      const secondaryWindowState = await getWindowTabState(serviceWorker, secondaryWindow.windowId);
+      expect(secondaryWindowState.activeTabId).toBe(secondaryWindow.expectedActiveTabId);
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+  });
+
   test("should use restored activation history before restored snapshot when the first post-restart activation creates a source transition", async ({
     context,
     serviceWorker,
@@ -523,6 +619,59 @@ test.describe("Service Worker Restart Handling", () => {
       const state = await getTabState(serviceWorker);
       expect(state.totalTabs).toBe(beforeState.totalTabs + 1);
       expect(state.activeTabIndex).toBe(activeTabIndex + 1);
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+  });
+
+  test("should fall back to restored snapshot active tab when restored history mismatches on the first post-restart active-tab close", async ({
+    context,
+    serviceWorker,
+  }) => {
+    const windowId = await getCurrentWindowId(serviceWorker);
+    expect(windowId).not.toBeNull();
+
+    await createTabsInWindow(serviceWorker, windowId!, 3);
+    await activateTabByIndexInWindow(serviceWorker, windowId!, 1);
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    await setExtensionSettings(context, {
+      afterTabClosing: { activateTab: "left" },
+    });
+
+    const beforeState = await getTabState(serviceWorker);
+    const beforeTabs = await getCurrentWindowTabs(serviceWorker);
+    const activeTabIndex = beforeTabs.findIndex(tab => tab.active);
+    expect(activeTabIndex).toBe(1);
+
+    const staleHistoryTailTabId = beforeTabs[activeTabIndex + 1]!.id;
+
+    await serviceWorker.evaluate(
+      async ({ windowId, tabsBeforeRemoval, staleHistoryTailTabId }) => {
+        await chrome.storage.session.set({
+          tabSnapshot: {
+            [String(windowId)]: tabsBeforeRemoval,
+          },
+          tabActivationHistory: {
+            [String(windowId)]: [staleHistoryTailTabId],
+          },
+        });
+      },
+      {
+        windowId: windowId!,
+        tabsBeforeRemoval: beforeTabs,
+        staleHistoryTailTabId,
+      },
+    );
+
+    await simulateServiceWorkerRestart(serviceWorker);
+    await closeActiveTabWithoutActivatedHandler(serviceWorker);
+
+    await expect(async () => {
+      const state = await getTabState(serviceWorker);
+      expect(state.totalTabs).toBe(beforeState.totalTabs - 1);
+      expect(state.activeTabIndex).toBe(activeTabIndex - 1);
     }).toPass({
       intervals: [100, 100, 100],
       timeout: 5000,
