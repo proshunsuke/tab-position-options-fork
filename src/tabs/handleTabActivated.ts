@@ -34,9 +34,14 @@ export const handleTabActivated = async (activeInfo: { tabId: number; windowId: 
         storedActivationHistory,
       )
     : (getActiveTabSnapshot(activeInfo.windowId)?.id ?? activationHistory.at(-1) ?? null);
+  const availableTabIds = new Set(getTabSnapshot(activeInfo.windowId).map(tab => tab.id));
+  const relevantStoredActivationHistory = getRelevantHistory(
+    storedActivationHistory,
+    availableTabIds,
+  );
   const transitionHistory =
-    shouldInitialize && storedActivationHistory.length > 0
-      ? storedActivationHistory
+    shouldInitialize && relevantStoredActivationHistory.length > 0
+      ? relevantStoredActivationHistory
       : activationHistory;
 
   recordNewTabSourceTransition(
@@ -94,6 +99,10 @@ const getPreviousActiveTabIdOnInitialization = (
   }
 
   return storedActiveTabId ?? historyLastTabId ?? liveActiveTabId;
+};
+
+const getRelevantHistory = (history: number[], availableTabIds: Set<number>) => {
+  return history.filter(tabId => availableTabIds.has(tabId));
 };
 
 const getPreviousTabIdFromHistory = (

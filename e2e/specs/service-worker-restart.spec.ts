@@ -47,7 +47,7 @@ test.describe("Service Worker Restart Handling", () => {
 
     // 左タブアクティベーション設定
     await setExtensionSettings(context, {
-      afterTabClosing: { activateTab: "left" },
+      afterTabClosing: { activateTab: "first" },
     });
 
     // 初期状態を確認
@@ -672,6 +672,96 @@ test.describe("Service Worker Restart Handling", () => {
 
     await simulateServiceWorkerRestart(serviceWorker);
     await closeActiveTabWithoutActivatedHandler(serviceWorker);
+
+    await expect(async () => {
+      const state = await getTabState(serviceWorker);
+      expect(state.totalTabs).toBe(beforeState.totalTabs - 1);
+      expect(state.activeTabIndex).toBe(activeTabIndex - 1);
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+  });
+
+  test("should ignore stale restored activation history tails when reconstructing close transitions after Service Worker restart", async ({
+    context,
+    serviceWorker,
+  }) => {
+    const windowId = await getCurrentWindowId(serviceWorker);
+    expect(windowId).not.toBeNull();
+
+    await createTabsInWindow(serviceWorker, windowId!, 3);
+    await activateTabByIndexInWindow(serviceWorker, windowId!, 1);
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    await setExtensionSettings(context, {
+      afterTabClosing: { activateTab: "left" },
+    });
+
+    const beforeState = await getTabState(serviceWorker);
+    const beforeTabs = await getCurrentWindowTabs(serviceWorker);
+    const activeTabIndex = beforeTabs.findIndex(tab => tab.active);
+    expect(activeTabIndex).toBe(1);
+
+    const removedTabId = beforeTabs[activeTabIndex]!.id;
+    const successorTabId = beforeTabs[activeTabIndex + 1]!.id;
+    const staleClosedTab = await createTabInWindow(serviceWorker, windowId!, {
+      active: false,
+    });
+    await serviceWorker.evaluate(async tabId => {
+      await chrome.tabs.remove(tabId);
+    }, staleClosedTab.newTabId!);
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    await serviceWorker.evaluate(
+      async ({ windowId, removedTabId, staleClosedTabId }) => {
+        await chrome.storage.session.set({
+          tabActivationHistory: {
+            [String(windowId)]: [removedTabId, staleClosedTabId],
+          },
+        });
+      },
+      {
+        windowId: windowId!,
+        removedTabId,
+        staleClosedTabId: staleClosedTab.newTabId!,
+      },
+    );
+
+    await simulateServiceWorkerRestart(serviceWorker);
+
+    await serviceWorker.evaluate(
+      async ({ windowId, removedTabId, successorTabId }) => {
+        const { handleTabActivated, handleTabRemoved, onActivated, onRemoved } =
+          globalThis.__testExports!.tabHandlers;
+
+        onActivated.removeListener(handleTabActivated);
+        onRemoved.removeListener(handleTabRemoved);
+
+        try {
+          await chrome.tabs.update(successorTabId, { active: true });
+          await handleTabActivated({
+            tabId: successorTabId,
+            windowId,
+          });
+          globalThis.__testExports!.states.removeTabFromSnapshot(windowId, removedTabId);
+          await chrome.tabs.remove(removedTabId);
+          await handleTabRemoved(removedTabId, {
+            windowId,
+            isWindowClosing: false,
+          });
+          await new Promise(resolve => setTimeout(resolve, 100));
+        } finally {
+          onActivated.addListener(handleTabActivated);
+          onRemoved.addListener(handleTabRemoved);
+        }
+      },
+      {
+        windowId: windowId!,
+        removedTabId,
+        successorTabId,
+      },
+    );
 
     await expect(async () => {
       const state = await getTabState(serviceWorker);

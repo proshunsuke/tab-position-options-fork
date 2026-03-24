@@ -16,8 +16,13 @@ declare global {
     tabHandlers: {
       handleNewTab: (tab: chrome.tabs.Tab) => Promise<void>;
       handleTabActivated: (activeInfo: { tabId: number; windowId: number }) => Promise<void>;
+      handleTabRemoved: (
+        tabId: number,
+        removeInfo: { windowId: number; isWindowClosing: boolean },
+      ) => Promise<void>;
       onCreated: typeof chrome.tabs.onCreated;
       onActivated: typeof chrome.tabs.onActivated;
+      onRemoved: typeof chrome.tabs.onRemoved;
     };
 
     /**
@@ -39,6 +44,7 @@ declare global {
       resetNewTabSourceTransition: () => void;
       resetPendingCloseTransition: () => void;
       resetTabSnapshotState: () => void;
+      removeTabFromSnapshot: (windowId: number, tabId: number) => unknown;
       resetAppDataState: () => void;
       resetInitializationState: () => void;
       getInitializationState: () => boolean;
