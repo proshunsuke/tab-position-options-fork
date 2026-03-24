@@ -19,6 +19,10 @@ type CurrentWindowTab = {
 type TestServiceWorkerQueryState = {
   __testTabQueryCalls?: chrome.tabs.QueryInfo[];
   __testOriginalTabsQuery?: typeof chrome.tabs.query;
+  __testFailingTabQueryWindowId?: number | null;
+  __testFailingTabQueryMessage?: string | null;
+  __testUnhandledRejections?: string[];
+  __testUnhandledRejectionListenerInstalled?: boolean;
 };
 
 type ServiceWorkerLikeGlobal = WorkerGlobalScope & {
@@ -417,11 +421,20 @@ export const resetServiceWorkerTabQueryCalls = async (serviceWorker: Worker) =>
   serviceWorker.evaluate(() => {
     const workerGlobal = globalThis as typeof globalThis & TestServiceWorkerQueryState;
     workerGlobal.__testTabQueryCalls = [];
+    workerGlobal.__testFailingTabQueryWindowId = null;
+    workerGlobal.__testFailingTabQueryMessage = null;
 
     if (!workerGlobal.__testOriginalTabsQuery) {
       workerGlobal.__testOriginalTabsQuery = chrome.tabs.query.bind(chrome.tabs);
       chrome.tabs.query = (async queryInfo => {
         workerGlobal.__testTabQueryCalls?.push(queryInfo ?? {});
+        if (
+          workerGlobal.__testFailingTabQueryWindowId !== null &&
+          workerGlobal.__testFailingTabQueryWindowId !== undefined &&
+          queryInfo?.windowId === workerGlobal.__testFailingTabQueryWindowId
+        ) {
+          throw new Error(workerGlobal.__testFailingTabQueryMessage ?? "Injected tabs.query error");
+        }
         return workerGlobal.__testOriginalTabsQuery!(queryInfo);
       }) as typeof chrome.tabs.query;
     }
@@ -432,3 +445,46 @@ export const getServiceWorkerTabQueryCalls = async (serviceWorker: Worker) =>
     const workerGlobal = globalThis as typeof globalThis & TestServiceWorkerQueryState;
     return [...(workerGlobal.__testTabQueryCalls ?? [])];
   });
+
+export const resetServiceWorkerUnhandledRejections = async (serviceWorker: Worker) =>
+  serviceWorker.evaluate(() => {
+    const workerGlobal = globalThis as typeof globalThis & TestServiceWorkerQueryState;
+    workerGlobal.__testUnhandledRejections = [];
+
+    if (!workerGlobal.__testUnhandledRejectionListenerInstalled) {
+      self.addEventListener("unhandledrejection", event => {
+        event.preventDefault();
+
+        const reason =
+          event.reason instanceof Error
+            ? event.reason.message
+            : typeof event.reason === "string"
+              ? event.reason
+              : JSON.stringify(event.reason);
+
+        workerGlobal.__testUnhandledRejections?.push(reason);
+      });
+
+      workerGlobal.__testUnhandledRejectionListenerInstalled = true;
+    }
+  });
+
+export const getServiceWorkerUnhandledRejections = async (serviceWorker: Worker) =>
+  serviceWorker.evaluate(() => {
+    const workerGlobal = globalThis as typeof globalThis & TestServiceWorkerQueryState;
+    return [...(workerGlobal.__testUnhandledRejections ?? [])];
+  });
+
+export const setServiceWorkerTabQueryFailure = async (
+  serviceWorker: Worker,
+  windowId: number,
+  message: string,
+) =>
+  serviceWorker.evaluate(
+    ({ windowId, message }) => {
+      const workerGlobal = globalThis as typeof globalThis & TestServiceWorkerQueryState;
+      workerGlobal.__testFailingTabQueryWindowId = windowId;
+      workerGlobal.__testFailingTabQueryMessage = message;
+    },
+    { windowId, message },
+  );

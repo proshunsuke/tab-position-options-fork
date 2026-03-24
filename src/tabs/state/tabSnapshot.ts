@@ -121,7 +121,21 @@ export const refreshAllTabSnapshots = async () => {
  */
 export const refreshWindowTabSnapshot = async (windowId: number) => {
   const windowKey = getWindowKey(windowId);
-  const tabs = await chrome.tabs.query({ windowId });
+  const tabs = await chrome.tabs.query({ windowId }).catch(error => {
+    if (isMissingWindowError(error)) {
+      const nextState = {
+        ...tabSnapshotState,
+      };
+      delete nextState[windowKey];
+      setState(nextState);
+    }
+
+    return null;
+  });
+  if (tabs === null) {
+    return;
+  }
+
   const nextWindowTabs = tabs.map(toTabSnapshot).filter((tab): tab is TabSnapshot => tab !== null);
   const nextState = {
     ...tabSnapshotState,
@@ -134,6 +148,10 @@ export const refreshWindowTabSnapshot = async (windowId: number) => {
   }
 
   setState(nextState);
+};
+
+const isMissingWindowError = (error: unknown) => {
+  return error instanceof Error && error.message.includes("No window with id");
 };
 
 /**

@@ -61,14 +61,22 @@ const getPreviousActiveTabIdOnInitialization = (
   activationHistory: number[],
   storedActivationHistory: number[],
 ) => {
+  const storedHistoryLastTabId = getPreviousTabIdFromHistory(
+    storedActivationHistory,
+    activatedTabId,
+  );
+  if (storedHistoryLastTabId !== null) {
+    return storedHistoryLastTabId;
+  }
+
   const storedTabs = getRestoredTabSnapshot(windowId);
   const storedActiveTabId = storedTabs.find(tab => tab.active)?.id ?? null;
   if (storedActiveTabId !== null && storedActiveTabId !== activatedTabId) {
     return storedActiveTabId;
   }
 
-  const historyLastTabId = activationHistory.at(-1) ?? null;
-  if (historyLastTabId !== null && historyLastTabId !== activatedTabId) {
+  const historyLastTabId = getPreviousTabIdFromHistory(activationHistory, activatedTabId);
+  if (historyLastTabId !== null) {
     return historyLastTabId;
   }
 
@@ -77,10 +85,16 @@ const getPreviousActiveTabIdOnInitialization = (
     return liveActiveTabId;
   }
 
-  const storedHistoryLastTabId = storedActivationHistory.at(-1) ?? null;
-  if (storedHistoryLastTabId !== null && storedHistoryLastTabId !== activatedTabId) {
-    return storedHistoryLastTabId;
+  return storedActiveTabId ?? historyLastTabId ?? liveActiveTabId;
+};
+
+const getPreviousTabIdFromHistory = (history: number[], activatedTabId: number) => {
+  for (let index = history.length - 1; index >= 0; index--) {
+    const tabId = history[index];
+    if (tabId !== activatedTabId) {
+      return tabId;
+    }
   }
 
-  return liveActiveTabId ?? historyLastTabId ?? storedHistoryLastTabId;
+  return null;
 };

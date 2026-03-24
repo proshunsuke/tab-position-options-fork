@@ -3,13 +3,18 @@ import {
   activateTabByIndexInWindow,
   clearExtensionStorage,
   closeActiveTabViaServiceWorker,
+  createExternalTabWithRaceCondition,
   createTabInWindow,
   createTabsInWindow,
   getCurrentWindowId,
   getCurrentWindowTabs,
   getMemoryCacheState,
+  getServiceWorkerUnhandledRejections,
   getTabState,
+  resetServiceWorkerTabQueryCalls,
+  resetServiceWorkerUnhandledRejections,
   setExtensionSettings,
+  setServiceWorkerTabQueryFailure,
   simulateServiceWorkerRestart,
 } from "@/e2e/utils/helpers";
 
@@ -461,6 +466,103 @@ test.describe("Service Worker Restart Handling", () => {
       expect(tabs.map(tab => tab.id)).toEqual(expectedTabIds);
       expect(tabs.findIndex(tab => tab.active)).toBe(activeTabIndex + 1);
       expect(tabs[activeTabIndex]?.id).toBe(activeTab.id);
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+  });
+
+  test("should use restored activation history before restored snapshot when the first post-restart activation creates a source transition", async ({
+    context,
+    serviceWorker,
+  }) => {
+    const windowId = await getCurrentWindowId(serviceWorker);
+    expect(windowId).not.toBeNull();
+
+    await createTabsInWindow(serviceWorker, windowId!, 3);
+    await activateTabByIndexInWindow(serviceWorker, windowId!, 1);
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    await setExtensionSettings(context, {
+      newTab: { position: "right", openInBackground: false },
+    });
+
+    const beforeState = await getTabState(serviceWorker);
+    const beforeTabs = await getCurrentWindowTabs(serviceWorker);
+    const activeTabIndex = beforeTabs.findIndex(tab => tab.active);
+    const activeTabId = beforeTabs[activeTabIndex]!.id;
+    const staleSnapshot = beforeTabs.map((tab, index) => ({
+      ...tab,
+      active: index === beforeTabs.length - 1,
+    }));
+
+    await serviceWorker.evaluate(
+      async ({ windowId, staleSnapshot, activeTabId }) => {
+        await chrome.storage.session.set({
+          tabSnapshot: {
+            [String(windowId)]: staleSnapshot,
+          },
+          tabActivationHistory: {
+            [String(windowId)]: [activeTabId],
+          },
+        });
+      },
+      {
+        windowId: windowId!,
+        staleSnapshot,
+        activeTabId,
+      },
+    );
+
+    await simulateServiceWorkerRestart(serviceWorker);
+
+    await createExternalTabWithRaceCondition(serviceWorker);
+
+    await expect(async () => {
+      const state = await getTabState(serviceWorker);
+      expect(state.totalTabs).toBe(beforeState.totalTabs + 1);
+      expect(state.activeTabIndex).toBe(activeTabIndex + 1);
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+  });
+
+  test("should not leak unhandled rejection when refreshWindowTabSnapshot fails after tab activation", async ({
+    context,
+    serviceWorker,
+  }) => {
+    const windowId = await getCurrentWindowId(serviceWorker);
+    expect(windowId).not.toBeNull();
+
+    const tab1 = await context.newPage();
+    await tab1.goto("data:text/html,<h1>Tab 1</h1>");
+
+    const tab2 = await context.newPage();
+    await tab2.goto("data:text/html,<h1>Tab 2</h1>");
+    await tab2.bringToFront();
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    await resetServiceWorkerTabQueryCalls(serviceWorker);
+    await resetServiceWorkerUnhandledRejections(serviceWorker);
+    await setServiceWorkerTabQueryFailure(
+      serviceWorker,
+      windowId!,
+      `No window with id: ${windowId!}.`,
+    );
+
+    await serviceWorker.evaluate(async windowId => {
+      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      await globalThis.__testExports!.tabHandlers.handleTabActivated({
+        tabId: activeTab!.id!,
+        windowId,
+      });
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }, windowId!);
+
+    await expect(async () => {
+      const unhandledRejections = await getServiceWorkerUnhandledRejections(serviceWorker);
+      expect(unhandledRejections).toEqual([]);
     }).toPass({
       intervals: [100, 100, 100],
       timeout: 5000,
