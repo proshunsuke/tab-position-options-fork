@@ -334,7 +334,7 @@ test.describe("Service Worker Restart Handling", () => {
     });
   });
 
-  test("should normalize activation history to the live active tab after Service Worker restart", async ({
+  test("should prefer live activation history over restored snapshot for source tab resolution after Service Worker restart", async ({
     context,
     serviceWorker,
   }) => {
@@ -358,26 +358,102 @@ test.describe("Service Worker Restart Handling", () => {
     expect(activeTabIndex).toBe(1);
 
     const activeTab = beforeTabs[activeTabIndex];
-    const staleHistoryTab = beforeTabs.at(-1);
-    if (!staleHistoryTab?.id) {
-      throw new Error("Stale history tab not found");
-    }
+    const staleSnapshot = beforeTabs.map((tab, index) => {
+      if (index === activeTabIndex) {
+        return {
+          ...tab,
+          active: false,
+        };
+      }
+
+      if (index === beforeTabs.length - 1) {
+        return {
+          ...tab,
+          active: true,
+        };
+      }
+
+      return tab;
+    });
 
     await serviceWorker.evaluate(
-      async ({ windowId, tabs, staleHistoryTabId }) => {
+      async ({ windowId, staleSnapshot, activeTabId }) => {
+        await chrome.storage.session.set({
+          tabSnapshot: {
+            [String(windowId)]: staleSnapshot,
+          },
+          tabActivationHistory: {
+            [String(windowId)]: [activeTabId],
+          },
+        });
+      },
+      {
+        windowId,
+        staleSnapshot,
+        activeTabId: activeTab.id,
+      },
+    );
+
+    await simulateServiceWorkerRestart(serviceWorker);
+
+    const createdTab = await createTabInWindow(serviceWorker, windowId, {
+      active: true,
+    });
+
+    const expectedTabIds = [
+      ...beforeTabs.slice(0, activeTabIndex + 1).map(tab => tab.id),
+      createdTab.newTabId!,
+      ...beforeTabs.slice(activeTabIndex + 1).map(tab => tab.id),
+    ];
+
+    await expect(async () => {
+      const tabs = await getCurrentWindowTabs(serviceWorker);
+      expect(tabs.map(tab => tab.id)).toEqual(expectedTabIds);
+      expect(tabs.findIndex(tab => tab.active)).toBe(activeTabIndex + 1);
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+  });
+
+  test("should fall back to restored snapshot active tab when activation history cannot resolve source tab after Service Worker restart", async ({
+    context,
+    serviceWorker,
+  }) => {
+    const windowId = await getCurrentWindowId(serviceWorker);
+    if (windowId === null) {
+      throw new Error("Current window not found");
+    }
+
+    await createTabsInWindow(serviceWorker, windowId, 3);
+    await activateTabByIndexInWindow(serviceWorker, windowId, 1);
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    await setExtensionSettings(context, {
+      newTab: { position: "right", openInBackground: false },
+    });
+
+    const beforeTabs = await getCurrentWindowTabs(serviceWorker);
+    expect(beforeTabs).toHaveLength(4);
+
+    const activeTabIndex = beforeTabs.findIndex(tab => tab.active);
+    expect(activeTabIndex).toBe(1);
+
+    const activeTab = beforeTabs[activeTabIndex];
+    await serviceWorker.evaluate(
+      async ({ windowId, tabs }) => {
         await chrome.storage.session.set({
           tabSnapshot: {
             [String(windowId)]: tabs,
           },
           tabActivationHistory: {
-            [String(windowId)]: [staleHistoryTabId],
+            [String(windowId)]: [],
           },
         });
       },
       {
         windowId,
         tabs: beforeTabs,
-        staleHistoryTabId: staleHistoryTab.id,
       },
     );
 

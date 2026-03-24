@@ -92,6 +92,11 @@ const getSourceTabId = (windowId: number, tab: chrome.tabs.Tab, shouldInitialize
     return sourceTabId;
   }
 
+  const lastActiveTabId = getLastActiveTabIdByNewTabId(windowId, tab.id);
+  if (lastActiveTabId !== null) {
+    return lastActiveTabId;
+  }
+
   if (shouldInitialize) {
     const restoredActiveTabId = getRestoredTabSnapshot(windowId).find(
       snapshot => snapshot.active,
@@ -101,7 +106,7 @@ const getSourceTabId = (windowId: number, tab: chrome.tabs.Tab, shouldInitialize
     }
   }
 
-  return getLastActiveTabIdByNewTabId(windowId, tab.id);
+  return null;
 };
 
 /**
