@@ -2,8 +2,12 @@ import { expect, test } from "@/e2e/fixtures";
 import {
   clearExtensionStorage,
   closeActiveTabViaServiceWorker,
+  closeWindow,
+  createWindowWithTabs,
   getCurrentWindowTabs,
+  getServiceWorkerTabQueryCalls,
   getTabState,
+  resetServiceWorkerTabQueryCalls,
   setExtensionSettings,
 } from "@/e2e/utils/helpers";
 
@@ -439,6 +443,23 @@ test.describe("Tab Behavior - After Tab Closing", () => {
       const finalState = await getTabState(serviceWorker);
       expect(finalState.totalTabs).toBe(initialTabCount + 2); // Tab A, Tab C
       expect(finalState.activeTabIndex).toBe(initialTabCount); // Tab A (左側のタブ)
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+  });
+
+  test("should not query a closing window after removing its last tabs", async ({
+    serviceWorker,
+  }) => {
+    const secondaryWindow = await createWindowWithTabs(serviceWorker, 2);
+
+    await resetServiceWorkerTabQueryCalls(serviceWorker);
+    await closeWindow(serviceWorker, secondaryWindow.windowId);
+
+    await expect(async () => {
+      const queryCalls = await getServiceWorkerTabQueryCalls(serviceWorker);
+      expect(queryCalls.filter(query => query.windowId === secondaryWindow.windowId)).toEqual([]);
     }).toPass({
       intervals: [100, 100, 100],
       timeout: 5000,

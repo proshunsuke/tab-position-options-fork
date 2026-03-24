@@ -77,6 +77,10 @@ export const handleTabRemoved = async (
   cleanupTabData(windowId, tabId);
   removeTabFromSnapshot(windowId, tabId);
 
+  if (removeInfo.isWindowClosing) {
+    return;
+  }
+
   if (nextActiveTabId !== null) {
     if (shouldInitialize) {
       setTimeout(() => {

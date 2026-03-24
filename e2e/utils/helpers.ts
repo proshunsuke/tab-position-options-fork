@@ -16,6 +16,11 @@ type CurrentWindowTab = {
   openerTabId?: number;
 };
 
+type TestServiceWorkerQueryState = {
+  __testTabQueryCalls?: chrome.tabs.QueryInfo[];
+  __testOriginalTabsQuery?: typeof chrome.tabs.query;
+};
+
 type ServiceWorkerLikeGlobal = WorkerGlobalScope & {
   registration: {
     active: ServiceWorker | null;
@@ -235,6 +240,11 @@ export const closeActiveTabInWindow = async (serviceWorker: Worker, windowId: nu
     return false;
   }, windowId);
 
+export const closeWindow = async (serviceWorker: Worker, windowId: number) =>
+  serviceWorker.evaluate(async windowId => {
+    await chrome.windows.remove(windowId);
+  }, windowId);
+
 /**
  * Service Worker経由で新しいタブを作成する
  */
@@ -402,3 +412,23 @@ export const getMemoryCacheState = async (serviceWorker: Worker) => {
     };
   });
 };
+
+export const resetServiceWorkerTabQueryCalls = async (serviceWorker: Worker) =>
+  serviceWorker.evaluate(() => {
+    const workerGlobal = globalThis as typeof globalThis & TestServiceWorkerQueryState;
+    workerGlobal.__testTabQueryCalls = [];
+
+    if (!workerGlobal.__testOriginalTabsQuery) {
+      workerGlobal.__testOriginalTabsQuery = chrome.tabs.query.bind(chrome.tabs);
+      chrome.tabs.query = (async queryInfo => {
+        workerGlobal.__testTabQueryCalls?.push(queryInfo ?? {});
+        return workerGlobal.__testOriginalTabsQuery!(queryInfo);
+      }) as typeof chrome.tabs.query;
+    }
+  });
+
+export const getServiceWorkerTabQueryCalls = async (serviceWorker: Worker) =>
+  serviceWorker.evaluate(() => {
+    const workerGlobal = globalThis as typeof globalThis & TestServiceWorkerQueryState;
+    return [...(workerGlobal.__testTabQueryCalls ?? [])];
+  });
