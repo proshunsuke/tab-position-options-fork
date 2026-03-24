@@ -9,6 +9,7 @@ import { recordPendingCloseTransition } from "@/src/tabs/state/pendingCloseTrans
 import {
   getActiveTabSnapshot,
   getRestoredTabSnapshot,
+  getTabSnapshot,
   refreshWindowTabSnapshot,
   setActiveTabInSnapshot,
 } from "@/src/tabs/state/tabSnapshot";
@@ -61,21 +62,28 @@ const getPreviousActiveTabIdOnInitialization = (
   activationHistory: number[],
   storedActivationHistory: number[],
 ) => {
+  const availableTabIds = new Set(getTabSnapshot(windowId).map(tab => tab.id));
   const storedHistoryLastTabId = getPreviousTabIdFromHistory(
     storedActivationHistory,
     activatedTabId,
+    availableTabIds,
   );
   if (storedHistoryLastTabId !== null) {
     return storedHistoryLastTabId;
   }
 
   const storedTabs = getRestoredTabSnapshot(windowId);
-  const storedActiveTabId = storedTabs.find(tab => tab.active)?.id ?? null;
+  const storedActiveTabId =
+    storedTabs.find(tab => tab.active && availableTabIds.has(tab.id))?.id ?? null;
   if (storedActiveTabId !== null && storedActiveTabId !== activatedTabId) {
     return storedActiveTabId;
   }
 
-  const historyLastTabId = getPreviousTabIdFromHistory(activationHistory, activatedTabId);
+  const historyLastTabId = getPreviousTabIdFromHistory(
+    activationHistory,
+    activatedTabId,
+    availableTabIds,
+  );
   if (historyLastTabId !== null) {
     return historyLastTabId;
   }
@@ -88,10 +96,14 @@ const getPreviousActiveTabIdOnInitialization = (
   return storedActiveTabId ?? historyLastTabId ?? liveActiveTabId;
 };
 
-const getPreviousTabIdFromHistory = (history: number[], activatedTabId: number) => {
+const getPreviousTabIdFromHistory = (
+  history: number[],
+  activatedTabId: number,
+  availableTabIds: Set<number>,
+) => {
   for (let index = history.length - 1; index >= 0; index--) {
     const tabId = history[index];
-    if (tabId !== activatedTabId) {
+    if (tabId !== activatedTabId && availableTabIds.has(tabId)) {
       return tabId;
     }
   }

@@ -350,6 +350,20 @@ export const createExternalTabWithRaceCondition = async (serviceWorker: Worker) 
     }
   });
 
+export const closeActiveTabWithoutActivatedHandler = async (serviceWorker: Worker) =>
+  serviceWorker.evaluate(async () => {
+    const { handleTabActivated, onActivated } = globalThis.__testExports!.tabHandlers;
+
+    onActivated.removeListener(handleTabActivated);
+
+    try {
+      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      await chrome.tabs.remove(activeTab!.id!);
+    } finally {
+      onActivated.addListener(handleTabActivated);
+    }
+  });
+
 /**
  * Service Worker経由でアクティブなタブを閉じる
  */

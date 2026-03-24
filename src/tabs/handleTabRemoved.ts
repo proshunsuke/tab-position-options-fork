@@ -1,6 +1,9 @@
 import { getSettings } from "@/src/settings/state/appData";
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
-import { getActivationHistory } from "@/src/tabs/state/activationHistory";
+import {
+  getActivationHistory,
+  getRestoredActivationHistory,
+} from "@/src/tabs/state/activationHistory";
 import { consumePendingCloseTransition } from "@/src/tabs/state/pendingCloseTransition";
 import type { TabSnapshot } from "@/src/tabs/state/tabSnapshot";
 import {
@@ -39,17 +42,26 @@ export const handleTabRemoved = async (
   const tabsBeforeRemoval = closedTab === null && storedTabs.length > 0 ? storedTabs : tabs;
   const closedTabBeforeRemoval = closedTab ?? storedTabs.find(tab => tab.id === tabId) ?? null;
   const currentActiveTab = getActiveTabSnapshot(windowId);
+  const liveActivationHistory = getActivationHistory(windowId);
+  const storedActivationHistory = shouldInitialize ? getRestoredActivationHistory(windowId) : [];
+  const storedHistoryBeforeRemoval = getRelevantHistory(storedActivationHistory, tabsBeforeRemoval);
   const pendingCloseTransition = consumePendingCloseTransition(
     windowId,
     tabId,
     currentActiveTab?.id ?? null,
   );
-  // Service Worker 再起動直後だけは pendingCloseTransition が空でも、
-  // 保存済み snapshot の active フラグを補助情報として扱う。
   const isClosedActiveTab =
     pendingCloseTransition !== null ||
-    (shouldInitialize && closedTabBeforeRemoval?.active === true);
-  const activationHistory = pendingCloseTransition?.historyBefore ?? getActivationHistory(windowId);
+    isClosedActiveTabOnInitialization(
+      shouldInitialize,
+      tabId,
+      closedTabBeforeRemoval,
+      storedHistoryBeforeRemoval,
+      tabsBeforeRemoval,
+    );
+  const activationHistory =
+    pendingCloseTransition?.historyBefore ??
+    (storedHistoryBeforeRemoval.length > 0 ? storedHistoryBeforeRemoval : liveActivationHistory);
   const shouldHandleMissingClosedTab =
     closedTabBeforeRemoval === null &&
     activationHistory.at(-1) === tabId &&
@@ -132,4 +144,33 @@ const canUseStoredSnapshotForRemovedTab = (
 
   const sharedStoredIds = storedTabs.filter(tab => liveTabIdSet.has(tab.id)).map(tab => tab.id);
   return sharedStoredIds.every((tabId, index) => tabId === liveTabIds[index]);
+};
+
+const isClosedActiveTabOnInitialization = (
+  shouldInitialize: boolean,
+  removedTabId: number,
+  closedTabBeforeRemoval: TabSnapshot | null,
+  storedHistoryBeforeRemoval: number[],
+  tabsBeforeRemoval: TabSnapshot[],
+) => {
+  if (!shouldInitialize || closedTabBeforeRemoval === null) {
+    return false;
+  }
+
+  const storedHistoryLastTabId = storedHistoryBeforeRemoval.at(-1) ?? null;
+  if (storedHistoryLastTabId !== null) {
+    return storedHistoryLastTabId === removedTabId;
+  }
+
+  return getStoredActiveTabId(tabsBeforeRemoval) === removedTabId;
+};
+
+const getRelevantHistory = (history: number[], tabs: TabSnapshot[]) => {
+  const availableTabIds = new Set(tabs.map(tab => tab.id));
+  return history.filter(tabId => availableTabIds.has(tabId));
+};
+
+const getStoredActiveTabId = (tabs: TabSnapshot[]) => {
+  const activeTabs = tabs.filter(tab => tab.active);
+  return activeTabs.length === 1 ? activeTabs[0].id : null;
 };
