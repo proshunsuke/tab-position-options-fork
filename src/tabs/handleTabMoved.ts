@@ -1,5 +1,5 @@
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
-import { moveTabInSnapshot } from "@/src/tabs/state/tabSnapshot";
+import { moveTabInSnapshot, refreshWindowTabSnapshot } from "@/src/tabs/state/tabSnapshot";
 
 export const handleTabMoved = async (
   tabId: number,
@@ -10,4 +10,5 @@ export const handleTabMoved = async (
   }
 
   moveTabInSnapshot(moveInfo.windowId, tabId, moveInfo.toIndex);
+  void refreshWindowTabSnapshot(moveInfo.windowId);
 };

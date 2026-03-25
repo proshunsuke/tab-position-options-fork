@@ -16,6 +16,8 @@ type WindowScopedTabSnapshot = Record<string, TabSnapshot[]>;
  * グローバルメモリ状態として管理
  */
 let tabSnapshotState: WindowScopedTabSnapshot = {};
+let restoredTabSnapshotState: WindowScopedTabSnapshot = {};
+let pendingStorageWrite = Promise.resolve();
 
 const getWindowKey = (windowId: number) => {
   return String(windowId);
@@ -94,10 +96,6 @@ const groupTabsByWindow = (tabs: chrome.tabs.Tab[]) => {
   return sortAndReindexState(groupedTabs);
 };
 
-const getWindowIds = (tabs: chrome.tabs.Tab[]) => {
-  return new Set(tabs.map(tab => tab.windowId));
-};
-
 /**
  * 同期的に状態を設定
  * メモリは即座に更新し、ストレージへは遅延保存
@@ -105,33 +103,65 @@ const getWindowIds = (tabs: chrome.tabs.Tab[]) => {
 const setState = (value: WindowScopedTabSnapshot) => {
   tabSnapshotState = reindexState(value);
 
-  Promise.resolve().then(() => {
-    chrome.storage.session.set({ tabSnapshot: tabSnapshotState }).catch(() => {});
+  pendingStorageWrite = pendingStorageWrite.finally(() => {
+    return chrome.storage.session.set({ tabSnapshot: tabSnapshotState }).catch(() => {});
   });
 };
 
 /**
- * ストレージから状態を初期化
+ * すべてのウィンドウの live state からスナップショットを再構築
+ */
+export const refreshAllTabSnapshots = async () => {
+  const tabs = await chrome.tabs.query({});
+  setState(groupTabsByWindow(tabs));
+};
+
+/**
+ * 特定ウィンドウの live state からスナップショットを再構築
+ */
+export const refreshWindowTabSnapshot = async (windowId: number) => {
+  const windowKey = getWindowKey(windowId);
+  const tabs = await chrome.tabs.query({ windowId }).catch(error => {
+    if (isMissingWindowError(error)) {
+      const nextState = {
+        ...tabSnapshotState,
+      };
+      delete nextState[windowKey];
+      setState(nextState);
+    }
+
+    return null;
+  });
+  if (tabs === null) {
+    return;
+  }
+
+  const nextWindowTabs = tabs.map(toTabSnapshot).filter((tab): tab is TabSnapshot => tab !== null);
+  const nextState = {
+    ...tabSnapshotState,
+  };
+
+  if (nextWindowTabs.length === 0) {
+    delete nextState[windowKey];
+  } else {
+    nextState[windowKey] = sortAndReindexTabs(nextWindowTabs);
+  }
+
+  setState(nextState);
+};
+
+const isMissingWindowError = (error: unknown) => {
+  return error instanceof Error && error.message.includes("No window with id");
+};
+
+/**
+ * live state を優先してスナップショットを初期化
  * Service Worker起動時に一度だけ呼び出される
  */
 export const initializeTabSnapshot = async () => {
-  const [result, tabs] = await Promise.all([
-    chrome.storage.session.get<TabSnapshotStorage>("tabSnapshot"),
-    chrome.tabs.query({}),
-  ]);
-  const currentState = groupTabsByWindow(tabs);
-  const savedState = sortAndReindexState(result.tabSnapshot ?? {});
-  const openWindowIds = getWindowIds(tabs);
-  const restoredState = Object.fromEntries(
-    Object.entries(savedState).filter(([windowId]) => openWindowIds.has(Number(windowId))),
-  );
-
-  // Service Worker 再起動直後の最初のイベントでは、保存済みスナップショットのほうが
-  // イベント発火前の並び順を保持しているため、同一 window ではそれを優先する。
-  setState({
-    ...currentState,
-    ...restoredState,
-  });
+  const result = await chrome.storage.session.get<TabSnapshotStorage>("tabSnapshot");
+  restoredTabSnapshotState = sortAndReindexState(result.tabSnapshot ?? {});
+  await refreshAllTabSnapshots();
 };
 
 /**
@@ -141,10 +171,8 @@ export const getTabSnapshot = (windowId: number) => {
   return tabSnapshotState[getWindowKey(windowId)] ?? [];
 };
 
-export const getStoredTabSnapshot = async (windowId: number) => {
-  const result = await chrome.storage.session.get<TabSnapshotStorage>("tabSnapshot");
-  const savedState = sortAndReindexState(result.tabSnapshot ?? {});
-  return savedState[getWindowKey(windowId)] ?? [];
+export const getRestoredTabSnapshot = (windowId: number) => {
+  return restoredTabSnapshotState[getWindowKey(windowId)] ?? [];
 };
 
 export const getTabSnapshotById = (windowId: number, tabId: number) => {
@@ -236,4 +264,6 @@ export const removeTabFromSnapshot = (windowId: number, tabId: number) => {
  */
 export const resetTabSnapshotState = () => {
   tabSnapshotState = {};
+  restoredTabSnapshotState = {};
+  pendingStorageWrite = Promise.resolve();
 };
