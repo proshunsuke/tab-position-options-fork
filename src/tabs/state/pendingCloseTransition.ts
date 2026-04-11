@@ -37,7 +37,7 @@ export const recordPendingCloseTransition = (
   };
 };
 
-// Chrome 146+ では active tab close 時に onActivated が先行するため、
+// active tab close では onActivated が先行することがあるため、
 // その直後の onRemoved とだけ結び付ける短命な one-shot state として扱う。
 export const consumePendingCloseTransition = (
   windowId: number,

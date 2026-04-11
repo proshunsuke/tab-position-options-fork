@@ -42,6 +42,8 @@ declare global {
     states: {
       resetActivationHistory: () => void;
       resetNewTabSourceTransition: () => void;
+      recordPendingCloseTarget: (windowId: number, targetTabId: number, windowMs?: number) => void;
+      resetPendingCloseTarget: () => void;
       resetPendingCloseTransition: () => void;
       resetTabSnapshotState: () => void;
       removeTabFromSnapshot: (windowId: number, tabId: number) => unknown;
