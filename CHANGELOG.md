@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.2
+- Fixed tab closing behavior on Chrome 147.0.7727.56
+- Fixed tab closing behavior to keep working even if Chrome changes tab-close event order in future updates
+
 ## 0.2.1
 - Fixed new tab positioning and tab closing behavior using stale session state after a Service Worker restart
 
