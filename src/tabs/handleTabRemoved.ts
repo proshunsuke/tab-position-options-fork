@@ -1,9 +1,14 @@
 import { getSettings } from "@/src/settings/state/appData";
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
+import { schedulePendingCloseTargetActivation } from "@/src/tabs/pendingCloseTargetActivation";
 import {
   getActivationHistory,
   getRestoredActivationHistory,
 } from "@/src/tabs/state/activationHistory";
+import {
+  clearPendingCloseTarget,
+  recordPendingCloseTarget,
+} from "@/src/tabs/state/pendingCloseTarget";
 import { consumePendingCloseTransition } from "@/src/tabs/state/pendingCloseTransition";
 import type { TabSnapshot } from "@/src/tabs/state/tabSnapshot";
 import {
@@ -31,6 +36,7 @@ export const handleTabRemoved = async (
   }
 
   const windowId = removeInfo.windowId;
+  clearPendingCloseTarget(windowId);
   const settings = getSettings();
   const tabs = getTabSnapshot(windowId);
   const closedTab = getTabSnapshotById(windowId, tabId);
@@ -50,8 +56,11 @@ export const handleTabRemoved = async (
     tabId,
     currentActiveTab?.id ?? null,
   );
+  // active tab close は onActivated / onRemoved の順序が固定ではないため、
+  // activation 先行・removal 先行・復元直後のどの経路でも同じ close として扱えるようにする。
   const isClosedActiveTab =
     pendingCloseTransition !== null ||
+    isClosedActiveTabInLiveSnapshot(tabId, closedTabBeforeRemoval, currentActiveTab) ||
     isClosedActiveTabOnInitialization(
       shouldInitialize,
       tabId,
@@ -67,6 +76,8 @@ export const handleTabRemoved = async (
     activationHistory.at(-1) === tabId &&
     settings.afterTabClosing.activateTab !== "default";
 
+  // 通常は close 前 snapshot に残っている removed tab から遷移先を決める。
+  // ただし復元直後などで removed tab 自体を取りこぼしていても、履歴だけで補正できる設定は拾う。
   const nextActiveTabId =
     closedTabBeforeRemoval &&
     isClosedActiveTab &&
@@ -94,25 +105,11 @@ export const handleTabRemoved = async (
   }
 
   if (nextActiveTabId !== null) {
-    if (shouldInitialize) {
-      setTimeout(() => {
-        setActiveTabInSnapshot(windowId, nextActiveTabId);
-        void chrome.tabs
-          .update(nextActiveTabId, { active: true })
-          .catch(() => {})
-          .finally(() => {
-            void refreshWindowTabSnapshot(windowId);
-          });
-      }, 0);
-    } else {
-      setActiveTabInSnapshot(windowId, nextActiveTabId);
-      void chrome.tabs
-        .update(nextActiveTabId, { active: true })
-        .catch(() => {})
-        .finally(() => {
-          void refreshWindowTabSnapshot(windowId);
-        });
-    }
+    // Chrome 標準の successor activation が直後に割り込むことがあるため、
+    // close 後に本来到達すべき tab を短時間だけ保持して再主張できるようにする。
+    recordPendingCloseTarget(windowId, nextActiveTabId);
+    setActiveTabInSnapshot(windowId, nextActiveTabId);
+    schedulePendingCloseTargetActivation(windowId, nextActiveTabId);
 
     return;
   }
@@ -163,6 +160,18 @@ const isClosedActiveTabOnInitialization = (
   }
 
   return getStoredActiveTabId(tabsBeforeRemoval) === removedTabId;
+};
+
+const isClosedActiveTabInLiveSnapshot = (
+  removedTabId: number,
+  closedTabBeforeRemoval: TabSnapshot | null,
+  currentActiveTab: TabSnapshot | null,
+) => {
+  if (closedTabBeforeRemoval?.active) {
+    return true;
+  }
+
+  return currentActiveTab?.id === removedTabId;
 };
 
 const getRelevantHistory = (history: number[], tabs: TabSnapshot[]) => {

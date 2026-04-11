@@ -1,15 +1,21 @@
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
+import { schedulePendingCloseTargetActivation } from "@/src/tabs/pendingCloseTargetActivation";
 import {
   getActivationHistory,
   getRestoredActivationHistory,
   recordTabActivation,
 } from "@/src/tabs/state/activationHistory";
 import { recordNewTabSourceTransition } from "@/src/tabs/state/newTabSourceTransition";
+import {
+  clearPendingCloseTarget,
+  getPendingCloseTarget,
+} from "@/src/tabs/state/pendingCloseTarget";
 import { recordPendingCloseTransition } from "@/src/tabs/state/pendingCloseTransition";
 import {
   getActiveTabSnapshot,
   getRestoredTabSnapshot,
   getTabSnapshot,
+  getTabSnapshotById,
   refreshWindowTabSnapshot,
   setActiveTabInSnapshot,
 } from "@/src/tabs/state/tabSnapshot";
@@ -20,6 +26,27 @@ export const handleTabActivated = async (activeInfo: { tabId: number; windowId: 
   const shouldInitialize = needsInitialization();
   if (shouldInitialize) {
     await initializeAllStates();
+  }
+
+  // close 補正の着地先が残っている間は、Chrome 標準の一時的な activation より
+  // pending target を優先して最終着地を維持する。
+  const pendingCloseTargetTabId = getPendingCloseTarget(activeInfo.windowId);
+  if (pendingCloseTargetTabId !== null) {
+    if (pendingCloseTargetTabId !== activeInfo.tabId) {
+      const pendingCloseTargetTab = getTabSnapshotById(
+        activeInfo.windowId,
+        pendingCloseTargetTabId,
+      );
+      if (pendingCloseTargetTab === null) {
+        clearPendingCloseTarget(activeInfo.windowId);
+      } else {
+        setActiveTabInSnapshot(activeInfo.windowId, pendingCloseTargetTabId);
+        schedulePendingCloseTargetActivation(activeInfo.windowId, pendingCloseTargetTabId);
+        return;
+      }
+    } else {
+      clearPendingCloseTarget(activeInfo.windowId);
+    }
   }
 
   const activationHistory = getActivationHistory(activeInfo.windowId);
