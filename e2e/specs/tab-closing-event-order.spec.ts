@@ -1,7 +1,9 @@
 import type { BrowserContext, Worker } from "@playwright/test";
 import { expect, test } from "@/e2e/fixtures";
 import {
+  activateTabByIndexInWindow,
   clearExtensionStorage,
+  getCurrentWindowId,
   getCurrentWindowTabs,
   setExtensionSettings,
 } from "@/e2e/utils/helpers";
@@ -17,7 +19,7 @@ test.describe("Tab Closing Event Order", () => {
     context,
     serviceWorker,
   }) => {
-    await prepareRepresentativeCloseScenario(context, serviceWorker);
+    await prepareRepresentativeCloseScenario(context, serviceWorker, "left");
 
     await simulateActiveTabCloseWithEventOrder(serviceWorker, "activated-first");
 
@@ -35,7 +37,7 @@ test.describe("Tab Closing Event Order", () => {
     context,
     serviceWorker,
   }) => {
-    await prepareRepresentativeCloseScenario(context, serviceWorker);
+    await prepareRepresentativeCloseScenario(context, serviceWorker, "left");
 
     await simulateActiveTabCloseWithEventOrder(serviceWorker, "removed-first");
 
@@ -48,11 +50,39 @@ test.describe("Tab Closing Event Order", () => {
       timeout: 5000,
     });
   });
+
+  test("should not override a quick user activation after an activated-first close", async ({
+    context,
+    serviceWorker,
+  }) => {
+    await prepareRepresentativeCloseScenario(context, serviceWorker, "right");
+
+    await simulateActiveTabCloseWithEventOrder(serviceWorker, "activated-first", {
+      waitForSettle: false,
+    });
+
+    const currentWindowId = await getCurrentWindowId(serviceWorker);
+    if (currentWindowId === null) {
+      throw new Error("Current window not found");
+    }
+
+    await activateTabByIndexInWindow(serviceWorker, currentWindowId, 0);
+
+    await expect(async () => {
+      const tabs = await getCurrentWindowTabs(serviceWorker);
+      expect(tabs).toHaveLength(3);
+      expect(tabs.find(tab => tab.active)?.index).toBe(0);
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+  });
 });
 
 const prepareRepresentativeCloseScenario = async (
   context: BrowserContext,
   serviceWorker: Worker,
+  activateTab: "left" | "right",
 ) => {
   await context.newPage();
   const targetTab = await context.newPage();
@@ -62,7 +92,7 @@ const prepareRepresentativeCloseScenario = async (
   await targetTab.waitForTimeout(200);
 
   await setExtensionSettings(context, {
-    afterTabClosing: { activateTab: "left" },
+    afterTabClosing: { activateTab },
   });
 
   const tabs = await getCurrentWindowTabs(serviceWorker);
@@ -73,61 +103,69 @@ const prepareRepresentativeCloseScenario = async (
 const simulateActiveTabCloseWithEventOrder = async (
   serviceWorker: Worker,
   eventOrder: CloseEventOrder,
+  options: {
+    waitForSettle?: boolean;
+  } = {},
 ) =>
-  serviceWorker.evaluate(async eventOrder => {
-    const { handleTabActivated, handleTabRemoved, onActivated, onRemoved } =
-      globalThis.__testExports!.tabHandlers;
+  serviceWorker.evaluate(
+    async ({ eventOrder, options }) => {
+      const { handleTabActivated, handleTabRemoved, onActivated, onRemoved } =
+        globalThis.__testExports!.tabHandlers;
 
-    onActivated.removeListener(handleTabActivated);
-    onRemoved.removeListener(handleTabRemoved);
+      onActivated.removeListener(handleTabActivated);
+      onRemoved.removeListener(handleTabRemoved);
 
-    try {
-      const tabs = (await chrome.tabs.query({ currentWindow: true })).sort(
-        (left, right) => left.index - right.index,
-      );
-      const activeTab = tabs.find(tab => tab.active);
-      if (!activeTab?.id) {
-        throw new Error("Active tab not found");
-      }
-
-      const closedTabIndex = tabs.findIndex(tab => tab.id === activeTab.id);
-      const successorTab = tabs[closedTabIndex + 1];
-      if (!successorTab?.id) {
-        throw new Error("Right-side successor tab not found");
-      }
-
-      if (eventOrder === "activated-first") {
-        await chrome.tabs.update(successorTab.id, { active: true });
-        await handleTabActivated({
-          tabId: successorTab.id,
-          windowId: successorTab.windowId,
-        });
-        await chrome.tabs.remove(activeTab.id);
-        await handleTabRemoved(activeTab.id, {
-          windowId: activeTab.windowId,
-          isWindowClosing: false,
-        });
-      } else {
-        await chrome.tabs.remove(activeTab.id);
-        await handleTabRemoved(activeTab.id, {
-          windowId: activeTab.windowId,
-          isWindowClosing: false,
-        });
-
-        const [newActiveTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (!newActiveTab?.id) {
-          throw new Error("New active tab not found after removal");
+      try {
+        const tabs = (await chrome.tabs.query({ currentWindow: true })).sort(
+          (left, right) => left.index - right.index,
+        );
+        const activeTab = tabs.find(tab => tab.active);
+        if (!activeTab?.id) {
+          throw new Error("Active tab not found");
         }
 
-        await handleTabActivated({
-          tabId: newActiveTab.id,
-          windowId: newActiveTab.windowId,
-        });
-      }
+        const closedTabIndex = tabs.findIndex(tab => tab.id === activeTab.id);
+        const successorTab = tabs[closedTabIndex + 1];
+        if (!successorTab?.id) {
+          throw new Error("Right-side successor tab not found");
+        }
 
-      await new Promise(resolve => setTimeout(resolve, 100));
-    } finally {
-      onActivated.addListener(handleTabActivated);
-      onRemoved.addListener(handleTabRemoved);
-    }
-  }, eventOrder);
+        if (eventOrder === "activated-first") {
+          await chrome.tabs.update(successorTab.id, { active: true });
+          await handleTabActivated({
+            tabId: successorTab.id,
+            windowId: successorTab.windowId,
+          });
+          await chrome.tabs.remove(activeTab.id);
+          await handleTabRemoved(activeTab.id, {
+            windowId: activeTab.windowId,
+            isWindowClosing: false,
+          });
+        } else {
+          await chrome.tabs.remove(activeTab.id);
+          await handleTabRemoved(activeTab.id, {
+            windowId: activeTab.windowId,
+            isWindowClosing: false,
+          });
+
+          const [newActiveTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+          if (!newActiveTab?.id) {
+            throw new Error("New active tab not found after removal");
+          }
+
+          await handleTabActivated({
+            tabId: newActiveTab.id,
+            windowId: newActiveTab.windowId,
+          });
+        }
+
+        if (options.waitForSettle ?? true) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      } finally {
+        onActivated.addListener(handleTabActivated);
+        onRemoved.addListener(handleTabRemoved);
+      }
+    },
+    { eventOrder, options },
+  );

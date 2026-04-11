@@ -107,9 +107,11 @@ export const handleTabRemoved = async (
   if (nextActiveTabId !== null) {
     // Chrome 標準の successor activation が直後に割り込むことがあるため、
     // close 後に本来到達すべき tab を短時間だけ保持して再主張できるようにする。
-    recordPendingCloseTarget(windowId, nextActiveTabId);
     setActiveTabInSnapshot(windowId, nextActiveTabId);
-    schedulePendingCloseTargetActivation(windowId, nextActiveTabId);
+    if (shouldArmPendingCloseTarget(currentActiveTab, nextActiveTabId)) {
+      recordPendingCloseTarget(windowId, nextActiveTabId);
+      schedulePendingCloseTargetActivation(windowId, nextActiveTabId);
+    }
 
     return;
   }
@@ -182,4 +184,13 @@ const getRelevantHistory = (history: number[], tabs: TabSnapshot[]) => {
 const getStoredActiveTabId = (tabs: TabSnapshot[]) => {
   const activeTabs = tabs.filter(tab => tab.active);
   return activeTabs.length === 1 ? activeTabs[0].id : null;
+};
+
+const shouldArmPendingCloseTarget = (
+  currentActiveTab: TabSnapshot | null,
+  nextActiveTabId: number,
+) => {
+  // すでに期待する tab が active なら close 競合は解消済みなので、
+  // pending target を残して後続の user activation を巻き戻さないようにする。
+  return currentActiveTab?.id !== nextActiveTabId;
 };
