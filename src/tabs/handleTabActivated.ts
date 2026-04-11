@@ -44,8 +44,6 @@ export const handleTabActivated = async (activeInfo: { tabId: number; windowId: 
         schedulePendingCloseTargetActivation(activeInfo.windowId, pendingCloseTargetTabId);
         return;
       }
-    } else {
-      clearPendingCloseTarget(activeInfo.windowId);
     }
   }
 

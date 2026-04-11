@@ -77,6 +77,24 @@ test.describe("Tab Closing Event Order", () => {
       timeout: 5000,
     });
   });
+
+  test("should keep reasserting the close target after the target tab is activated once", async ({
+    context,
+    serviceWorker,
+  }) => {
+    await prepareRepresentativeCloseScenario(context, serviceWorker, "left");
+
+    await simulateActivatedFirstCloseRaceAfterTargetActivation(serviceWorker);
+
+    await expect(async () => {
+      const tabs = await getCurrentWindowTabs(serviceWorker);
+      expect(tabs).toHaveLength(3);
+      expect(tabs.find(tab => tab.active)?.index).toBe(1);
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+  });
 });
 
 const prepareRepresentativeCloseScenario = async (
@@ -169,3 +187,58 @@ const simulateActiveTabCloseWithEventOrder = async (
     },
     { eventOrder, options },
   );
+
+const simulateActivatedFirstCloseRaceAfterTargetActivation = async (serviceWorker: Worker) =>
+  serviceWorker.evaluate(async () => {
+    const { handleTabActivated, handleTabRemoved, onActivated, onRemoved } =
+      globalThis.__testExports!.tabHandlers;
+
+    onActivated.removeListener(handleTabActivated);
+    onRemoved.removeListener(handleTabRemoved);
+
+    try {
+      const tabs = (await chrome.tabs.query({ currentWindow: true })).sort(
+        (left, right) => left.index - right.index,
+      );
+      const activeTab = tabs.find(tab => tab.active);
+      if (!activeTab?.id) {
+        throw new Error("Active tab not found");
+      }
+
+      const closedTabIndex = tabs.findIndex(tab => tab.id === activeTab.id);
+      const leftTab = tabs[closedTabIndex - 1];
+      const rightTab = tabs[closedTabIndex + 1];
+      if (!leftTab?.id || !rightTab?.id) {
+        throw new Error("Adjacent tabs not found");
+      }
+
+      await chrome.tabs.update(rightTab.id, { active: true });
+      await handleTabActivated({
+        tabId: rightTab.id,
+        windowId: rightTab.windowId,
+      });
+
+      await chrome.tabs.remove(activeTab.id);
+      await handleTabRemoved(activeTab.id, {
+        windowId: activeTab.windowId,
+        isWindowClosing: false,
+      });
+
+      await chrome.tabs.update(leftTab.id, { active: true });
+      await handleTabActivated({
+        tabId: leftTab.id,
+        windowId: leftTab.windowId,
+      });
+
+      await chrome.tabs.update(rightTab.id, { active: true });
+      await handleTabActivated({
+        tabId: rightTab.id,
+        windowId: rightTab.windowId,
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+    } finally {
+      onActivated.addListener(handleTabActivated);
+      onRemoved.addListener(handleTabRemoved);
+    }
+  });
