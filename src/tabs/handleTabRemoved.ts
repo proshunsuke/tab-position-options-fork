@@ -1,6 +1,6 @@
 import { getSettings } from "@/src/settings/state/appData";
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
-import { schedulePendingCloseTargetActivation } from "@/src/tabs/pendingCloseTargetActivation";
+import { applyPendingCloseTargetActivation } from "@/src/tabs/pendingCloseTargetActivation";
 import {
   getActivationHistory,
   getRestoredActivationHistory,
@@ -110,7 +110,7 @@ export const handleTabRemoved = async (
     setActiveTabInSnapshot(windowId, nextActiveTabId);
     if (shouldArmPendingCloseTarget(currentActiveTab, nextActiveTabId)) {
       recordPendingCloseTarget(windowId, nextActiveTabId);
-      schedulePendingCloseTargetActivation(windowId, nextActiveTabId);
+      applyPendingCloseTargetActivation(windowId, nextActiveTabId);
     }
 
     return;

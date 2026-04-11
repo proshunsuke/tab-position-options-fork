@@ -5,32 +5,34 @@ import { refreshWindowTabSnapshot } from "@/src/tabs/state/tabSnapshot";
 // 最初の補正は即時に走り、この値は close 直後の標準 activation が被さった場合だけを拾うために使う。
 const CLOSE_TARGET_REASSERT_DELAY_MS = 50;
 
-export const schedulePendingCloseTargetActivation = (windowId: number, targetTabId: number) => {
-  // まず即時に補正し、さらに close 後の標準 activation があとから被さるケースだけを
-  // 短い再実行で吸収する。
-  schedulePendingCloseTargetActivationAttempt(windowId, targetTabId, 0);
-  schedulePendingCloseTargetActivationAttempt(
-    windowId,
-    targetTabId,
-    CLOSE_TARGET_REASSERT_DELAY_MS,
-  );
+export const applyPendingCloseTargetActivation = (windowId: number, targetTabId: number) => {
+  // 本体補正はイベント処理中に即時で打ち、遅延側は標準 activation があとから被さった場合の
+  // 最小限の再主張だけに限定する。
+  void chrome.tabs
+    .update(targetTabId, { active: true })
+    .catch(() => {})
+    .finally(() => {
+      void refreshWindowTabSnapshot(windowId);
+    });
+
+  schedulePendingCloseTargetReassertion(windowId, targetTabId);
 };
 
-const schedulePendingCloseTargetActivationAttempt = (
-  windowId: number,
-  targetTabId: number,
-  delayMs: number,
-) => {
+const schedulePendingCloseTargetReassertion = (windowId: number, targetTabId: number) => {
   setTimeout(() => {
-    if (getPendingCloseTarget(windowId) !== targetTabId) {
-      return;
-    }
+    reassertPendingCloseTargetActivation(windowId, targetTabId);
+  }, CLOSE_TARGET_REASSERT_DELAY_MS);
+};
 
-    void chrome.tabs
-      .update(targetTabId, { active: true })
-      .catch(() => {})
-      .finally(() => {
-        void refreshWindowTabSnapshot(windowId);
-      });
-  }, delayMs);
+const reassertPendingCloseTargetActivation = (windowId: number, targetTabId: number) => {
+  if (getPendingCloseTarget(windowId) !== targetTabId) {
+    return;
+  }
+
+  void chrome.tabs
+    .update(targetTabId, { active: true })
+    .catch(() => {})
+    .finally(() => {
+      void refreshWindowTabSnapshot(windowId);
+    });
 };

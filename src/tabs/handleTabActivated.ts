@@ -1,5 +1,5 @@
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
-import { schedulePendingCloseTargetActivation } from "@/src/tabs/pendingCloseTargetActivation";
+import { applyPendingCloseTargetActivation } from "@/src/tabs/pendingCloseTargetActivation";
 import {
   getActivationHistory,
   getRestoredActivationHistory,
@@ -41,7 +41,7 @@ export const handleTabActivated = async (activeInfo: { tabId: number; windowId: 
         clearPendingCloseTarget(activeInfo.windowId);
       } else {
         setActiveTabInSnapshot(activeInfo.windowId, pendingCloseTargetTabId);
-        schedulePendingCloseTargetActivation(activeInfo.windowId, pendingCloseTargetTabId);
+        applyPendingCloseTargetActivation(activeInfo.windowId, pendingCloseTargetTabId);
         return;
       }
     }
