@@ -11,7 +11,10 @@ import { handleTabRemoved } from "@/src/tabs/handleTabRemoved";
 import { createSessionRestoreDetector, defaultDetector } from "@/src/tabs/sessionRestoreDetector";
 import { resetActivationHistory } from "@/src/tabs/state/activationHistory";
 import { resetNewTabSourceTransition } from "@/src/tabs/state/newTabSourceTransition";
-import { resetPendingCloseTarget } from "@/src/tabs/state/pendingCloseTarget";
+import {
+  recordPendingCloseTarget,
+  resetPendingCloseTarget,
+} from "@/src/tabs/state/pendingCloseTarget";
 import { resetPendingCloseTransition } from "@/src/tabs/state/pendingCloseTransition";
 import { removeTabFromSnapshot, resetTabSnapshotState } from "@/src/tabs/state/tabSnapshot";
 import type { GlobalTestExports } from "./types";
@@ -53,6 +56,7 @@ export const setupTestEnvironment = () => {
       states: {
         resetActivationHistory: resetActivationHistory,
         resetNewTabSourceTransition: resetNewTabSourceTransition,
+        recordPendingCloseTarget: recordPendingCloseTarget,
         resetPendingCloseTarget: resetPendingCloseTarget,
         resetPendingCloseTransition: resetPendingCloseTransition,
         resetTabSnapshotState: resetTabSnapshotState,

@@ -5,10 +5,7 @@ import {
   getActivationHistory,
   getRestoredActivationHistory,
 } from "@/src/tabs/state/activationHistory";
-import {
-  clearPendingCloseTarget,
-  recordPendingCloseTarget,
-} from "@/src/tabs/state/pendingCloseTarget";
+import { recordPendingCloseTarget } from "@/src/tabs/state/pendingCloseTarget";
 import { consumePendingCloseTransition } from "@/src/tabs/state/pendingCloseTransition";
 import type { TabSnapshot } from "@/src/tabs/state/tabSnapshot";
 import {
@@ -36,7 +33,6 @@ export const handleTabRemoved = async (
   }
 
   const windowId = removeInfo.windowId;
-  clearPendingCloseTarget(windowId);
   const settings = getSettings();
   const tabs = getTabSnapshot(windowId);
   const closedTab = getTabSnapshotById(windowId, tabId);
@@ -107,6 +103,8 @@ export const handleTabRemoved = async (
   if (nextActiveTabId !== null) {
     // Chrome 標準の successor activation が直後に割り込むことがあるため、
     // close 後に本来到達すべき tab を短時間だけ保持して再主張できるようにする。
+    // 同一 window の後続 remove で無条件に消すと、先行する active-close 補正の保険まで
+    // 失われるので、pending target は新しい active-close を確定したときだけ上書きする。
     setActiveTabInSnapshot(windowId, nextActiveTabId);
     if (shouldArmPendingCloseTarget(currentActiveTab, nextActiveTabId)) {
       recordPendingCloseTarget(windowId, nextActiveTabId);

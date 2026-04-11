@@ -95,6 +95,24 @@ test.describe("Tab Closing Event Order", () => {
       timeout: 5000,
     });
   });
+
+  test("should keep the pending close target across a background-tab removal burst", async ({
+    context,
+    serviceWorker,
+  }) => {
+    await prepareRepresentativeCloseScenario(context, serviceWorker, "left");
+
+    await simulateActivatedFirstCloseWithBackgroundRemoveBeforeLateActivation(serviceWorker);
+
+    await expect(async () => {
+      const tabs = await getCurrentWindowTabs(serviceWorker);
+      expect(tabs).toHaveLength(2);
+      expect(tabs.find(tab => tab.active)?.index).toBe(0);
+    }).toPass({
+      intervals: [100, 100, 100],
+      timeout: 5000,
+    });
+  });
 });
 
 const prepareRepresentativeCloseScenario = async (
@@ -228,6 +246,69 @@ const simulateActivatedFirstCloseRaceAfterTargetActivation = async (serviceWorke
       await handleTabActivated({
         tabId: leftTab.id,
         windowId: leftTab.windowId,
+      });
+
+      await chrome.tabs.update(rightTab.id, { active: true });
+      await handleTabActivated({
+        tabId: rightTab.id,
+        windowId: rightTab.windowId,
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+    } finally {
+      onActivated.addListener(handleTabActivated);
+      onRemoved.addListener(handleTabRemoved);
+    }
+  });
+
+const simulateActivatedFirstCloseWithBackgroundRemoveBeforeLateActivation = async (
+  serviceWorker: Worker,
+) =>
+  serviceWorker.evaluate(async () => {
+    const { handleTabActivated, handleTabRemoved, onActivated, onRemoved } =
+      globalThis.__testExports!.tabHandlers;
+    const { recordPendingCloseTarget } = globalThis.__testExports!.states;
+
+    onActivated.removeListener(handleTabActivated);
+    onRemoved.removeListener(handleTabRemoved);
+
+    try {
+      const tabs = (await chrome.tabs.query({ currentWindow: true })).sort(
+        (left, right) => left.index - right.index,
+      );
+      const activeTab = tabs.find(tab => tab.active);
+      if (!activeTab?.id) {
+        throw new Error("Active tab not found");
+      }
+
+      const closedTabIndex = tabs.findIndex(tab => tab.id === activeTab.id);
+      const farLeftTab = tabs[0];
+      const leftTab = tabs[closedTabIndex - 1];
+      const rightTab = tabs[closedTabIndex + 1];
+      if (!farLeftTab?.id || !leftTab?.id || !rightTab?.id) {
+        throw new Error("Representative tabs not found");
+      }
+
+      await chrome.tabs.update(rightTab.id, { active: true });
+      await handleTabActivated({
+        tabId: rightTab.id,
+        windowId: rightTab.windowId,
+      });
+
+      await chrome.tabs.remove(activeTab.id);
+      await handleTabRemoved(activeTab.id, {
+        windowId: activeTab.windowId,
+        isWindowClosing: false,
+      });
+
+      // 実時間の remove で pending window を跨がないよう、論点である
+      // 「後続 remove が先行 close 用 pending target を消すか」だけを固定して検証する。
+      recordPendingCloseTarget(activeTab.windowId, leftTab.id, 1000);
+
+      await chrome.tabs.remove(farLeftTab.id);
+      await handleTabRemoved(farLeftTab.id, {
+        windowId: farLeftTab.windowId,
+        isWindowClosing: false,
       });
 
       await chrome.tabs.update(rightTab.id, { active: true });
