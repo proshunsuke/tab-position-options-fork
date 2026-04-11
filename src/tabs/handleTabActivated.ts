@@ -30,6 +30,9 @@ export const handleTabActivated = async (activeInfo: { tabId: number; windowId: 
 
   // close 補正の着地先が残っている間は、Chrome 標準の一時的な activation より
   // pending target を優先して最終着地を維持する。
+  // この短い window 内の activation は、標準の後続切り替えか素早い user 操作かを
+  // 拡張側から確実には見分けられない。ここでは完璧な識別よりも、
+  // close 直後のちらつきを最小化しつつ設定どおりの着地先を守ることを優先する。
   const pendingCloseTargetTabId = getPendingCloseTarget(activeInfo.windowId);
   if (pendingCloseTargetTabId !== null) {
     if (pendingCloseTargetTabId !== activeInfo.tabId) {
