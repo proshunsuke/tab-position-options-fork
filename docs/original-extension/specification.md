@@ -457,7 +457,7 @@ When no custom settings are configured:
 
 - Extension tracks original URLs before redirects occur
 - Server redirects are detected via `server_redirect` transition qualifier
-- URL matching rules apply to the original URL, not the redirected URL
+- Match the committed destination URL first; if no rule matches and `server_redirect` is present, fall back to the URL recorded by `onBeforeNavigate`
 - Redirect tracking information is cleaned up when tabs are closed
 
 ### Tab Movement and Timing
