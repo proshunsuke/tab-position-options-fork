@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
 import { TabBehavior } from "@/entrypoints/options/TabBehavior";
 import { TabClosing } from "@/entrypoints/options/TabClosing";
+import { TabOnActivate } from "@/entrypoints/options/TabOnActivate";
 import {
   getSettings,
   initializeAppData,
   saveSettingsWithVersion,
 } from "@/src/settings/state/appData";
-import type { TabActivation, TabPosition } from "@/src/types";
+import type { TabActivation, TabOnActivateBehavior, TabPosition } from "@/src/types";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<"behavior" | "closing">("behavior");
+  const [activeTab, setActiveTab] = useState<"behavior" | "closing" | "activation">("behavior");
   const [newTabPosition, setNewTabPosition] = useState<TabPosition>("default");
   const [openInBackground, setOpenInBackground] = useState(false);
   const [afterTabClosing, setAfterTabClosing] = useState<TabActivation>("default");
+  const [tabOnActivate, setTabOnActivate] = useState<TabOnActivateBehavior>("default");
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
@@ -30,6 +32,9 @@ export default function App() {
       if (settings.afterTabClosing?.activateTab) {
         setAfterTabClosing(settings.afterTabClosing.activateTab);
       }
+      if (settings.tabOnActivate?.behavior) {
+        setTabOnActivate(settings.tabOnActivate.behavior);
+      }
     })();
   }, []);
 
@@ -43,6 +48,10 @@ export default function App() {
 
   const handleAfterTabClosingChange = (value: string) => {
     setAfterTabClosing(value as TabActivation);
+  };
+
+  const handleTabOnActivateChange = (value: string) => {
+    setTabOnActivate(value as TabOnActivateBehavior);
   };
 
   const handleSave = () => {
@@ -60,6 +69,7 @@ export default function App() {
         afterTabClosing: {
           activateTab: afterTabClosing,
         },
+        tabOnActivate: { behavior: tabOnActivate },
       });
 
       setSaveMessage("Settings saved successfully!");
@@ -103,6 +113,17 @@ export default function App() {
           >
             Tab Closing
           </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("activation")}
+            className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${
+              activeTab === "activation"
+                ? "border-chrome-blue text-chrome-blue"
+                : "border-transparent text-gray-600 hover:text-gray-800"
+            }`}
+          >
+            Tab on Activate
+          </button>
         </div>
 
         {/* タブコンテンツと保存ボタンのコンテナ */}
@@ -115,6 +136,13 @@ export default function App() {
                 onNewTabPositionChange={handleNewTabPositionChange}
                 openInBackground={openInBackground}
                 onOpenInBackgroundChange={handleOpenInBackgroundChange}
+              />
+            )}
+
+            {activeTab === "activation" && (
+              <TabOnActivate
+                behavior={tabOnActivate}
+                onBehaviorChange={handleTabOnActivateChange}
               />
             )}
 

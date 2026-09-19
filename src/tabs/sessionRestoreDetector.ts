@@ -10,6 +10,7 @@ type TimeProvider = () => number;
 type DetectorState = {
   isStartupPhase: boolean;
   lastTabCreationTime: number;
+  startupTime: number;
 };
 
 type DetectorConfig = {
@@ -21,6 +22,7 @@ type SessionRestoreDetector = {
   handleBrowserStartup: () => void;
   initSessionRestoreDetector: () => void;
   isSessionRestoreTab: () => boolean;
+  isSessionRestoreInProgress: () => boolean;
   __testHelpers: {
     setStartupPhase: (value: boolean) => void;
     getState: () => DetectorState;
@@ -41,6 +43,7 @@ export const createSessionRestoreDetector = (
   const state: DetectorState = {
     isStartupPhase: false,
     lastTabCreationTime: 0,
+    startupTime: 0,
   };
 
   /**
@@ -49,6 +52,7 @@ export const createSessionRestoreDetector = (
   const handleBrowserStartup = () => {
     state.isStartupPhase = true;
     state.lastTabCreationTime = 0;
+    state.startupTime = timeProvider();
   };
 
   /**
@@ -57,6 +61,15 @@ export const createSessionRestoreDetector = (
   const initSessionRestoreDetector = () => {
     state.isStartupPhase = false;
     state.lastTabCreationTime = 0;
+    state.startupTime = 0;
+  };
+
+  // activationからは作成時刻を更新しない。新規タブを開かなくても通常操作へ戻れるようにする。
+  const isSessionRestoreInProgress = () => {
+    return (
+      state.isStartupPhase &&
+      timeProvider() - (state.lastTabCreationTime || state.startupTime) < rapidCreationThresholdMs
+    );
   };
 
   /**
@@ -94,12 +107,14 @@ export const createSessionRestoreDetector = (
       state.isStartupPhase = value;
       if (value) {
         state.lastTabCreationTime = 0;
+        state.startupTime = timeProvider();
       }
     },
     getState: () => ({ ...state }),
     resetState: () => {
       state.isStartupPhase = false;
       state.lastTabCreationTime = 0;
+      state.startupTime = 0;
     },
   };
 
@@ -107,6 +122,7 @@ export const createSessionRestoreDetector = (
     handleBrowserStartup,
     initSessionRestoreDetector,
     isSessionRestoreTab,
+    isSessionRestoreInProgress,
     __testHelpers,
   };
 };
@@ -118,3 +134,4 @@ export const defaultDetector = createSessionRestoreDetector();
 export const handleBrowserStartup = defaultDetector.handleBrowserStartup;
 export const initSessionRestoreDetector = defaultDetector.initSessionRestoreDetector;
 export const isSessionRestoreTab = defaultDetector.isSessionRestoreTab;
+export const isSessionRestoreInProgress = defaultDetector.isSessionRestoreInProgress;

@@ -22,6 +22,7 @@ import {
   determineNextActiveTab,
   determineNextActiveTabWithoutClosedTab,
 } from "@/src/tabs/tabClosing";
+import { moveActivatedTab } from "@/src/tabs/tabOnActivate";
 
 export const handleTabRemoved = async (
   tabId: number,
@@ -41,17 +42,22 @@ export const handleTabRemoved = async (
   const storedTabs = canUseStoredSnapshotForRemovedTab(tabs, storedTabsCandidate, tabId)
     ? storedTabsCandidate
     : [];
-  const tabsBeforeRemoval = closedTab === null && storedTabs.length > 0 ? storedTabs : tabs;
-  const closedTabBeforeRemoval = closedTab ?? storedTabs.find(tab => tab.id === tabId) ?? null;
+  const snapshotBeforeRemoval = closedTab === null && storedTabs.length > 0 ? storedTabs : tabs;
   const currentActiveTab = getActiveTabSnapshot(windowId);
   const liveActivationHistory = getActivationHistory(windowId);
   const storedActivationHistory = shouldInitialize ? getRestoredActivationHistory(windowId) : [];
-  const storedHistoryBeforeRemoval = getRelevantHistory(storedActivationHistory, tabsBeforeRemoval);
+  const storedHistoryBeforeRemoval = getRelevantHistory(
+    storedActivationHistory,
+    snapshotBeforeRemoval,
+  );
   const pendingCloseTransition = consumePendingCloseTransition(
     windowId,
     tabId,
     currentActiveTab?.id ?? null,
   );
+  // activation先行時も、即時移動前の隣接関係からclose後の選択先を決める。
+  const tabsBeforeRemoval = pendingCloseTransition?.tabsBefore ?? snapshotBeforeRemoval;
+  const closedTabBeforeRemoval = tabsBeforeRemoval.find(tab => tab.id === tabId) ?? null;
   // active tab close は onActivated / onRemoved の順序が固定ではないため、
   // activation 先行・removal 先行・復元直後のどの経路でも同じ close として扱えるようにする。
   const isClosedActiveTab =
@@ -110,6 +116,7 @@ export const handleTabRemoved = async (
       recordPendingCloseTarget(windowId, nextActiveTabId);
       applyPendingCloseTargetActivation(windowId, nextActiveTabId);
     }
+    moveActivatedTab(windowId, nextActiveTabId);
 
     return;
   }

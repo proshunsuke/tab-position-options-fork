@@ -1,7 +1,10 @@
+import type { TabSnapshot } from "@/src/tabs/state/tabSnapshot";
+
 type PendingCloseTransition = {
   fromTabId: number;
   toTabId: number;
   historyBefore: number[];
+  tabsBefore: TabSnapshot[];
   createdAt: number;
 };
 
@@ -17,6 +20,7 @@ export const recordPendingCloseTransition = (
   fromTabId: number | null,
   toTabId: number,
   historyBefore: number[],
+  tabsBefore: TabSnapshot[],
 ) => {
   clearPendingCloseTransition(windowId);
 
@@ -32,6 +36,7 @@ export const recordPendingCloseTransition = (
       fromTabId,
       toTabId,
       historyBefore,
+      tabsBefore,
       createdAt: Date.now(),
     },
   };
