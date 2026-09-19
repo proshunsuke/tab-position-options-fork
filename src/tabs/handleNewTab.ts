@@ -1,12 +1,12 @@
 import { getSettings } from "@/src/settings/state/appData";
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
-import { findNewTabUrlRule } from "@/src/tabs/newTabUrlRules";
 import { calculateNewTabIndex } from "@/src/tabs/position";
 import { isSessionRestoreTab } from "@/src/tabs/sessionRestoreDetector";
 import {
   getActivationHistory,
   getLastActiveTabIdByNewTabId,
 } from "@/src/tabs/state/activationHistory";
+import { getLoadingPositionRevision, markRestoredLoadingTab } from "@/src/tabs/state/loadingPage";
 import { recordNewTabActivation } from "@/src/tabs/state/newTabActivation";
 import { consumeRecentNewTabSourceTransition } from "@/src/tabs/state/newTabSourceTransition";
 import {
@@ -17,6 +17,7 @@ import {
   refreshWindowTabSnapshot,
 } from "@/src/tabs/state/tabSnapshot";
 import { getActivationIndex } from "@/src/tabs/tabOnActivate";
+import { findUrlRule } from "@/src/tabs/urlRules";
 import type { TabPosition } from "@/src/types";
 
 export const handleNewTab = async (tab: chrome.tabs.Tab) => {
@@ -42,7 +43,7 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
   }
 
   const settings = getSettings();
-  const rule = findNewTabUrlRule(tab.pendingUrl || tab.url || "", settings.newTab.urlRules);
+  const rule = findUrlRule(tab.pendingUrl || tab.url || "", settings.newTab.urlRules);
   const position = rule?.position ?? settings.newTab.position;
   const openInBackground = rule ? rule.active === "background" : settings.newTab.openInBackground;
   const lastActiveTabId = getSourceTabId(windowId, tab, shouldInitialize, rule !== undefined);
@@ -50,6 +51,7 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
 
   // 復元時はURLルールによる前面化・背景化も行わない。
   if (isSessionRestoreTab()) {
+    markRestoredLoadingTab(tabId);
     void refreshWindowTabSnapshot(windowId);
     return;
   }
@@ -59,12 +61,17 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
     void chrome.tabs.update(tabId, { active: true }).catch(() => {});
   }
 
+  const loadingRevision = getLoadingPositionRevision(tabId);
   if (openInBackground && lastActiveTabId) {
     // 既存の背景化経路では、元タブの再選択が完了してから配置する必要がある。
     void chrome.tabs
       .update(lastActiveTabId, { active: true })
       .catch(() => {})
       .finally(() => {
+        // 背景化の完了前にLoading Pageが配置した場合、古い新規タブルールで戻さない。
+        if (getLoadingPositionRevision(tabId) !== loadingRevision) {
+          return;
+        }
         positionTabAndUpdateStates(
           position,
           windowId,

@@ -18,6 +18,12 @@ When a tab is created, the extension reads its URL, including its pending naviga
 
 The extension processes these URLs in memory. It does not save them as browsing history or send them to external servers. User-entered URL patterns are saved as settings, as described above. The extension does not read the contents of web pages.
 
+### Page Navigation URLs
+
+When Loading Page rules are configured, the extension checks the destination URL when a top-level navigation commits. For server redirects, it also checks the original navigation URL if the destination does not match.
+
+The pending navigation URL and its tab ID, timestamp, and restoration flag are temporarily retained in `chrome.storage.session` so matching can survive a background-process restart. They are removed when the navigation commits or fails, or the tab closes. Browser restart clears this storage. This is temporary navigation state, not a history of visited pages. Page contents are not read and URLs are not transmitted externally.
+
 ### Session Tab State
 
 To maintain tab behavior when Chrome stops and restarts the extension's background process, the extension stores the following information in `chrome.storage.session`:
@@ -26,8 +32,9 @@ To maintain tab behavior when Chrome stops and restarts the extension's backgrou
 - Tab positions and active/pinned state
 - IDs identifying which tabs opened other tabs
 - The order in which tabs became active
+- Tab IDs whose initial restored navigation should not change their position
 
-This state is used only for tab positioning and activation, including choosing a tab after another tab closes. It does not contain saved page URLs, page titles, or page contents. Session storage is temporary and is cleared when the browser restarts; it is separate from your persistent settings.
+This state is used only for tab positioning and activation, including choosing a tab after another tab closes. Tab snapshots do not contain page URLs, page titles, or page contents; pending navigation URLs are handled separately as described above. Session storage is temporary and is cleared when the browser restarts; it is separate from your persistent settings.
 
 ## Data Storage and Sharing
 
@@ -38,8 +45,9 @@ This state is used only for tab positioning and activation, including choosing a
 
 ## Permissions
 
-- **storage**: Saves your preferences and URL rules locally, and retains session tab state across background-process restarts.
+- **storage**: Saves your preferences and URL rules locally, and retains session tab and pending navigation state across background-process restarts.
 - **tabs**: Reads new-tab URLs to apply your URL rules. This permission is used for local matching, not for uploading or maintaining a history of visited pages.
+- **webNavigation**: Detects top-level navigation commits and server redirects to apply Loading Page URL rules.
 
 ## Your Controls
 

@@ -16,6 +16,11 @@ export type NewTabUrlRule = {
   active: "foreground" | "background";
 };
 
+export type LoadingPageUrlRule = {
+  url: string;
+  position: "first" | "middle" | "last";
+};
+
 export type Settings = {
   newTab: {
     position: TabPosition;
@@ -23,7 +28,7 @@ export type Settings = {
     urlRules?: NewTabUrlRule[];
   };
   loadingPage: {
-    position: TabPosition;
+    urlRules?: LoadingPageUrlRule[];
   };
   afterTabClosing: {
     activateTab: TabActivation;
@@ -43,7 +48,7 @@ export const DEFAULT_SETTINGS: Settings = {
     urlRules: [],
   },
   loadingPage: {
-    position: "default",
+    urlRules: [],
   },
   afterTabClosing: {
     activateTab: "default",

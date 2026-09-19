@@ -14,6 +14,16 @@ declare global {
      * タブハンドラー関連
      */
     tabHandlers: {
+      handleBeforeNavigate: (
+        details: chrome.webNavigation.WebNavigationBaseCallbackDetails,
+      ) => Promise<void>;
+      handleNavigationCommitted: (
+        details: chrome.webNavigation.WebNavigationTransitionCallbackDetails,
+      ) => Promise<void>;
+      handleNavigationError: (
+        details: chrome.webNavigation.WebNavigationFramedErrorCallbackDetails,
+      ) => Promise<void>;
+      handleLoadingPageStartup: () => Promise<void>;
       handleNewTab: (tab: chrome.tabs.Tab) => Promise<void>;
       handleTabActivated: (activeInfo: { tabId: number; windowId: number }) => Promise<void>;
       handleTabRemoved: (
@@ -40,6 +50,7 @@ declare global {
      * 状態関連
      */
     states: {
+      resetLoadingPageState: () => void;
       resetActivationHistory: () => void;
       resetNewTabSourceTransition: () => void;
       resetNewTabActivation: () => void;
