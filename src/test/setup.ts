@@ -14,7 +14,7 @@ import {
   handleNavigationCommitted,
   handleNavigationError,
 } from "@/src/tabs/loadingPage";
-import { createSessionRestoreDetector, defaultDetector } from "@/src/tabs/sessionRestoreDetector";
+import { defaultDetector } from "@/src/tabs/sessionRestoreDetector";
 import { resetActivationHistory } from "@/src/tabs/state/activationHistory";
 import { resetLoadingPageState } from "@/src/tabs/state/loadingPage";
 import { resetNewTabActivation } from "@/src/tabs/state/newTabActivation";
@@ -61,7 +61,6 @@ export const setupTestEnvironment = () => {
       },
 
       sessionRestore: {
-        createDetector: createSessionRestoreDetector,
         defaultDetector,
       },
 

@@ -1,5 +1,10 @@
 import { expect, test } from "@/e2e/fixtures";
-import { clearExtensionStorage, setExtensionSettings } from "@/e2e/utils/helpers";
+import {
+  activatePage,
+  clearExtensionStorage,
+  getTabState,
+  setExtensionSettings,
+} from "@/e2e/utils/helpers";
 
 test.describe("Race Condition - Multiple Tab Closure", () => {
   test.beforeEach(async ({ serviceWorker }) => {
@@ -18,8 +23,7 @@ test.describe("Race Condition - Multiple Tab Closure", () => {
     }
 
     // Tab 3 (pages[2]) をアクティブにする
-    await pages[2].bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await activatePage(serviceWorker, pages[2]);
 
     // "Left Tab" アクティベーション動作を設定
     await setExtensionSettings(context, {
@@ -57,32 +61,11 @@ test.describe("Race Condition - Multiple Tab Closure", () => {
       return true;
     }, tabsToClose);
 
-    // すべてのタブが閉じられイベントハンドラーが処理されるのを待つ
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // 最終状態を確認
-    const finalState = await serviceWorker.evaluate(async () => {
-      const tabs = await chrome.tabs.query({ currentWindow: true });
-      const activeTab = tabs.find(t => t.active);
-      return {
-        totalTabs: tabs.length,
-        activeTabIndex: activeTab?.index,
-        activeTabId: activeTab?.id,
-        tabIndices: tabs.map(t => t.index).sort((a, b) => a - b),
-      };
-    });
-
-    // タブが閉じられたことを確認
-    const expectedRemainingTabs = activeIndex + 1; // アクティブタブまでのタブ
-    expect(finalState.totalTabs).toBe(expectedRemainingTabs);
-
-    // "left"設定での期待される動作：
-    // アクティブタブが閉じられなかった場合、アクティブのまま残るはず
-    // しかしレースコンディションのため、動作が予測不能になる可能性がある
-
-    // レースコンディションのテスト：複数のハンドラーが競合した場合、
-    // アクティブタブが期待通りでない可能性がある
-    expect(finalState.activeTabIndex).toBe(activeIndex); // 同じアクティブタブのままのはず
+    await expect(async () => {
+      const state = await getTabState(serviceWorker);
+      expect(state.totalTabs).toBe(activeIndex + 1);
+      expect(state.activeTabIndex).toBe(activeIndex);
+    }).toPass({ timeout: 5000 });
   });
 
   test("should maintain consistent state when closing all tabs to the right", async ({
@@ -98,14 +81,10 @@ test.describe("Race Condition - Multiple Tab Closure", () => {
     }
 
     // 特定のアクティベーション履歴を構築: Tab 0 -> Tab 2 -> Tab 4 -> Tab 1
-    await pages[0].bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 100));
-    await pages[2].bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 100));
-    await pages[4].bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 100));
-    await pages[1].bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await activatePage(serviceWorker, pages[0]);
+    await activatePage(serviceWorker, pages[2]);
+    await activatePage(serviceWorker, pages[4]);
+    await activatePage(serviceWorker, pages[1]);
 
     // "In activated order" の動作を設定（アクティベーション履歴に依存）
     await setExtensionSettings(context, {
@@ -135,23 +114,11 @@ test.describe("Race Condition - Multiple Tab Closure", () => {
       });
     }, tabsToClose);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const finalState = await serviceWorker.evaluate(async () => {
-      const tabs = await chrome.tabs.query({ currentWindow: true });
-      const activeTab = tabs.find(t => t.active);
-      return {
-        totalTabs: tabs.length,
-        activeTabIndex: activeTab?.index,
-      };
-    });
-
-    // レースコンディションにより、アクティベーション履歴が破損する可能性がある
-    // 期待値: アクティブタブは閉じられていないのでアクティブのまま
-    // 実際: レースコンディションのため予測不能になる可能性がある
-    const expectedRemainingTabs = activeIndex + 1;
-    expect(finalState.totalTabs).toBe(expectedRemainingTabs);
-    expect(finalState.activeTabIndex).toBe(activeIndex); // まだアクティブのはず
+    await expect(async () => {
+      const state = await getTabState(serviceWorker);
+      expect(state.totalTabs).toBe(activeIndex + 1);
+      expect(state.activeTabIndex).toBe(activeIndex);
+    }).toPass({ timeout: 5000 });
   });
 
   test("should handle rapid successive tab closures", async ({ context, serviceWorker }) => {
@@ -164,8 +131,7 @@ test.describe("Race Condition - Multiple Tab Closure", () => {
     }
 
     // 最後のタブをアクティブにする
-    await pages[4].bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await activatePage(serviceWorker, pages[4]);
 
     await setExtensionSettings(context, {
       afterTabClosing: { activateTab: "left" },
@@ -189,25 +155,10 @@ test.describe("Race Condition - Multiple Tab Closure", () => {
       }
     }, tabIds);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const finalState = await serviceWorker.evaluate(async () => {
-      const tabs = await chrome.tabs.query({ currentWindow: true });
-      const activeTab = tabs.find(t => t.active);
-      return {
-        totalTabs: tabs.length,
-        activeTabIndex: activeTab?.index,
-      };
-    });
-
-    // "left"設定での期待値:
-    // 最後のタブを閉じた後、最後から2番目がアクティブになるはず
-    // それを閉じた後、次の左タブがアクティブになるはず、以降同様
-    // しかしレースコンディションのため、正しく動作しない可能性がある
-    const expectedRemainingTabs = tabIds.length - 3; // 3つのタブが閉じられた
-    expect(finalState.totalTabs).toBe(expectedRemainingTabs);
-
-    // アクティブタブは残りの最後のタブから1つ左（left tab）のはず
-    expect(finalState.activeTabIndex).toBe(expectedRemainingTabs - 1);
+    await expect(async () => {
+      const state = await getTabState(serviceWorker);
+      expect(state.totalTabs).toBe(tabIds.length - 3);
+      expect(state.activeTabIndex).toBe(tabIds.length - 4);
+    }).toPass({ timeout: 5000 });
   });
 });

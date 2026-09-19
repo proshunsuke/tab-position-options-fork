@@ -1,4 +1,5 @@
-import type { BrowserContext, Worker } from "@playwright/test";
+import { type BrowserContext, expect, type Page, type Worker } from "@playwright/test";
+import type { TabSnapshot } from "@/src/tabs/state/tabSnapshot";
 import type { Settings } from "@/src/types";
 import { DEFAULT_SETTINGS } from "@/src/types";
 
@@ -32,6 +33,28 @@ type ServiceWorkerLikeGlobal = WorkerGlobalScope & {
 };
 
 const SERVICE_WORKER_WAIT_TIMEOUT_MS = 30_000;
+
+export const activatePage = async (serviceWorker: Worker, page: Page) => {
+  await page.bringToFront();
+  // Chromeのactive状態だけでなく、次の操作・再起動で使う履歴とsnapshotへの反映を待つ。
+  await expect(async () => {
+    const ready = await serviceWorker.evaluate(async url => {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab?.id || tab.url !== url) {
+        return false;
+      }
+      const state = await chrome.storage.session.get<{
+        tabActivationHistory?: Record<string, number[]>;
+        tabSnapshot?: Record<string, TabSnapshot[]>;
+      }>(["tabActivationHistory", "tabSnapshot"]);
+      return (
+        state.tabActivationHistory?.[tab.windowId]?.at(-1) === tab.id &&
+        state.tabSnapshot?.[tab.windowId]?.find(snapshot => snapshot.id === tab.id)?.active === true
+      );
+    }, page.url());
+    expect(ready).toBe(true);
+  }).toPass({ timeout: 5000 });
+};
 
 /**
  * Service Workerが利用可能になるまで待機
@@ -419,8 +442,7 @@ export const simulateServiceWorkerRestart = async (serviceWorker: Worker) => {
     }
   });
 
-  // ストレージから状態を再読み込みする時間を確保
-  await new Promise(resolve => setTimeout(resolve, 100));
+  // 再初期化は次のイベントで始まるため、ここでは待機しない。
 };
 
 /**

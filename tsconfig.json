@@ -16,6 +16,7 @@
     "src",
     "e2e",
     "wxt.config.ts",
+    "vitest.config.ts",
     ".wxt/wxt.d.ts"
   ],
   "exclude": ["node_modules", "dist"]

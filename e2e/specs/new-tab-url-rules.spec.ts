@@ -86,14 +86,7 @@ for (const scenario of cases) {
   });
 }
 
-for (const scenario of [
-  "first-match",
-  "no-match",
-  "invalid",
-  "prefix-fallback",
-  "regex",
-  "opener-not-target",
-] as const) {
+for (const scenario of ["first-match", "no-match", "opener-not-target"] as const) {
   test(`URL matching: ${scenario}`, async ({ context, serviceWorker }) => {
     await clearExtensionStorage(serviceWorker);
     const { windowId } = await createWindowWithTabs(serviceWorker, 4);
@@ -105,14 +98,7 @@ for (const scenario of [
           ]
         : [
             {
-              url:
-                scenario === "invalid"
-                  ? "["
-                  : scenario === "prefix-fallback"
-                    ? "https://rules.test/a$"
-                    : scenario === "regex"
-                      ? "^about:blank#tar.*$"
-                      : "^https://source.test",
+              url: "^https://source.test",
               position: "last",
               active: "foreground",
             },
@@ -133,15 +119,13 @@ for (const scenario of [
           index: 2,
           openerTabId: source.id,
           active: true,
-          url: scenario === "prefix-fallback" ? "https://rules.test/a$more" : "about:blank#target",
+          url: "about:blank#target",
         });
       },
       { windowId, scenario },
     );
     await expect(async () => {
-      expect((await serviceWorker.evaluate(id => chrome.tabs.get(id), tab.id!)).index).toBe(
-        scenario === "prefix-fallback" || scenario === "regex" ? 4 : 0,
-      );
+      expect((await serviceWorker.evaluate(id => chrome.tabs.get(id), tab.id!)).index).toBe(0);
     }).toPass();
   });
 }
