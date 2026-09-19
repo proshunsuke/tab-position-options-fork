@@ -32,6 +32,8 @@ Tab Position Optionsを再実装したChrome Manifest V3拡張機能。WXT・Typ
 - Issueには現在と期待する動作、バグなら再現手順、可能なら解決案を含め、優先度をHigh 🔴・Medium 🟡・Low 🟢で示す。
 - PRには変更内容と検証結果を、規模に応じて説明する。バグ修正では原因を、設計上の判断が必要なら技術的な理由を添える。
 
-## 原版との比較
+## ドキュメント
+
+- READMEは英語版（`README.md`）を正本とし、変更時は日本語版（`README.ja.md`）と簡体字中国語版（`README.zh-CN.md`）も同時に更新する。
 
 原版の挙動やUIを調べる場合は[仕様書](docs/original-extension/specification.md)、[日本語仕様書](docs/original-extension/specification-ja.md)、[設定画面の実装](docs/original-extension/options-page-assets/)、[スクリーンショット](docs/original-extension/screenshots/)を参照する。
