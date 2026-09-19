@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24.4.0
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -36,12 +36,12 @@ jobs:
         run: npm run test:unit
 
   e2e:
-    name: E2E (${{ matrix.shard }}/2)
+    name: E2E (${{ matrix.shard }}/3)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2]
+        shard: [1, 2, 3]
 
     steps:
       - name: Checkout
@@ -50,17 +50,17 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24.4.0
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps --no-shell chromium
 
       - name: Run E2E tests
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" npm run test:e2e -- --shard=${{ matrix.shard }}/2
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" npm run test:e2e -- --shard=${{ matrix.shard }}/3
 
       - name: Upload test results
         if: always()
