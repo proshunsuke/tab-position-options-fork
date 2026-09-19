@@ -1,5 +1,6 @@
 import { expect, test } from "@/e2e/fixtures";
 import {
+  activatePage,
   clearExtensionStorage,
   createExternalTabViaServiceWorker,
   createExternalTabWithRaceCondition,
@@ -31,8 +32,7 @@ test.describe("External Tab Opening Behavior", () => {
     await tab3.goto("data:text/html,<h1>Tab 3</h1>");
 
     // tab2（インデックス1）をアクティブに
-    await tab2.bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await activatePage(serviceWorker, tab2);
 
     await setExtensionSettings(context, { newTab: { position: "right", openInBackground: false } });
 
@@ -74,8 +74,7 @@ test.describe("External Tab Opening Behavior", () => {
     await tab3.goto("data:text/html,<h1>Tab 3</h1>");
 
     // tab2（インデックス1）をアクティブに
-    await tab2.bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await activatePage(serviceWorker, tab2);
 
     await setExtensionSettings(context, { newTab: { position: "left", openInBackground: false } });
 
@@ -114,8 +113,7 @@ test.describe("External Tab Opening Behavior", () => {
     await tab3.goto("data:text/html,<h1>Tab 3</h1>");
 
     // tab2（インデックス1）をアクティブに
-    await tab2.bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await activatePage(serviceWorker, tab2);
 
     await setExtensionSettings(context, { newTab: { position: "first", openInBackground: false } });
 
@@ -154,8 +152,7 @@ test.describe("External Tab Opening Behavior", () => {
     await tab3.goto("data:text/html,<h1>Tab 3</h1>");
 
     // tab2（インデックス1）をアクティブに
-    await tab2.bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await activatePage(serviceWorker, tab2);
 
     await setExtensionSettings(context, { newTab: { position: "last", openInBackground: false } });
 
@@ -200,8 +197,7 @@ test.describe("External Tab Opening Behavior", () => {
     await tab5.goto("data:text/html,<h1>Tab 5</h1>");
 
     // tab3（中間のタブ）をアクティブに
-    await tab3.bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await activatePage(serviceWorker, tab3);
 
     await setExtensionSettings(context, { newTab: { position: "right", openInBackground: false } });
 
@@ -243,8 +239,7 @@ test.describe("External Tab Opening Behavior", () => {
     await tab3.goto("data:text/html,<h1>Tab 3</h1>");
 
     // tab2をアクティブに
-    await tab2.bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await activatePage(serviceWorker, tab2);
 
     await setExtensionSettings(context, {
       newTab: { position: "default", openInBackground: false },
@@ -297,8 +292,7 @@ test.describe("External Tab Opening with Race Condition", () => {
     await tab3.goto("data:text/html,<h1>Tab 3</h1>");
 
     // tab2（インデックス1）をアクティブに
-    await tab2.bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await activatePage(serviceWorker, tab2);
 
     await setExtensionSettings(context, { newTab: { position: "right", openInBackground: false } });
 
@@ -341,8 +335,7 @@ test.describe("External Tab Opening with Race Condition", () => {
     await tab3.goto("data:text/html,<h1>Tab 3</h1>");
 
     // tab2（インデックス1）をアクティブに
-    await tab2.bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await activatePage(serviceWorker, tab2);
 
     await setExtensionSettings(context, { newTab: { position: "left", openInBackground: false } });
 
@@ -385,8 +378,7 @@ test.describe("External Tab Opening with Race Condition", () => {
     await tab3.goto("data:text/html,<h1>Tab 3</h1>");
 
     // tab2をアクティブに
-    await tab2.bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await activatePage(serviceWorker, tab2);
 
     await setExtensionSettings(context, { newTab: { position: "first", openInBackground: false } });
 
@@ -428,8 +420,7 @@ test.describe("External Tab Opening with Race Condition", () => {
     await tab3.goto("data:text/html,<h1>Tab 3</h1>");
 
     // tab2（インデックス1）をアクティブに
-    await tab2.bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await activatePage(serviceWorker, tab2);
 
     await setExtensionSettings(context, { newTab: { position: "last", openInBackground: false } });
 

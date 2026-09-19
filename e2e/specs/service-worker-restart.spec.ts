@@ -1,5 +1,6 @@
 import { expect, test } from "@/e2e/fixtures";
 import {
+  activatePage,
   activateTabByIndexInWindow,
   clearExtensionStorage,
   closeActiveTabViaServiceWorker,
@@ -43,8 +44,7 @@ test.describe("Service Worker Restart Handling", () => {
     await tab3.goto("data:text/html,<h1>Tab 3</h1>");
 
     // 右端のタブ（tab3）をアクティブに
-    await tab3.bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await activatePage(serviceWorker, tab3);
 
     // 左タブアクティベーション設定
     await setExtensionSettings(context, {
@@ -108,14 +108,10 @@ test.describe("Service Worker Restart Handling", () => {
     }
 
     // 特定の順序でタブをアクティブ化: Tab1 -> Tab3 -> Tab2 -> Tab4
-    await pages[0].bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 100));
-    await pages[2].bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 100));
-    await pages[1].bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 100));
-    await pages[3].bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await activatePage(serviceWorker, pages[0]);
+    await activatePage(serviceWorker, pages[2]);
+    await activatePage(serviceWorker, pages[1]);
+    await activatePage(serviceWorker, pages[3]);
 
     // アクティベーション履歴を使用する設定
     await setExtensionSettings(context, {
@@ -696,8 +692,7 @@ test.describe("Service Worker Restart Handling", () => {
 
     const tab2 = await context.newPage();
     await tab2.goto("data:text/html,<h1>Tab 2</h1>");
-    await tab2.bringToFront();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await activatePage(serviceWorker, tab2);
 
     await resetServiceWorkerTabQueryCalls(serviceWorker);
     await resetServiceWorkerUnhandledRejections(serviceWorker);
