@@ -1,6 +1,6 @@
 ---
 name: tab-position-release
-description: Tab Position Options Forkのリリース準備、Changelog更新、リリース実行の手順。これらの作業を依頼された場合に使用する。
+description: Tab Position Options Forkのリリース準備、Changelog・申請文書の更新、ダッシュボードへの反映、リリース実行の手順。これらの作業を依頼された場合に使用する。
 ---
 
 # リリースとChangelog
@@ -23,7 +23,9 @@ description: Tab Position Options Forkのリリース準備、Changelog更新、
 1. 対象バージョンと変更内容を確認し、PRを作る場合は変更をコミットする前に`release/vX.X.X`ブランチを用意する。
 2. バージョンの正本である[package.json](../../../package.json)を更新し、`npm install`でlockfileを更新する。アプリや設定にバージョンをハードコードしない。
 3. 上記の形式でChangelogを更新する。
-4. 型チェック・lint・全E2E・Chromeビルドの成功を確認する。環境準備とE2E実行には[tab-position-e2e](../tab-position-e2e/SKILL.md)を使用する。
+4. [CHROMEWEBSTORE.md](../../../CHROMEWEBSTORE.md)の掲載文・単一用途・権限理由・データ使用・画像アセット・対象バージョンを、実装と照合して更新する。データの扱いが変わった場合は[PRIVACY.md](../../../PRIVACY.md)も先に更新し、説明を一致させる。READMEの変更が必要なら3言語を同期する。
+5. 文書には登録済みの内容と次回反映する内容を区別し、未確認の項目や提出前の状態を公開済みとして記録しない。ダッシュボードへの反映元はリポジトリ内の文書とし、画面上だけで文案を変更しない。
+6. 型チェック・lint・全E2E・Chromeビルドの成功を確認する。環境準備とE2E実行には[tab-position-e2e](../tab-position-e2e/SKILL.md)を使用する。
 
 ```fish
 npx wxt prepare
@@ -38,4 +40,4 @@ npm run test:e2e
 
 ## リリース実行
 
-実行を依頼された場合にだけ[公開手順](references/publish.md)を読む。Gitタグは手動作成しない。
+リリース実行またはダッシュボードへの反映を依頼された場合は[公開手順](references/publish.md)を読む。Gitタグは手動作成しない。

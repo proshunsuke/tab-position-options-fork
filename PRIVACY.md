@@ -1,72 +1,57 @@
 # Privacy Policy for Tab Position Options Fork
 
-*Last updated: January 2025*
+*Last updated: September 19, 2026*
 
 ## Overview
 
-Tab Position Options Fork is a Chrome extension that allows users to control where new tabs are opened in their browser. We take your privacy seriously and are committed to protecting it.
+Tab Position Options Fork lets you customize tab positioning and activation behavior in Chrome. The extension processes the information described below locally on your device. It does not transmit this information to external servers or share it with third parties.
 
-## Data Collection and Usage
+## Information We Handle
 
-### What data we collect
+### Settings and URL Rules
 
-This extension collects and stores only the following data:
+Your tab positioning, background-opening, and activation preferences are saved using `chrome.storage.local`. This includes URL patterns you enter in the extension's options page. Settings remain on your device until changed, removed, or deleted by uninstalling the extension.
 
-- **Extension Settings**: Your preferences for tab positioning behavior (e.g., where new tabs open, which tab becomes active after closing a tab)
+### New-Tab URLs
 
-### How we collect data
+When a tab is created, the extension reads its URL, including its pending navigation URL when available, to check your URL rules. Matching rules determine the tab's position and whether it opens in the foreground or background.
 
-- Settings are stored locally on your device using Chrome's `chrome.storage.local` API
-- Tab information is accessed temporarily using Chrome's `chrome.tabs` API to implement the tab positioning features
+The extension processes these URLs in memory. It does not save them as browsing history or send them to external servers. User-entered URL patterns are saved as settings, as described above. The extension does not read the contents of web pages.
 
-### How we use data
+### Session Tab State
 
-The collected data is used solely to:
-- Save your preferences
-- Apply your chosen tab positioning behavior
-- Provide the functionality described in the extension
+To maintain tab behavior when Chrome stops and restarts the extension's background process, the extension stores the following information in `chrome.storage.session`:
 
-## Data Storage
+- Window and tab IDs
+- Tab positions and active/pinned state
+- IDs identifying which tabs opened other tabs
+- The order in which tabs became active
 
-- All data is stored **locally on your device**
-- No data is transmitted to external servers
-- No analytics or tracking services are used
-- No personal information is collected
+This state is used only for tab positioning and activation, including choosing a tab after another tab closes. It does not contain saved page URLs, page titles, or page contents. Session storage is temporary and is cleared when the browser restarts; it is separate from your persistent settings.
 
-## Data Sharing
+## Data Storage and Sharing
 
-We do **not** share any data with third parties. Your settings remain on your device.
+- Settings and session tab state remain on your device.
+- The extension does not use Chrome storage sync to synchronize this data between devices.
+- The extension does not use analytics, advertising, or tracking services.
+- The extension does not sell, transmit, or share the information described above with third parties.
 
-## User Rights
+## Permissions
 
-### Access and Control
+- **storage**: Saves your preferences and URL rules locally, and retains session tab state across background-process restarts.
+- **tabs**: Reads new-tab URLs to apply your URL rules. This permission is used for local matching, not for uploading or maintaining a history of visited pages.
 
-You have full control over your data:
-- View your settings at any time through the extension's options page
-- Modify your settings at any time
-- Delete all data by uninstalling the extension
+## Your Controls
 
-### Data Deletion
+You can view and change preferences, and edit or remove URL rules, in the extension's options page. Click **Save Settings** to apply changes. Removing all URL rules stops URL-based matching; other tab settings continue to apply.
 
-To delete all stored data:
-1. Uninstall the extension from Chrome
-2. Or, clear the extension's data through Chrome's settings
-
-## Security
-
-Your settings are protected by Chrome's built-in security measures for extension storage.
+Restarting the browser clears session tab state. Uninstalling the extension removes its stored settings and extension data from that browser profile.
 
 ## Changes to This Policy
 
-We may update this privacy policy from time to time. Any changes will be posted on this page with an updated revision date.
+We will update this policy when the extension's data handling changes and revise the date above. The policy available in the repository describes the corresponding source code; older installed versions may have fewer features or permissions.
 
 ## Contact
 
-If you have any questions about this privacy policy, please create an issue on our GitHub repository:
+For questions about privacy or data handling, please open an issue at:
 https://github.com/proshunsuke/tab-position-options-fork/issues
-
-## Compliance
-
-This extension complies with:
-- Chrome Web Store Developer Program Policies
-- Chrome Extension Platform Privacy Requirements

@@ -88,6 +88,8 @@ npm run test:e2e
 
 準備と公開の手順は[リリースガイド](.agents/skills/tab-position-release/SKILL.md)、リリースノートは[CHANGELOG.md](CHANGELOG.md)を参照してください。
 
+ストア申請情報は[CHROMEWEBSTORE.md](CHROMEWEBSTORE.md)で管理します。先にリポジトリ内の文書を更新・確認し、その内容をDeveloper Dashboardに反映します。
+
 ## 謝辞
 
 原版の[Tab Position Options](https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl)の開発者に感謝します。本プロジェクトは独立したフォークであり、Googleとは関係ありません。
