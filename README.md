@@ -1,188 +1,101 @@
 <div align="center">
-  <img src="store-assets/social-preview-1280x640.png" alt="Tab Position Options" width="640" height="320">
-  
-  # Tab Position Options
-  
-  ### Take control of your Chrome tabs like never before 🎯
-  
-  [![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/bimiahgcjenkoacmdfggckkaflnnebki.svg)](https://chrome.google.com/webstore/detail/tab-position-options/bimiahgcjenkoacmdfggckkaflnnebki)
-  [![Chrome Web Store Users](https://img.shields.io/chrome-web-store/users/bimiahgcjenkoacmdfggckkaflnnebki.svg)](https://chrome.google.com/webstore/detail/tab-position-options/bimiahgcjenkoacmdfggckkaflnnebki)
-  [![Chrome Web Store Rating](https://img.shields.io/chrome-web-store/rating/bimiahgcjenkoacmdfggckkaflnnebki.svg)](https://chrome.google.com/webstore/detail/tab-position-options/bimiahgcjenkoacmdfggckkaflnnebki)
-  [![GitHub Stars](https://img.shields.io/github/stars/proshunsuke/tab-position-options-fork.svg)](https://github.com/proshunsuke/tab-position-options-fork)
-  [![Manifest V3](https://img.shields.io/badge/Manifest-V3-blue.svg)](https://developer.chrome.com/docs/extensions/mv3/)
-  [![License](https://img.shields.io/github/license/proshunsuke/tab-position-options-fork.svg)](https://github.com/proshunsuke/tab-position-options-fork)
-  
-  <a href="https://chrome.google.com/webstore/detail/tab-position-options/bimiahgcjenkoacmdfggckkaflnnebki">
-    <img src="https://developer.chrome.com/static/docs/webstore/branding/image/iNEddTyWiMfLSwFD6qGq.png" alt="Available in the Chrome Web Store" width="248" height="75">
-  </a>
+  <img src="store-assets/social-preview-1280x640.png" alt="Tab Position Options Fork" width="640" height="320">
+
+# Tab Position Options Fork
+
+[English](README.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
+
+[![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/bimiahgcjenkoacmdfggckkaflnnebki.svg)](https://chromewebstore.google.com/detail/tab-position-options-fork/bimiahgcjenkoacmdfggckkaflnnebki)
+[![Chrome Web Store Users](https://img.shields.io/chrome-web-store/users/bimiahgcjenkoacmdfggckkaflnnebki.svg)](https://chromewebstore.google.com/detail/tab-position-options-fork/bimiahgcjenkoacmdfggckkaflnnebki)
+[![Chrome Web Store Rating](https://img.shields.io/chrome-web-store/rating/bimiahgcjenkoacmdfggckkaflnnebki.svg)](https://chromewebstore.google.com/detail/tab-position-options-fork/bimiahgcjenkoacmdfggckkaflnnebki)
+[![GitHub Stars](https://img.shields.io/github/stars/proshunsuke/tab-position-options-fork.svg)](https://github.com/proshunsuke/tab-position-options-fork)
+[![Manifest V3](https://img.shields.io/badge/Manifest-V3-blue.svg)](https://developer.chrome.com/docs/extensions/mv3/)
+[![License](https://img.shields.io/github/license/proshunsuke/tab-position-options-fork.svg)](https://github.com/proshunsuke/tab-position-options-fork)
+
+<a href="https://chromewebstore.google.com/detail/tab-position-options-fork/bimiahgcjenkoacmdfggckkaflnnebki">
+  <img src="https://developer.chrome.com/static/docs/webstore/branding/image/iNEddTyWiMfLSwFD6qGq.png" alt="Available in the Chrome Web Store" width="248" height="75">
+</a>
+
 </div>
 
----
+A Chrome extension that lets you customize where new tabs open, whether they open in the background, and which tab becomes active after closing the current tab. Reimplemented from the original Tab Position Options for Manifest V3.
 
-## ✨ Features at a Glance
+<img src="store-assets/screenshots/screenshot-1.png" alt="Tab Position Options Fork settings" width="640">
 
-<div align="center">
-  <table>
-    <tr>
-      <td align="center" width="33%">
-        <h3>🎯 New Tab Position</h3>
-        <p>Control exactly where your new tabs appear - first, last, or relative to current tab</p>
-      </td>
-      <td align="center" width="33%">
-        <h3>📌 Smart Tab Closing</h3>
-        <p>Choose which tab becomes active when you close a tab - no more jumping around!</p>
-      </td>
-      <td align="center" width="33%">
-        <h3>🚀 Lightning Fast</h3>
-        <p>Zero performance impact - built with Manifest V3 for maximum efficiency</p>
-      </td>
-    </tr>
-  </table>
-</div>
+## Getting Started
 
-## 📸 Screenshot
+1. Install the extension from the Chrome Web Store.
+2. Open the extension from Chrome's Extensions menu or its toolbar icon.
+3. Choose your preferences and click **Save Settings**.
 
-<div align="center">
-  <img src="store-assets/screenshots/screenshot-1.png" alt="Tab Position Options Settings" width="640">
-</div>
+For installation from source, see [Manual Installation](#manual-installation).
 
-## 🚀 Getting Started
+## Privacy
 
-### Install from Chrome Web Store (Recommended)
+Settings are stored locally on your device. The extension does not send data to external servers.
 
-1. Visit the [Chrome Web Store page](https://chrome.google.com/webstore/detail/tab-position-options/bimiahgcjenkoacmdfggckkaflnnebki)
-2. Click "Add to Chrome"
-3. Click the extension icon in your toolbar
-4. Configure your preferences
-5. Enjoy organized tabs! 🎉
+## Development
 
-### Manual Installation (For Developers)
+Built with WXT, TypeScript, React, and Tailwind CSS, with Biome for code checks and Playwright for E2E tests.
 
-See the [For Developers](#-for-developers) section below for detailed setup instructions.
+### Setup
 
-## 🎨 How It Works
+Use Node.js and npm matching the version in the [CI workflow](.github/workflows/test.yml).
 
-### New Tab Position Options
+```fish
+git clone https://github.com/proshunsuke/tab-position-options-fork.git
+cd tab-position-options-fork
+npm ci
+npx wxt prepare
+```
 
-Choose where new tabs open when you press Ctrl/Cmd+T or click the + button:
+### Common Commands
 
-- **🔵 Always First** - New tabs appear at the beginning
-- **🔴 Always Last** - New tabs appear at the end
-- **➡️ Right of Current** - New tabs open to the right of your active tab
-- **⬅️ Left of Current** - New tabs open to the left of your active tab
-- **⚪ Default** - Use Chrome's default behavior
+```fish
+npm run dev          # Start Chrome development mode with hot reload
+npm run build        # Build the Chrome extension
+npm run typecheck    # Check TypeScript types
+npm run lint:check   # Check lint and formatting without modifying files
+```
 
-**Additional Option:**
-- **🔇 Background** - Open new tabs in the background without switching focus
+See [package.json](package.json) for all scripts. `npm run lint` applies automatic fixes, including unsafe fixes.
 
-### Tab Closing Behavior
+### Manual Installation
 
-Control which tab becomes active after closing a tab:
+After completing the setup above:
 
-- **⏮️ First Tab** - Jump to the first tab
-- **⏭️ Last Tab** - Jump to the last tab
-- **▶️ Right Tab** - Activate the tab on the right
-- **◀️ Left Tab** - Activate the tab on the left
-- **🔄 In Activated Order** - Return to previously active tab
-- **⚪ Default** - Use Chrome's default behavior
+1. Run `npm run build`.
+2. Open `chrome://extensions` in Chrome and enable **Developer mode**.
+3. Click **Load unpacked** and select the `dist/chrome-mv3` directory.
+4. Open the extension, choose your preferences, and click **Save Settings**.
 
-## 📊 Current Status
+After rebuilding, reload the extension from `chrome://extensions` to use the updated build.
 
-This is an early release focusing on core functionality. Some features from the original extension are still being implemented.
+### E2E Tests
 
-### ✅ Implemented
-- **New Tab Position** - Full control over where new tabs open
-- **New Tab Background** - Open tabs without losing focus on current tab
-- **Tab Closing Behavior** - Smart tab activation after closing
+Install Playwright's Chromium before the first run:
 
-### 🚧 Coming Soon
-- **Loading Page** - Control where tabs open from links
-- **Tab on Activate** - Advanced tab activation features
-- **Pop-up Windows** - Convert pop-ups to tabs
+```fish
+npx playwright install chromium
+npm run test:e2e
+```
 
-## 🛡️ Privacy & Security
+`test:e2e` builds the extension before running the tests. On Linux without a display, use the Xvfb setup in the [CI workflow](.github/workflows/test.yml). See the [E2E guide](.agents/skills/tab-position-e2e/SKILL.md) for environment setup and test-specific procedures.
 
-<div align="center">
-  <table>
-    <tr>
-      <td align="center">
-        <h3>🔒 No Data Collection</h3>
-        <p>All settings stored locally<br>Zero external connections</p>
-      </td>
-      <td align="center">
-        <h3>✅ Manifest V3</h3>
-        <p>Built with latest Chrome<br>security standards</p>
-      </td>
-      <td align="center">
-        <h3>📖 Open Source</h3>
-        <p>Fully transparent<br>Community driven</p>
-      </td>
-    </tr>
-  </table>
-</div>
+## Releases
 
-## 📜 About This Fork
+The manually triggered release workflow uploads a draft to the Chrome Web Store, then creates a GitHub Release with the extension ZIP. Submission for store review is a separate manual step.
 
-This is a modern fork of the original [Tab Position Options](https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl) extension, updated for Chrome Manifest V3 to ensure continued compatibility and enhanced security.
+See the [release guide](.agents/skills/tab-position-release/SKILL.md) for preparation and publishing procedures, and [CHANGELOG.md](CHANGELOG.md) for release notes.
 
-We're grateful to the original developer for creating this useful extension. This fork aims to preserve its functionality while meeting modern Chrome security requirements.
+## Acknowledgments
 
-## 🤝 Contributing
+Thanks to the developer of the original [Tab Position Options](https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl). This project is an independent fork and is not affiliated with Google.
 
-We welcome contributions! Feel free to:
+## Contributing
 
-- 🐛 [Report bugs](https://github.com/proshunsuke/tab-position-options-fork/issues)
-- 💡 [Suggest features](https://github.com/proshunsuke/tab-position-options-fork/issues)
-- 🔧 [Submit pull requests](https://github.com/proshunsuke/tab-position-options-fork/pulls)
+[Bug reports and feature requests](https://github.com/proshunsuke/tab-position-options-fork/issues) and [pull requests](https://github.com/proshunsuke/tab-position-options-fork/pulls) are welcome.
 
-## 🧑‍💻 For Developers
+## License
 
-### Tech Stack
-
-- **Framework**: [WXT](https://wxt.dev/) - Next generation web extension framework
-- **Language**: TypeScript
-- **UI**: React
-- **Styling**: Tailwind CSS
-- **Testing**: Playwright
-- **Code Quality**: Biome
-
-### Development Setup
-
-1. **Clone & Install**
-   ```bash
-   git clone https://github.com/proshunsuke/tab-position-options-fork.git
-   cd tab-position-options-fork
-   npm install
-   ```
-
-2. **Development Commands**
-   ```bash
-   npm run dev          # Start dev server with HMR (Chrome)
-   npm run dev:firefox  # Start dev server (Firefox)
-   npm run build        # Production build (Chrome)
-   npm run build:firefox # Production build (Firefox)
-   npm run typecheck    # TypeScript type checking
-   npm run lint         # Lint & format with Biome
-   npm run test:e2e     # Run E2E tests with Playwright
-   ```
-
-### Release Process
-
-Automated releases via GitHub Actions:
-1. Update version in `package.json`
-2. Commit and push changes
-3. Run release workflow from [Actions tab](https://github.com/proshunsuke/tab-position-options-fork/actions/workflows/release.yml)
-   - Creates GitHub release with ZIP file
-   - Uploads to Chrome Web Store as draft
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
----
-
-<div align="center">
-  Made with ❤️ for the Chrome community
-  
-  <sub>Not affiliated with Google Chrome</sub>
-</div>
+[MIT](LICENSE.txt)
