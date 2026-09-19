@@ -1,5 +1,6 @@
 import { getSettings } from "@/src/settings/state/appData";
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
+import { findNewTabUrlRule } from "@/src/tabs/newTabUrlRules";
 import { calculateNewTabIndex } from "@/src/tabs/position";
 import { isSessionRestoreTab } from "@/src/tabs/sessionRestoreDetector";
 import {
@@ -41,20 +42,37 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
   }
 
   const settings = getSettings();
-  const lastActiveTabId = getSourceTabId(windowId, tab, shouldInitialize);
+  const rule = findNewTabUrlRule(tab.pendingUrl || tab.url || "", settings.newTab.urlRules);
+  const position = rule?.position ?? settings.newTab.position;
+  const openInBackground = rule ? rule.active === "background" : settings.newTab.openInBackground;
+  const lastActiveTabId = getSourceTabId(windowId, tab, shouldInitialize, rule !== undefined);
   addTabToSnapshot(tab);
 
-  if (settings.newTab.openInBackground && lastActiveTabId) {
+  // 復元時はURLルールによる前面化・背景化も行わない。
+  if (isSessionRestoreTab()) {
+    void refreshWindowTabSnapshot(windowId);
+    return;
+  }
+
+  if (rule?.active === "foreground" && !tab.active) {
+    recordNewTabActivation(windowId, tabId);
+    void chrome.tabs.update(tabId, { active: true }).catch(() => {});
+  }
+
+  if (openInBackground && lastActiveTabId) {
+    // 既存の背景化経路では、元タブの再選択が完了してから配置する必要がある。
     void chrome.tabs
       .update(lastActiveTabId, { active: true })
       .catch(() => {})
       .finally(() => {
         positionTabAndUpdateStates(
-          settings.newTab.position,
+          position,
           windowId,
           tabId,
           tabIndex,
           lastActiveTabId,
+          false,
+          rule !== undefined,
         );
       });
 
@@ -62,12 +80,13 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
   }
 
   positionTabAndUpdateStates(
-    settings.newTab.position,
+    position,
     windowId,
     tabId,
     tabIndex,
     lastActiveTabId,
-    tab.active && !settings.newTab.openInBackground,
+    (tab.active || rule?.active === "foreground") && !openInBackground,
+    rule !== undefined,
   );
 };
 
@@ -81,13 +100,15 @@ const positionTabAndUpdateStates = (
   tabIndex: number,
   lastActiveTabId: number | null,
   applyActivation = false,
+  hasUrlRule = false,
 ) => {
   // 新規配置とactivationの最終位置を先に決め、途中の位置への移動を避ける。
-  const isSessionRestore = isSessionRestoreTab();
   const activationIndex = applyActivation ? getActivationIndex(windowId, tabId) : null;
-  const newIndex = isSessionRestore
-    ? tabIndex
-    : (activationIndex ?? getNewIndex(position, windowId, lastActiveTabId, tabIndex));
+  const newIndex =
+    activationIndex ??
+    (hasUrlRule
+      ? getRuleIndex(position, windowId, lastActiveTabId, tabIndex)
+      : getNewIndex(position, windowId, lastActiveTabId, tabIndex));
   if (newIndex !== tabIndex) {
     moveTabInSnapshot(windowId, tabId, newIndex);
     void chrome.tabs
@@ -103,9 +124,18 @@ const positionTabAndUpdateStates = (
   void refreshWindowTabSnapshot(windowId);
 };
 
-const getSourceTabId = (windowId: number, tab: chrome.tabs.Tab, shouldInitialize: boolean) => {
+const getSourceTabId = (
+  windowId: number,
+  tab: chrome.tabs.Tab,
+  shouldInitialize: boolean,
+  useCurrentTab = false,
+) => {
   const openerTabId = tab.openerTabId;
-  if (openerTabId && getTabSnapshot(windowId).some(snapshot => snapshot.id === openerTabId)) {
+  if (
+    !useCurrentTab &&
+    openerTabId &&
+    getTabSnapshot(windowId).some(snapshot => snapshot.id === openerTabId)
+  ) {
     return openerTabId;
   }
 
@@ -155,4 +185,32 @@ const getNewIndex = (
   }
   const tabs = getTabSnapshot(windowId);
   return calculateNewTabIndex(position, tabs, lastActiveTabId) ?? index;
+};
+
+const getRuleIndex = (
+  position: TabPosition,
+  windowId: number,
+  sourceTabId: number | null,
+  index: number,
+) => {
+  const tabs = getTabSnapshot(windowId);
+  if (position === "default") {
+    return index;
+  }
+  if (position === "first") {
+    return tabs.filter(tab => tab.pinned).length;
+  }
+  if (position === "last") {
+    return tabs.length - 1;
+  }
+  const source = tabs.find(tab => tab.id === sourceTabId);
+  if (!source) {
+    return index;
+  }
+  // 対象タブを取り除いた後のインデックスに合わせる。
+  const sourceIndex = source.index - (index < source.index ? 1 : 0);
+  return Math.max(
+    tabs.filter(tab => tab.pinned).length,
+    sourceIndex + (position === "right" ? 1 : 0),
+  );
 };

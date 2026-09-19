@@ -10,10 +10,17 @@ export type TabActivation =
   | "default";
 export type TabOnActivateBehavior = "default" | "last" | "first";
 
+export type NewTabUrlRule = {
+  url: string;
+  position: TabPosition;
+  active: "foreground" | "background";
+};
+
 export type Settings = {
   newTab: {
     position: TabPosition;
     openInBackground: boolean;
+    urlRules?: NewTabUrlRule[];
   };
   loadingPage: {
     position: TabPosition;
@@ -33,6 +40,7 @@ export const DEFAULT_SETTINGS: Settings = {
   newTab: {
     position: "default",
     openInBackground: false,
+    urlRules: [],
   },
   loadingPage: {
     position: "default",

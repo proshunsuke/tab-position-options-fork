@@ -7,7 +7,8 @@ import {
   initializeAppData,
   saveSettingsWithVersion,
 } from "@/src/settings/state/appData";
-import type { TabActivation, TabOnActivateBehavior, TabPosition } from "@/src/types";
+import { isValidUrlPattern } from "@/src/tabs/newTabUrlRules";
+import type { NewTabUrlRule, TabActivation, TabOnActivateBehavior, TabPosition } from "@/src/types";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<"behavior" | "closing" | "activation">("behavior");
@@ -15,6 +16,7 @@ export default function App() {
   const [openInBackground, setOpenInBackground] = useState(false);
   const [afterTabClosing, setAfterTabClosing] = useState<TabActivation>("default");
   const [tabOnActivate, setTabOnActivate] = useState<TabOnActivateBehavior>("default");
+  const [urlRules, setUrlRules] = useState<NewTabUrlRule[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
@@ -29,6 +31,7 @@ export default function App() {
       if (settings.newTab?.openInBackground !== undefined) {
         setOpenInBackground(settings.newTab.openInBackground);
       }
+      setUrlRules(settings.newTab?.urlRules ?? []);
       if (settings.afterTabClosing?.activateTab) {
         setAfterTabClosing(settings.afterTabClosing.activateTab);
       }
@@ -55,6 +58,10 @@ export default function App() {
   };
 
   const handleSave = () => {
+    if (urlRules.some(rule => !isValidUrlPattern(rule.url.trim()))) {
+      setSaveMessage("Enter a valid URL pattern for each rule.");
+      return;
+    }
     setIsSaving(true);
     setSaveMessage("");
 
@@ -65,6 +72,7 @@ export default function App() {
         newTab: {
           position: newTabPosition,
           openInBackground,
+          urlRules: urlRules.map(rule => ({ ...rule, url: rule.url.trim() })),
         },
         afterTabClosing: {
           activateTab: afterTabClosing,
@@ -132,6 +140,8 @@ export default function App() {
           <div className="bg-white rounded-lg shadow-lg p-10 min-h-[500px]">
             {activeTab === "behavior" && (
               <TabBehavior
+                urlRules={urlRules}
+                onUrlRulesChange={setUrlRules}
                 newTabPosition={newTabPosition}
                 onNewTabPositionChange={handleNewTabPositionChange}
                 openInBackground={openInBackground}
