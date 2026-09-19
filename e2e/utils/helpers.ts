@@ -408,6 +408,7 @@ export const simulateServiceWorkerRestart = async (serviceWorker: Worker) => {
       globalThis.__testExports.states.resetPendingCloseTarget();
       globalThis.__testExports.states.resetPendingCloseTransition();
       globalThis.__testExports.states.resetTabSnapshotState();
+      globalThis.__testExports.states.resetLoadingPageState();
       globalThis.__testExports.states.resetAppDataState();
       globalThis.__testExports.states.resetInitializationState();
     }

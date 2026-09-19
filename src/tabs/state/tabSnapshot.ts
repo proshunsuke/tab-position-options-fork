@@ -177,6 +177,13 @@ export const getRestoredTabSnapshot = (windowId: number) => {
   return restoredTabSnapshotState[getWindowKey(windowId)] ?? [];
 };
 
+export const findTabWindowId = (tabId: number) => {
+  const entry = Object.entries(tabSnapshotState).find(([, tabs]) =>
+    tabs.some(tab => tab.id === tabId),
+  );
+  return entry ? Number(entry[0]) : null;
+};
+
 export const getTabSnapshotById = (windowId: number, tabId: number) => {
   return getTabSnapshot(windowId).find(tab => tab.id === tabId) ?? null;
 };
@@ -278,3 +285,6 @@ export const resetTabSnapshotState = () => {
   restoredTabSnapshotState = {};
   pendingStorageWrite = Promise.resolve();
 };
+
+export const getAllTabIds = () =>
+  Object.values(tabSnapshotState).flatMap(tabs => tabs.map(tab => tab.id));

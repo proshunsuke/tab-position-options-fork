@@ -5,13 +5,15 @@
 
 import { initializeAppData } from "@/src/settings/state/appData";
 import { initializeActivationHistory } from "@/src/tabs/state/activationHistory";
-import { initializeTabSnapshot } from "@/src/tabs/state/tabSnapshot";
+import { initializeLoadingPageState, markInitialLoadingTabs } from "@/src/tabs/state/loadingPage";
+import { getAllTabIds, initializeTabSnapshot } from "@/src/tabs/state/tabSnapshot";
 
 /**
  * Service Worker の初期化状態を管理するフラグ
  * Service Worker が再起動されると false にリセットされる
  */
 let isInitialized = false;
+let initialization: Promise<void> | undefined;
 
 /**
  * 初期化が必要かどうかをチェック
@@ -38,11 +40,24 @@ export const initializeAllStates = async () => {
   if (isInitialized) {
     return; // 既に初期化済み
   }
-  // 全ステートを並行して初期化（高速化のため）
-  await Promise.all([initializeActivationHistory(), initializeAppData(), initializeTabSnapshot()]);
-
-  // 初期化完了をマーク
-  markInitialized();
+  // 同時に届くタブ・navigationイベントは同じ初期化を待ち、live stateの上書きを防ぐ。
+  initialization ??= Promise.all([
+    initializeActivationHistory(),
+    initializeAppData(),
+    initializeTabSnapshot(),
+    initializeLoadingPageState(),
+  ])
+    .then(([, , , isFirstSessionInitialization]) => {
+      // 起動イベントより先に届く復元navigationも、既存の初期化snapshotで除外する。
+      if (isFirstSessionInitialization) {
+        markInitialLoadingTabs(getAllTabIds());
+      }
+      markInitialized();
+    })
+    .finally(() => {
+      initialization = undefined;
+    });
+  await initialization;
 };
 
 /**
@@ -51,6 +66,7 @@ export const initializeAllStates = async () => {
  */
 export const resetInitializationState = () => {
   isInitialized = false;
+  initialization = undefined;
 };
 
 /**

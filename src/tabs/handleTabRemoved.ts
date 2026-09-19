@@ -5,6 +5,7 @@ import {
   getActivationHistory,
   getRestoredActivationHistory,
 } from "@/src/tabs/state/activationHistory";
+import { clearLoadingTab } from "@/src/tabs/state/loadingPage";
 import { recordPendingCloseTarget } from "@/src/tabs/state/pendingCloseTarget";
 import { consumePendingCloseTransition } from "@/src/tabs/state/pendingCloseTransition";
 import type { TabSnapshot } from "@/src/tabs/state/tabSnapshot";
@@ -33,6 +34,7 @@ export const handleTabRemoved = async (
     await initializeAllStates();
   }
 
+  clearLoadingTab(tabId);
   const windowId = removeInfo.windowId;
   const settings = getSettings();
   const tabs = getTabSnapshot(windowId);

@@ -39,7 +39,7 @@ test.describe("Settings Storage", () => {
     expect(savedSettings).toEqual({
       newTab: { position: "first", openInBackground: true, urlRules: [] },
       afterTabClosing: { activateTab: "inActivatedOrder" },
-      loadingPage: { position: "default" },
+      loadingPage: { urlRules: [] },
       tabOnActivate: { behavior: "default" },
       popup: { openAsNewTab: false },
     });

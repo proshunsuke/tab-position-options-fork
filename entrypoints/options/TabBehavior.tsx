@@ -1,11 +1,14 @@
 import type { FC } from "react";
+import { LoadingPage } from "@/entrypoints/options/LoadingPage";
 import { Checkbox } from "@/entrypoints/options/ui/Checkbox";
 import { RadioGroup, type RadioOption } from "@/entrypoints/options/ui/RadioGroup";
 import { TabContent } from "@/entrypoints/options/ui/TabContent";
 import { TabSection } from "@/entrypoints/options/ui/TabSection";
-import type { NewTabUrlRule, TabPosition } from "@/src/types";
+import type { LoadingPageUrlRule, NewTabUrlRule, TabPosition } from "@/src/types";
 
 type Props = {
+  loadingRules: LoadingPageUrlRule[];
+  onLoadingRulesChange: (rules: LoadingPageUrlRule[]) => void;
   urlRules: NewTabUrlRule[];
   onUrlRulesChange: (rules: NewTabUrlRule[]) => void;
   newTabPosition: TabPosition;
@@ -23,6 +26,8 @@ const NewTabOptions: RadioOption<TabPosition>[] = [
 ];
 
 export const TabBehavior: FC<Props> = ({
+  loadingRules,
+  onLoadingRulesChange,
   urlRules,
   onUrlRulesChange,
   newTabPosition,
@@ -141,12 +146,7 @@ export const TabBehavior: FC<Props> = ({
         </div>
       </TabSection>
 
-      <TabSection
-        title="Loading Page"
-        description="Choose where tabs are opened when loading new pages from links"
-      >
-        <div className="text-gray-500 italic">Coming soon...</div>
-      </TabSection>
+      <LoadingPage rules={loadingRules} onRulesChange={onLoadingRulesChange} />
     </TabContent>
   );
 };

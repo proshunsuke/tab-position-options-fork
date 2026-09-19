@@ -169,6 +169,12 @@ test.describe("Service Worker Restart Handling", () => {
       };
     });
 
+    // 作成直後のnavigationがWorker再初期化を起こさないよう、読み込み完了後に停止を再現する。
+    await expect(async () => {
+      const tab = await serviceWorker.evaluate(id => chrome.tabs.get(id), childTabInfo.childId!);
+      expect(tab.status).toBe("complete");
+    }).toPass();
+
     // ソースタブ設定を使用
     await setExtensionSettings(context, {
       afterTabClosing: { activateTab: "sourceTab" },

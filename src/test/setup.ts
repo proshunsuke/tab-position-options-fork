@@ -8,8 +8,15 @@ import { getInitializationState, resetInitializationState } from "@/src/state/in
 import { handleNewTab } from "@/src/tabs/handleNewTab";
 import { handleTabActivated } from "@/src/tabs/handleTabActivated";
 import { handleTabRemoved } from "@/src/tabs/handleTabRemoved";
+import {
+  handleBeforeNavigate,
+  handleLoadingPageStartup,
+  handleNavigationCommitted,
+  handleNavigationError,
+} from "@/src/tabs/loadingPage";
 import { createSessionRestoreDetector, defaultDetector } from "@/src/tabs/sessionRestoreDetector";
 import { resetActivationHistory } from "@/src/tabs/state/activationHistory";
+import { resetLoadingPageState } from "@/src/tabs/state/loadingPage";
 import { resetNewTabActivation } from "@/src/tabs/state/newTabActivation";
 import { resetNewTabSourceTransition } from "@/src/tabs/state/newTabSourceTransition";
 import {
@@ -41,6 +48,10 @@ export const setupTestEnvironment = () => {
     // テスト用エクスポートを構築
     const exports: GlobalTestExports = {
       tabHandlers: {
+        handleBeforeNavigate,
+        handleNavigationCommitted,
+        handleNavigationError,
+        handleLoadingPageStartup,
         handleNewTab,
         handleTabActivated,
         handleTabRemoved,
@@ -55,6 +66,7 @@ export const setupTestEnvironment = () => {
       },
 
       states: {
+        resetLoadingPageState,
         resetActivationHistory: resetActivationHistory,
         resetNewTabSourceTransition,
         resetNewTabActivation,

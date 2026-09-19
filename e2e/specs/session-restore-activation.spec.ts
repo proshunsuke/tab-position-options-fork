@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { createServer } from "node:http";
 import path from "node:path";
 import { chromium } from "@playwright/test";
 import { expect, test } from "@/e2e/fixtures";
@@ -15,6 +16,17 @@ for (const behavior of ["first", "last"] as const) {
       path.join(profile, "Default", "Preferences"),
       JSON.stringify({ session: { restore_on_startup: 1 } }),
     );
+    // HTTPの実ナビゲーションでLoading Pageの復元ガードも検証する。
+    const server = createServer((_request, response) => {
+      response.writeHead(200, { "content-type": "text/html" });
+      response.end("<title>Restored page</title>");
+    });
+    await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve));
+    const address = server.address();
+    if (!address || typeof address === "string") {
+      throw new Error("Missing server address");
+    }
+    const origin = `http://127.0.0.1:${address.port}`;
     const launch = () =>
       chromium.launchPersistentContext(profile, {
         headless: false,
@@ -28,11 +40,8 @@ for (const behavior of ["first", "last"] as const) {
     let context = await launch();
     try {
       let worker = await waitForServiceWorker(context);
-      const extensionId = worker.url().split("/")[2];
       await setExtensionSettings(context, DEFAULT_SETTINGS);
-      const urls = ["a", "b", "c", "d"].map(
-        name => `chrome-extension://${extensionId}/options.html#restore-${name}`,
-      );
+      const urls = ["a", "b", "c", "d"].map(name => `${origin}/page#restore-${name}`);
       await worker.evaluate(async urls => {
         const tabs = [];
         for (const url of urls) {
@@ -41,6 +50,13 @@ for (const behavior of ["first", "last"] as const) {
         await chrome.tabs.update(tabs[0].id!, { pinned: true });
         await chrome.tabs.update(tabs[2].id!, { active: true });
       }, urls);
+      // 設定変更前に初回読み込みを終え、復元前の配置を確定させる。
+      await expect(async () => {
+        const tabs = await worker.evaluate(() => chrome.tabs.query({}));
+        expect(
+          tabs.filter(tab => urls.includes(tab.url ?? "") && tab.status === "complete"),
+        ).toHaveLength(urls.length);
+      }).toPass();
       await setExtensionSettings(context, {
         ...DEFAULT_SETTINGS,
         newTab: {
@@ -53,6 +69,7 @@ for (const behavior of ["first", "last"] as const) {
             },
           ],
         },
+        loadingPage: { urlRules: [{ url: "#restore-", position: behavior }] },
         tabOnActivate: { behavior },
       });
       const before = await worker.evaluate(async () =>
@@ -103,6 +120,9 @@ for (const behavior of ["first", "last"] as const) {
       }).toPass();
     } finally {
       await context.close();
+      await new Promise<void>((resolve, reject) =>
+        server.close(error => (error ? reject(error) : resolve())),
+      );
       fs.rmSync(profile, { recursive: true, force: true });
     }
   });

@@ -4,9 +4,12 @@ import { handleTabMoved } from "@/src/tabs/handleTabMoved";
 import { handleTabRemoved } from "@/src/tabs/handleTabRemoved";
 import { handleTabUpdated } from "@/src/tabs/handleTabUpdated";
 import {
-  handleBrowserStartup,
-  initSessionRestoreDetector,
-} from "@/src/tabs/sessionRestoreDetector";
+  handleBeforeNavigate,
+  handleLoadingPageStartup,
+  handleNavigationCommitted,
+  handleNavigationError,
+} from "@/src/tabs/loadingPage";
+import { initSessionRestoreDetector } from "@/src/tabs/sessionRestoreDetector";
 
 export const setupTabHandlers = () => {
   if (typeof chrome !== "undefined" && chrome.tabs && chrome.runtime) {
@@ -17,6 +20,9 @@ export const setupTabHandlers = () => {
     chrome.tabs.onRemoved.addListener(handleTabRemoved);
     chrome.tabs.onMoved.addListener(handleTabMoved);
     chrome.tabs.onUpdated.addListener(handleTabUpdated);
-    chrome.runtime.onStartup.addListener(handleBrowserStartup);
+    chrome.runtime.onStartup.addListener(handleLoadingPageStartup);
+    chrome.webNavigation.onBeforeNavigate.addListener(handleBeforeNavigate);
+    chrome.webNavigation.onCommitted.addListener(handleNavigationCommitted);
+    chrome.webNavigation.onErrorOccurred.addListener(handleNavigationError);
   }
 };
