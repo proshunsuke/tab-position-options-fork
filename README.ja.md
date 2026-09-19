@@ -71,6 +71,12 @@ npm run lint:check   # ファイルを変更せずlintとフォーマットを�
 
 再ビルド後は、`chrome://extensions`から拡張機能を再読み込みして更新を反映してください。
 
+### 単体テスト
+
+```fish
+npm run test:unit
+```
+
 ### E2Eテスト
 
 初回実行前にPlaywrightのChromiumをインストールします。

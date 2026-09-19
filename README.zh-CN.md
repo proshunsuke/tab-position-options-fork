@@ -71,6 +71,12 @@ npm run lint:check   # 检查代码和格式，不修改文件
 
 重新构建后，请在`chrome://extensions`中重新加载扩展以应用更新。
 
+### 单元测试
+
+```fish
+npm run test:unit
+```
+
 ### E2E测试
 
 首次运行前，请安装Playwright的Chromium：

@@ -39,10 +39,6 @@ declare global {
      * セッション復元検出器
      */
     sessionRestore: {
-      createDetector: (config?: {
-        timeProvider?: () => number;
-        thresholdMs?: number;
-      }) => SessionRestoreDetector;
       defaultDetector: SessionRestoreDetector;
     };
 
@@ -66,18 +62,9 @@ declare global {
   }
 
   /**
-   * カスタム検出器（一時的なテスト用）
-   */
-  interface TestDetector {
-    detector: SessionRestoreDetector;
-    setTime: (time: number) => void;
-  }
-
-  /**
    * グローバル変数の定義
    */
   var __testExports: GlobalTestExports | undefined;
-  var __testDetector: TestDetector | undefined;
 }
 
 export type { GlobalTestExports };

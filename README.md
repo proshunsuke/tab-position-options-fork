@@ -71,6 +71,12 @@ After completing the setup above:
 
 After rebuilding, reload the extension from `chrome://extensions` to use the updated build.
 
+### Unit Tests
+
+```fish
+npm run test:unit
+```
+
 ### E2E Tests
 
 Install Playwright's Chromium before the first run:
