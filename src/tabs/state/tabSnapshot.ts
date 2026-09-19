@@ -2,6 +2,7 @@ export type TabSnapshot = {
   id: number;
   index: number;
   active: boolean;
+  pinned: boolean;
   openerTabId?: number;
 };
 
@@ -75,6 +76,7 @@ const toTabSnapshot = (tab: chrome.tabs.Tab) => {
     id: tab.id,
     index: tab.index,
     active: tab.active,
+    pinned: tab.pinned,
     openerTabId: tab.openerTabId,
   } as TabSnapshot;
 };
@@ -214,6 +216,15 @@ export const setActiveTabInSnapshot = (windowId: number, tabId: number) => {
       ...tab,
       active: tab.id === tabId,
     })),
+  });
+};
+
+export const setPinnedTabInSnapshot = (windowId: number, tabId: number, pinned: boolean) => {
+  setState({
+    ...tabSnapshotState,
+    [getWindowKey(windowId)]: getTabSnapshot(windowId).map(tab =>
+      tab.id === tabId ? { ...tab, pinned } : tab,
+    ),
   });
 };
 

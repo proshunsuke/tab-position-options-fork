@@ -404,6 +404,7 @@ export const simulateServiceWorkerRestart = async (serviceWorker: Worker) => {
     if (globalThis.__testExports?.states) {
       globalThis.__testExports.states.resetActivationHistory();
       globalThis.__testExports.states.resetNewTabSourceTransition();
+      globalThis.__testExports.states.resetNewTabActivation();
       globalThis.__testExports.states.resetPendingCloseTarget();
       globalThis.__testExports.states.resetPendingCloseTransition();
       globalThis.__testExports.states.resetTabSnapshotState();

@@ -286,3 +286,73 @@ test.describe("Browser Startup Tab Order", () => {
     }
   });
 });
+
+for (const behavior of ["first", "last"] as const) {
+  test(`restoration activation does not move an existing middle tab with ${behavior}`, async ({
+    context,
+    serviceWorker,
+  }) => {
+    await clearExtensionStorage(serviceWorker);
+    await setExtensionSettings(context, {
+      newTab: { position: "default", openInBackground: false },
+      tabOnActivate: { behavior },
+    });
+    const result = await serviceWorker.evaluate(async () => {
+      const { handleTabActivated, onActivated } = globalThis.__testExports!.tabHandlers;
+      const detector = globalThis.__testExports!.sessionRestore.defaultDetector;
+      const win = await chrome.windows.create({
+        url: ["about:blank", "about:blank", "about:blank"],
+      });
+      if (!win?.id) {
+        throw new Error("Test window was not created");
+      }
+      const tabs = await chrome.tabs.query({ windowId: win.id });
+      onActivated.removeListener(handleTabActivated);
+      const originalMove = chrome.tabs.move;
+      let moves = 0;
+      try {
+        await chrome.tabs.update(tabs[1].id!, { active: true });
+        chrome.tabs.move = ((tabId: number, _properties: chrome.tabs.MoveProperties) => {
+          moves++;
+          return Promise.resolve({ ...tabs[1], id: tabId });
+        }) as typeof chrome.tabs.move;
+        detector.handleBrowserStartup();
+        // onCreatedが届く前の復元activationも抑止する。
+        await handleTabActivated({ windowId: win.id!, tabId: tabs[1].id! });
+        detector.isSessionRestoreTab();
+        await handleTabActivated({ windowId: win.id!, tabId: tabs[1].id! });
+        return moves;
+      } finally {
+        detector.__testHelpers.resetState();
+        chrome.tabs.move = originalMove;
+        onActivated.addListener(handleTabActivated);
+      }
+    });
+    expect(result).toBe(0);
+  });
+}
+
+test("activation checks do not prolong session restoration", async ({ serviceWorker }) => {
+  const result = await serviceWorker.evaluate(() => {
+    let now = 1000;
+    const detector = globalThis.__testExports!.sessionRestore.createDetector({
+      timeProvider: () => now,
+    });
+    detector.handleBrowserStartup();
+    const beforeCreation = detector.isSessionRestoreInProgress();
+    detector.isSessionRestoreTab();
+    now = 1100;
+    const duringRestoration = detector.isSessionRestoreInProgress();
+    now = 1201;
+    return {
+      beforeCreation,
+      duringRestoration,
+      afterRestoration: detector.isSessionRestoreInProgress(),
+    };
+  });
+  expect(result).toEqual({
+    beforeCreation: true,
+    duringRestoration: true,
+    afterRestoration: false,
+  });
+});

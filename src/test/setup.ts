@@ -10,6 +10,7 @@ import { handleTabActivated } from "@/src/tabs/handleTabActivated";
 import { handleTabRemoved } from "@/src/tabs/handleTabRemoved";
 import { createSessionRestoreDetector, defaultDetector } from "@/src/tabs/sessionRestoreDetector";
 import { resetActivationHistory } from "@/src/tabs/state/activationHistory";
+import { resetNewTabActivation } from "@/src/tabs/state/newTabActivation";
 import { resetNewTabSourceTransition } from "@/src/tabs/state/newTabSourceTransition";
 import {
   recordPendingCloseTarget,
@@ -55,7 +56,8 @@ export const setupTestEnvironment = () => {
 
       states: {
         resetActivationHistory: resetActivationHistory,
-        resetNewTabSourceTransition: resetNewTabSourceTransition,
+        resetNewTabSourceTransition,
+        resetNewTabActivation,
         recordPendingCloseTarget: recordPendingCloseTarget,
         resetPendingCloseTarget: resetPendingCloseTarget,
         resetPendingCloseTransition: resetPendingCloseTransition,

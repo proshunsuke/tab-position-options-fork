@@ -2,7 +2,11 @@ import { getSettings } from "@/src/settings/state/appData";
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
 import { calculateNewTabIndex } from "@/src/tabs/position";
 import { isSessionRestoreTab } from "@/src/tabs/sessionRestoreDetector";
-import { getLastActiveTabIdByNewTabId } from "@/src/tabs/state/activationHistory";
+import {
+  getActivationHistory,
+  getLastActiveTabIdByNewTabId,
+} from "@/src/tabs/state/activationHistory";
+import { recordNewTabActivation } from "@/src/tabs/state/newTabActivation";
 import { consumeRecentNewTabSourceTransition } from "@/src/tabs/state/newTabSourceTransition";
 import {
   addTabToSnapshot,
@@ -11,10 +15,19 @@ import {
   moveTabInSnapshot,
   refreshWindowTabSnapshot,
 } from "@/src/tabs/state/tabSnapshot";
+import { getActivationIndex } from "@/src/tabs/tabOnActivate";
 import type { TabPosition } from "@/src/types";
 
 export const handleNewTab = async (tab: chrome.tabs.Tab) => {
   const shouldInitialize = needsInitialization();
+  // 初期化がliveのactive tabを履歴に取り込む前に、後続activationの処理済み印を付ける。
+  if (
+    tab.id !== undefined &&
+    tab.active &&
+    (shouldInitialize || getActivationHistory(tab.windowId).at(-1) !== tab.id)
+  ) {
+    recordNewTabActivation(tab.windowId, tab.id);
+  }
   if (shouldInitialize) {
     await initializeAllStates();
   }
@@ -48,7 +61,14 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
     return;
   }
 
-  positionTabAndUpdateStates(settings.newTab.position, windowId, tabId, tabIndex, lastActiveTabId);
+  positionTabAndUpdateStates(
+    settings.newTab.position,
+    windowId,
+    tabId,
+    tabIndex,
+    lastActiveTabId,
+    tab.active && !settings.newTab.openInBackground,
+  );
 };
 
 /**
@@ -60,8 +80,14 @@ const positionTabAndUpdateStates = (
   tabId: number,
   tabIndex: number,
   lastActiveTabId: number | null,
+  applyActivation = false,
 ) => {
-  const newIndex = getNewIndex(position, windowId, lastActiveTabId, tabIndex);
+  // 新規配置とactivationの最終位置を先に決め、途中の位置への移動を避ける。
+  const isSessionRestore = isSessionRestoreTab();
+  const activationIndex = applyActivation ? getActivationIndex(windowId, tabId) : null;
+  const newIndex = isSessionRestore
+    ? tabIndex
+    : (activationIndex ?? getNewIndex(position, windowId, lastActiveTabId, tabIndex));
   if (newIndex !== tabIndex) {
     moveTabInSnapshot(windowId, tabId, newIndex);
     void chrome.tabs
@@ -119,13 +145,6 @@ const getNewIndex = (
   lastActiveTabId: number | null,
   index: number,
 ) => {
-  // セッション復元によるタブかチェック
-  const isSessionRestore = isSessionRestoreTab();
-  if (isSessionRestore) {
-    // タブの追跡は記録するが、位置調整はスキップ
-    return index;
-  }
-
   // デフォルト・lastの場合は何もしない
   if (["default", "last"].includes(position)) {
     return index;
