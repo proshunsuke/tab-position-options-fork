@@ -10,11 +10,6 @@ for (const behavior of ["first", "last"] as const) {
     const profile = fs.mkdtempSync(path.join(process.cwd(), "test-results", "restore-profile-"));
     const extensionPath = path.join(profile, "test-extension");
     fs.cpSync(path.join(process.cwd(), "dist/chrome-mv3"), extensionPath, { recursive: true });
-    // 再起動で変わるtab IDではなくURLで順序を照合するため、テスト用コピーだけに追加する。
-    const manifestPath = path.join(extensionPath, "manifest.json");
-    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-    manifest.permissions = [...manifest.permissions, "tabs"];
-    fs.writeFileSync(manifestPath, JSON.stringify(manifest));
     fs.mkdirSync(path.join(profile, "Default"));
     fs.writeFileSync(
       path.join(profile, "Default", "Preferences"),
@@ -46,7 +41,20 @@ for (const behavior of ["first", "last"] as const) {
         await chrome.tabs.update(tabs[0].id!, { pinned: true });
         await chrome.tabs.update(tabs[2].id!, { active: true });
       }, urls);
-      await setExtensionSettings(context, { ...DEFAULT_SETTINGS, tabOnActivate: { behavior } });
+      await setExtensionSettings(context, {
+        ...DEFAULT_SETTINGS,
+        newTab: {
+          ...DEFAULT_SETTINGS.newTab,
+          urlRules: [
+            {
+              url: "#restore-",
+              position: behavior,
+              active: behavior === "first" ? "foreground" : "background",
+            },
+          ],
+        },
+        tabOnActivate: { behavior },
+      });
       const before = await worker.evaluate(async () =>
         (await chrome.tabs.query({}))
           .filter(tab => tab.url?.includes("#restore-"))
