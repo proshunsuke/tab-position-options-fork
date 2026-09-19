@@ -88,6 +88,8 @@ npm run test:e2e
 
 准备和发布步骤请参阅[发布指南](.agents/skills/tab-position-release/SKILL.md)，版本说明请参阅[CHANGELOG.md](CHANGELOG.md)。
 
+商店提交信息在[CHROMEWEBSTORE.md](CHROMEWEBSTORE.md)中维护。先更新并核对仓库中的文档，再将内容同步到Developer Dashboard。
+
 ## 致谢
 
 感谢原版[Tab Position Options](https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl)的开发者。本项目是独立的分支项目，与Google无关联。

@@ -88,6 +88,8 @@ The manually triggered release workflow uploads a draft to the Chrome Web Store,
 
 See the [release guide](.agents/skills/tab-position-release/SKILL.md) for preparation and publishing procedures, and [CHANGELOG.md](CHANGELOG.md) for release notes.
 
+Store submission information is maintained in [CHROMEWEBSTORE.md](CHROMEWEBSTORE.md). Update and verify the repository documents first, then apply them to the Developer Dashboard.
+
 ## Acknowledgments
 
 Thanks to the developer of the original [Tab Position Options](https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl). This project is an independent fork and is not affiliated with Google.
