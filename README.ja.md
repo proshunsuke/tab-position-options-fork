@@ -22,6 +22,8 @@
 
 設定画面はブラウザの表示言語に合わせて表示し、[10 ロケール](locales/)に対応しています。未対応の言語では英語を使用します。
 
+設定ファイルのエクスポート・インポートで、設定のバックアップや、この Fork をインストールした別環境への移行ができます。
+
 <img src="store-assets/screenshots/screenshot-1.png" alt="Tab Position Options Forkの設定画面" width="640">
 
 ## 使い始める

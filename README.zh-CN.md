@@ -22,6 +22,8 @@
 
 设置页面会根据浏览器的界面语言显示，支持 [10 种语言区域设置](locales/)。不支持的语言使用英语。
 
+您可以导出和导入设置文件，以备份配置或将其迁移到安装了此分支扩展的其他环境。
+
 <img src="store-assets/screenshots/screenshot-1.png" alt="Tab Position Options Fork设置界面" width="640">
 
 ## 开始使用
