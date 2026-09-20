@@ -37,7 +37,7 @@ xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" npm run test:e2
 - 分割実行の結果・プロファイルは`test-results/sharded/shard-*`、統合レポートは`playwright-report/sharded`。通常の実行は`test-results/`と`playwright-report/`。
 - プロファイルは`testInfo.outputPath()`または`test.info().outputPath()`配下に作り、分割間で保存先を共有しない。
 - 通常実行と分割実行、または複数の分割実行コマンドを同じ作業ディレクトリで同時に起動しない。結果の後片付けが干渉する。
-- 通常実行とCIは画面表示あり。分割実行はデスクトップ上のフォーカス競合を避けるためヘッドレスにする。画面表示時の挙動は`test:e2e`でも確認する。
+- 通常実行とCIは画面表示あり。分割実行はデスクトップ上のフォーカス競合を避けるためヘッドレスにする。ヘッドレスでは複数ウィンドウが同時に`focused: true`になるため、実際のウィンドウフォーカスは`test:e2e`で検証し、フォーカス変更APIの呼び出し条件も単体テストで確認する。
 
 ## 追加・変更
 
@@ -50,6 +50,7 @@ xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" npm run test:e2
 
 ## 再起動・イベント順序の検証
 
+- ブラウザのセッション復元は[sessionRestore.ts](../../../e2e/utils/sessionRestore.ts)で拡張機能を初回のみ通常インストールし、同じプロファイルを閉じて再起動する。起動ごとの`--load-extension`やCDPの読み込みでは、復元中のイベントが届かず誤って成功することがある。再起動後の`onStartup`・復元タブの`onCreated`到達と、`onInstalled`が発生しないことも検証する。
 - [service-worker-restart.spec.ts](../../../e2e/specs/service-worker-restart.spec.ts)を参照する。`simulateServiceWorkerRestart`はメモリ状態のリセットであり、実際のWorker停止・再起動の検証ではない。
 - イベント順序の再現は既存helperと[tab-closing-event-order.spec.ts](../../../e2e/specs/tab-closing-event-order.spec.ts)に合わせる。手動でハンドラーを呼ぶ際は通常イベントとの二重実行を避け、一時的に外したリスナーを`finally`で復元する。
 - 同じcloseのイベントを手動再生する場合は、ブラウザ操作を済ませてからハンドラーを連続して呼ぶ。イベント間に操作APIの完了待ちを挟むと、短命な遷移ステートの期限をテスト側の待ち時間で超えてしまう。

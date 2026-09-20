@@ -3,7 +3,6 @@ import { recordExternalLinkTab, removeExternalLinkTab } from "@/src/externalLink
 import { getSettings } from "@/src/settings/state/appData";
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
 import { calculateNewTabIndex } from "@/src/tabs/position";
-import { isSessionRestoreInProgress } from "@/src/tabs/sessionRestoreDetector";
 import { getNormalWindowId, getWindowSnapshot } from "@/src/tabs/state/popup";
 import { getActiveTabSnapshot, getTabSnapshot } from "@/src/tabs/state/tabSnapshot";
 import { findUrlRule } from "@/src/tabs/urlRules";
@@ -64,8 +63,7 @@ export const handleExternalLink = async (
   const openerTabId = windowId === tab.windowId ? tab.id : undefined;
   const sourceTabId =
     openerTabId ?? (windowId === null ? undefined : getActiveTabSnapshot(windowId)?.id);
-  const activation =
-    active && !isSessionRestoreInProgress() ? settings.tabOnActivate.behavior : "default";
+  const activation = active ? settings.tabOnActivate.behavior : "default";
   const position =
     activation !== "default" ? activation : (rule?.position ?? settings.newTab.position);
   const desiredIndex =

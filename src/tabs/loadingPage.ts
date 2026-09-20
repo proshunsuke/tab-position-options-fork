@@ -1,10 +1,7 @@
 import { getSettings } from "@/src/settings/state/appData";
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
 import { handlePopupUrl } from "@/src/tabs/popup";
-import {
-  handleBrowserStartup,
-  isSessionRestoreInProgress,
-} from "@/src/tabs/sessionRestoreDetector";
+import { markSessionRestoreTabs } from "@/src/tabs/sessionRestoreDetector";
 import {
   consumeLoadingNavigation,
   markRestoredLoadingTab,
@@ -29,7 +26,7 @@ export const handleBeforeNavigate = async (
   if (details.frameId !== 0) {
     return;
   }
-  const restoring = isSessionRestoreInProgress();
+  const restoring = startupCommittedTabs !== undefined;
   if (needsInitialization()) {
     // Worker再起動時のみ、保存したnavigationと設定の復元が必要。
     await initializeAllStates();
@@ -48,7 +45,7 @@ export const handleNavigationCommitted = async (
     return;
   }
   startupCommittedTabs?.add(details.tabId);
-  const restoring = startupCommittedTabs !== undefined || isSessionRestoreInProgress();
+  const restoring = startupCommittedTabs !== undefined;
   if (needsInitialization()) {
     // Worker再起動時のみ、URLルール・遷移元・タブ配置の復元を待つ。
     await initializeAllStates();
@@ -123,7 +120,6 @@ export const handleNavigationError = async (
 };
 
 export const handleLoadingPageStartup = async () => {
-  handleBrowserStartup();
   const committedTabs = new Set<number>();
   startupCommittedTabs = committedTabs;
   // 復元タブは一時的にcompleteと報告されることもあるため、起動時の全タブを記録する。
@@ -131,6 +127,7 @@ export const handleLoadingPageStartup = async () => {
   const tabsPromise = chrome.tabs.query({}).catch(() => []);
   await initializeAllStates();
   const tabs = await tabsPromise;
+  markSessionRestoreTabs(tabs);
   for (const tab of tabs) {
     if (tab.id !== undefined && !committedTabs.has(tab.id)) {
       markRestoredLoadingTab(tab.id);

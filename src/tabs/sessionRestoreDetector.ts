@@ -1,137 +1,78 @@
-/**
- * セッション復元検出器
- *
- * ブラウザ起動直後にフラグを立て、タブ作成間隔を監視して
- * セッション復元が終了したタイミングを検出する
- */
-
-type TimeProvider = () => number;
-
-type DetectorState = {
-  isStartupPhase: boolean;
-  lastTabCreationTime: number;
-  startupTime: number;
+type StartupTab = { id?: number; windowId: number; active: boolean };
+type SessionRestoreState = {
+  tabs: Record<string, number>;
+  activations: Record<string, number>;
 };
 
-type DetectorConfig = {
-  timeProvider?: TimeProvider;
-  thresholdMs?: number;
+let state: SessionRestoreState = { tabs: {}, activations: {} };
+let pendingStorageWrite = Promise.resolve();
+const newTabs = new Set<number>();
+
+export const initializeSessionRestoreState = async () => {
+  const stored = await chrome.storage.session
+    .get<{ sessionRestoreState?: SessionRestoreState }>("sessionRestoreState")
+    .catch(() => ({ sessionRestoreState: undefined }));
+  state = stored.sessionRestoreState ?? { tabs: {}, activations: {} };
+  return stored.sessionRestoreState === undefined;
 };
 
-type SessionRestoreDetector = {
-  handleBrowserStartup: () => void;
-  initSessionRestoreDetector: () => void;
-  isSessionRestoreTab: () => boolean;
-  isSessionRestoreInProgress: () => boolean;
-  __testHelpers: {
-    setStartupPhase: (value: boolean) => void;
-    getState: () => DetectorState;
-    resetState: () => void;
-  };
-};
-
-/**
- * セッション復元検出器を作成
- */
-export const createSessionRestoreDetector = (
-  config: DetectorConfig = {},
-): SessionRestoreDetector => {
-  const timeProvider = config.timeProvider || (() => Date.now());
-  const rapidCreationThresholdMs = config.thresholdMs || 200;
-
-  // 状態を閉じ込める（クロージャ）
-  const state: DetectorState = {
-    isStartupPhase: false,
-    lastTabCreationTime: 0,
-    startupTime: 0,
-  };
-
-  /**
-   * ブラウザ起動時の処理
-   */
-  const handleBrowserStartup = () => {
-    state.isStartupPhase = true;
-    state.lastTabCreationTime = 0;
-    state.startupTime = timeProvider();
-  };
-
-  /**
-   * 検出器を初期化（拡張機能起動時に呼ばれる）
-   */
-  const initSessionRestoreDetector = () => {
-    state.isStartupPhase = false;
-    state.lastTabCreationTime = 0;
-    state.startupTime = 0;
-  };
-
-  // activationからは作成時刻を更新しない。新規タブを開かなくても通常操作へ戻れるようにする。
-  const isSessionRestoreInProgress = () => {
-    return (
-      state.isStartupPhase &&
-      timeProvider() - (state.lastTabCreationTime || state.startupTime) < rapidCreationThresholdMs
-    );
-  };
-
-  /**
-   * セッション復元によるタブかどうかを判定
-   * @returns セッション復元によるタブの場合はtrue
-   */
-  const isSessionRestoreTab = () => {
-    if (!state.isStartupPhase) {
-      return false;
+export const markSessionRestoreTabs = (tabs: StartupTab[]) => {
+  for (const tab of tabs) {
+    if (tab.id === undefined || newTabs.has(tab.id) || state.tabs[tab.id] !== undefined) {
+      continue;
     }
-
-    const now = timeProvider();
-
-    if (state.lastTabCreationTime === 0) {
-      state.lastTabCreationTime = now;
-      // 最初のタブはセッション復元の可能性があるため、スキップ
-      return true;
+    state.tabs[tab.id] = tab.windowId;
+    if (tab.active) {
+      state.activations[tab.windowId] = tab.id;
     }
-
-    const interval = now - state.lastTabCreationTime;
-    state.lastTabCreationTime = now;
-
-    // 間隔が閾値より長い場合、ユーザーによる手動作成と判断
-    if (interval >= rapidCreationThresholdMs) {
-      state.isStartupPhase = false;
-      return false;
-    }
-
-    return true;
-  };
-
-  // テスト用のヘルパー
-  const __testHelpers = {
-    setStartupPhase: (value: boolean) => {
-      state.isStartupPhase = value;
-      if (value) {
-        state.lastTabCreationTime = 0;
-        state.startupTime = timeProvider();
-      }
-    },
-    getState: () => ({ ...state }),
-    resetState: () => {
-      state.isStartupPhase = false;
-      state.lastTabCreationTime = 0;
-      state.startupTime = 0;
-    },
-  };
-
-  return {
-    handleBrowserStartup,
-    initSessionRestoreDetector,
-    isSessionRestoreTab,
-    isSessionRestoreInProgress,
-    __testHelpers,
-  };
+  }
+  // 空でも保存し、ブラウザ起動と同じセッション内のWorker再起動を区別する。
+  persistState();
 };
 
-// デフォルトのインスタンスを作成
-export const defaultDetector = createSessionRestoreDetector();
+export const isSessionRestoreTab = (tabId: number) => state.tabs[tabId] !== undefined;
 
-// シンプルなAPIとして公開
-export const handleBrowserStartup = defaultDetector.handleBrowserStartup;
-export const initSessionRestoreDetector = defaultDetector.initSessionRestoreDetector;
-export const isSessionRestoreTab = defaultDetector.isSessionRestoreTab;
-export const isSessionRestoreInProgress = defaultDetector.isSessionRestoreInProgress;
+export const recordNewSessionTab = (tabId: number) => {
+  // onStartupのquery完了が後着しても、処理済みの通常タブを復元対象にしない。
+  newTabs.add(tabId);
+};
+
+export const consumeSessionRestoreActivation = (windowId: number, tabId: number) => {
+  const expected = state.activations[windowId];
+  if (expected === undefined) {
+    return false;
+  }
+  // 別タブへのユーザー操作が先に来た場合も解除し、その後の再選択を抑止しない。
+  delete state.activations[windowId];
+  persistState();
+  return expected === tabId;
+};
+
+export const isSessionRestoreWindow = (windowId: number) =>
+  Object.values(state.tabs).includes(windowId);
+
+export const clearSessionRestoreTab = (tabId: number) => {
+  newTabs.delete(tabId);
+  const windowId = state.tabs[tabId];
+  if (windowId === undefined) {
+    return;
+  }
+  delete state.tabs[tabId];
+  if (state.activations[windowId] === tabId) {
+    delete state.activations[windowId];
+  }
+  persistState();
+};
+
+export const resetSessionRestoreState = () => {
+  state = { tabs: {}, activations: {} };
+  newTabs.clear();
+  pendingStorageWrite = Promise.resolve();
+};
+
+const persistState = () => {
+  // 判定はメモリで同期的に行い、保存をタブ操作の前提にしない。
+  pendingStorageWrite = pendingStorageWrite.finally(() =>
+    chrome.storage.session.set({ sessionRestoreState: state }).catch(() => {}),
+  );
+};

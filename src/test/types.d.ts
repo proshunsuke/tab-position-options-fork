@@ -3,8 +3,6 @@
  * すべてのテスト関連のグローバル型をここで一元管理
  */
 
-import type { SessionRestoreDetector } from "@/src/tabs/sessionRestoreDetector";
-
 declare global {
   /**
    * テスト用エクスポートの統合インターフェース
@@ -40,7 +38,8 @@ declare global {
      * セッション復元検出器
      */
     sessionRestore: {
-      defaultDetector: SessionRestoreDetector;
+      markSessionRestoreTabs: (tabs: { id?: number; windowId: number; active: boolean }[]) => void;
+      resetSessionRestoreState: () => void;
     };
 
     /**

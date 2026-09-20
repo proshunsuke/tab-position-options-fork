@@ -100,10 +100,10 @@ No data is transmitted to external servers. All data remains on the user's local
 ### storage — Draft for next release
 
 ```text
-The storage permission saves tab positioning and activation preferences, including user-defined URL rules, locally using chrome.storage.local. The extension also uses chrome.storage.session to retain tab activation order and tab snapshots across service worker restarts so tab positioning and closing behavior remain consistent. Session storage also temporarily retains pending navigation URLs and restoration markers for Loading Page rules; navigation URLs are removed on commit, error, or tab closure. The last focused normal window and pending pop-up window IDs are also retained to resume conversions after service worker restarts. This is not a browsing history. Data stays on the user's device and is not transmitted to external servers.
+The storage permission saves tab positioning and activation preferences, including user-defined URL rules, locally using chrome.storage.local. The extension also uses chrome.storage.session to retain tab activation order and tab snapshots across service worker restarts so tab positioning and closing behavior remain consistent. Session storage also retains restored tab identities and initial selection markers to preserve restored positions, and temporarily retains pending navigation URLs and restoration markers for Loading Page rules; navigation URLs are removed on commit, error, or tab closure. The last focused normal window and pending pop-up window IDs are also retained to resume conversions after service worker restarts. This is not a browsing history. Data stays on the user's device and is not transmitted to external servers.
 ```
 
-Evidence: [settings](src/settings/state/appData.ts), [activation history](src/tabs/state/activationHistory.ts), [tab snapshots](src/tabs/state/tabSnapshot.ts), [pop-up state](src/tabs/state/popup.ts).
+Evidence: [settings](src/settings/state/appData.ts), [activation history](src/tabs/state/activationHistory.ts), [tab snapshots](src/tabs/state/tabSnapshot.ts), [restoration state](src/tabs/sessionRestoreDetector.ts), [pop-up state](src/tabs/state/popup.ts).
 
 ### tabs — Draft for next release; absent from current dashboard package
 
@@ -154,7 +154,7 @@ These are recorded dashboard values, not a new submission or certification.
 | Preferences and user-entered URL patterns | Saved in `chrome.storage.local`; editable in options | No / No |
 | Settings files selected for import or downloaded on export | Processed locally on request; exports contain the current form settings and user-entered URL patterns, not session state; downloaded files remain until the user deletes them | No automatic transmission / No |
 | Pending navigation URL, tab ID, timestamp and restoration flag | Temporarily stored in `chrome.storage.session` until commit, error or tab closure; cleared on browser restart | No / No |
-| Restored tab IDs | Retained in session storage until initial navigation ends or the tab closes | No / No |
+| Restored tab and window IDs, including the initial selected tab | Stored in `chrome.storage.session` to preserve restored positions and selection across worker restarts; tab identities remain until tab closure or browser restart, selection markers until the selection event is handled, and navigation markers until the initial navigation ends or the tab closes | No / No |
 | Pop-up URL and window type/incognito status | Checked in memory to apply exceptions and choose a compatible destination; pop-up URLs are not persisted by the conversion feature | No / No |
 | Last focused normal window ID and pending pop-up window IDs | Stored in `chrome.storage.session` for conversion and worker restart recovery; cleared on browser restart | No / No |
 | Clicked link URL/attributes and current page/frame URL | Read in memory only while external-link handling is enabled; page and destination URLs sent to the local extension background process for new-tab creation; no stored click history | No analytics or external reporting / No |

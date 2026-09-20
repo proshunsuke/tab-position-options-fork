@@ -3,7 +3,7 @@ import { getSettings } from "@/src/settings/state/appData";
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
 import { handlePopupTabCreated } from "@/src/tabs/popup";
 import { calculateNewTabIndex } from "@/src/tabs/position";
-import { isSessionRestoreTab } from "@/src/tabs/sessionRestoreDetector";
+import { isSessionRestoreTab, recordNewSessionTab } from "@/src/tabs/sessionRestoreDetector";
 import {
   getActivationHistory,
   getLastActiveTabIdByNewTabId,
@@ -52,6 +52,14 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
     return;
   }
 
+  if (isSessionRestoreTab(tabId)) {
+    // 初期化で取得した最新snapshotを、復元途中の古いactive情報で上書きしない。
+    markRestoredLoadingTab(tabId);
+    void refreshWindowTabSnapshot(windowId);
+    return;
+  }
+  recordNewSessionTab(tabId);
+
   if (handlePopupTabCreated(tab)) {
     consumeNewTabActivation(windowId, tabId);
     return;
@@ -63,13 +71,6 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
   const openInBackground = rule ? rule.active === "background" : settings.newTab.openInBackground;
   const lastActiveTabId = getSourceTabId(windowId, tab, shouldInitialize, rule !== undefined);
   addTabToSnapshot(tab);
-
-  // 復元時はURLルールによる前面化・背景化も行わない。
-  if (isSessionRestoreTab()) {
-    markRestoredLoadingTab(tabId);
-    void refreshWindowTabSnapshot(windowId);
-    return;
-  }
 
   if (rule?.active === "foreground" && !tab.active) {
     recordNewTabActivation(windowId, tabId);

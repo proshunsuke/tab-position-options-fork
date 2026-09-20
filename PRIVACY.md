@@ -49,9 +49,9 @@ To maintain tab behavior when Chrome stops and restarts the extension's backgrou
 - Tab positions and active/pinned state
 - IDs identifying which tabs opened other tabs
 - The order in which tabs became active
-- Tab IDs whose initial restored navigation should not change their position
+- Restored tab and window IDs, including the initial selected tab, used to preserve restored positions and selection
 
-This state is used only for tab positioning and activation, including choosing a tab after another tab closes and switching to the last active tab. Tab snapshots do not contain page URLs, page titles, or page contents; pending navigation URLs are handled separately as described above. Session storage is temporary and is cleared when the browser restarts; it is separate from your persistent settings.
+This state is used only for tab positioning and activation, including choosing a tab after another tab closes and switching to the last active tab. Restored tab identities are retained until the tab closes or the browser restarts; initial selection markers are cleared when the selection event is handled. Tab snapshots do not contain page URLs, page titles, or page contents; pending navigation URLs are handled separately as described above. Session storage is temporary and is cleared when the browser restarts; it is separate from your persistent settings.
 
 ## Data Storage and Sharing
 

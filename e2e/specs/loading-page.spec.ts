@@ -260,7 +260,7 @@ for (const scenario of [
           exports.states.resetInitializationState();
         }
         if (scenario === "restored") {
-          exports.sessionRestore.defaultDetector.handleBrowserStartup();
+          await handlers.handleLoadingPageStartup();
         }
         await handlers.handleBeforeNavigate(before);
         // 保存完了を確認してからWorker停止を再現する。
@@ -269,7 +269,7 @@ for (const scenario of [
           exports.states.resetLoadingPageState();
           exports.states.resetInitializationState();
         }
-        exports.sessionRestore.defaultDetector.__testHelpers.resetState();
+        exports.sessionRestore.resetSessionRestoreState();
         const originalMove = chrome.tabs.move;
         const originalQuery = chrome.tabs.query;
         const calls: string[] = [];
@@ -288,7 +288,8 @@ for (const scenario of [
             timeStamp: 2,
             frameId: scenario === "subframe" ? 1 : 0,
             url: scenario === "restart-redirect" ? "https://elsewhere.test/" : before.url,
-            transitionType: scenario === "restored-reload" ? "reload" : "link",
+            transitionType:
+              scenario === "restored-reload" || scenario === "restored" ? "reload" : "link",
             transitionQualifiers: scenario === "restart-redirect" ? ["server_redirect"] : [],
           });
           const immediate = [...calls];

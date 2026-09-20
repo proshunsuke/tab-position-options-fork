@@ -32,7 +32,7 @@ Tab Position Optionsを再実装したChrome Manifest V3拡張機能。WXT・Typ
 
 - 共有ステートに依存するタブハンドラーは、`needsInitialization()`が真なら`initializeAllStates()`の完了を待って処理する。
 - Service Workerはアイドル時に停止し、次のイベントで起動する。メモリの継続を前提にしない。
-- 設定は`chrome.storage.local`、アクティベーション履歴とタブスナップショットは`chrome.storage.session`を使用する。短命な遷移ステートはメモリ内で扱う。
+- 設定は`chrome.storage.local`、アクティベーション履歴・タブスナップショット・復元タブの識別情報は`chrome.storage.session`を使用する。短命な遷移ステートはメモリ内で扱う。
 - Promise形式のChrome APIはrejectionを処理し、コールバック形式では`chrome.runtime.lastError`を確認する。
 - 拡張機能の権限は[wxt.config.ts](wxt.config.ts)で必要最小限に保つ。
 
