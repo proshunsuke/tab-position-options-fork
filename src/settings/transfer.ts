@@ -1,5 +1,5 @@
 import { isValidUrlPattern } from "@/src/tabs/urlRules";
-import type { Settings } from "@/src/types";
+import { EXTERNAL_LINK_ACTIONS, type Settings } from "@/src/types";
 
 export const SETTINGS_FILE_NAME = "tab-position-options-fork-settings.json";
 const fileFormat = "tab-position-options-fork";
@@ -26,6 +26,7 @@ export const serializeSettings = (settings: Settings) => {
 
 const readSettings = (value: unknown) => {
   const settings = readObject(value, [
+    "externalLinks",
     "newTab",
     "loadingPage",
     "afterTabClosing",
@@ -37,8 +38,19 @@ const readSettings = (value: unknown) => {
   const afterTabClosing = readObject(settings.afterTabClosing, ["activateTab"]);
   const tabOnActivate = readObject(settings.tabOnActivate, ["behavior"]);
   const popup = readObject(settings.popup, ["openAsNewTab", "exceptions"]);
+  const externalLinks = readObject(settings.externalLinks, ["enabled", "urlRules"]);
 
   return {
+    externalLinks: {
+      enabled: readBoolean(externalLinks.enabled),
+      urlRules: readArray(externalLinks.urlRules).map(value => {
+        const rule = readObject(value, ["url", "action"]);
+        return {
+          url: readPattern(rule.url),
+          action: readChoice(rule.action, [...EXTERNAL_LINK_ACTIONS]),
+        };
+      }),
+    },
     newTab: {
       position: readChoice(newTab.position, ["first", "last", "right", "left", "default"]),
       openInBackground: readBoolean(newTab.openInBackground),

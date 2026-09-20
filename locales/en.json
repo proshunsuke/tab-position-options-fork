@@ -72,5 +72,18 @@
   "shortcutUnassigned": "Not assigned",
   "shortcutsUnavailable": "Unable to read shortcuts",
   "configureShortcuts": "Configure shortcuts",
-  "shortcutSortingHelp": "Sorting keeps pinned tabs and group boundaries in place. Tabs are sorted within each group and each continuous ungrouped section."
+  "shortcutSortingHelp": "Sorting keeps pinned tabs and group boundaries in place. Tabs are sorted within each group and each continuous ungrouped section.",
+  "externalLinks": "External Links",
+  "externalDescription": "External links have a different protocol, host, or port. Applies to ordinary left-clicks on HTTP(S) links, including links in frames.",
+  "externalEnabled": "Open external links in new tabs",
+  "externalRulesHelp": "Patterns support regular expressions. Priority: page exclusions, link URL rules, page URL rules, then external links. The first match in each category wins.",
+  "externalPlacementHelp": "Explicit foreground/background rules take priority over New Tab activation settings. New Tab positioning, Tab on Activate, and Loading Page rules still apply.",
+  "externalActionLabel": "Link action $1",
+  "externalExcludePage": "Page: exclude",
+  "externalNewPage": "Page: new foreground tab",
+  "externalBackgroundPage": "Page: new background tab",
+  "externalCurrentPage": "Page: current tab/frame",
+  "externalNewLink": "Link: new foreground tab",
+  "externalBackgroundLink": "Link: new background tab",
+  "externalCurrentLink": "Link: current tab/frame"
 }

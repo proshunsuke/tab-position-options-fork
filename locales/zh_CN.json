@@ -72,5 +72,18 @@
   "shortcutUnassigned": "未分配",
   "shortcutsUnavailable": "无法读取快捷键",
   "configureShortcuts": "设置快捷键",
-  "shortcutSortingHelp": "排序时保留固定标签页和分组边界。仅在各分组内部及连续的未分组标签页范围内排序。"
+  "shortcutSortingHelp": "排序时保留固定标签页和分组边界。仅在各分组内部及连续的未分组标签页范围内排序。",
+  "externalLinks": "外部链接",
+  "externalDescription": "协议、主机名或端口不同的链接属于外部链接。适用于普通左键点击的 HTTP(S) 链接，包括框架内的链接。",
+  "externalEnabled": "在新标签页中打开外部链接",
+  "externalRulesHelp": "支持正则表达式。优先级：页面排除、链接 URL 规则、页面 URL 规则，最后为普通外部链接。每类使用首个匹配规则。",
+  "externalPlacementHelp": "明确的前台或后台规则优先于新标签页的激活设置。新标签页位置、标签页激活和页面加载的位置规则仍然适用。",
+  "externalActionLabel": "链接操作 $1",
+  "externalExcludePage": "页面：排除",
+  "externalNewPage": "页面：新前台标签页",
+  "externalBackgroundPage": "页面：新后台标签页",
+  "externalCurrentPage": "页面：当前标签页或框架",
+  "externalNewLink": "链接：新前台标签页",
+  "externalBackgroundLink": "链接：新后台标签页",
+  "externalCurrentLink": "链接：当前标签页或框架"
 }

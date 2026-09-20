@@ -72,5 +72,18 @@
   "shortcutUnassigned": "Não atribuído",
   "shortcutsUnavailable": "Não foi possível ler os atalhos",
   "configureShortcuts": "Configurar atalhos",
-  "shortcutSortingHelp": "As abas fixadas e os limites dos grupos são mantidos. A ordenação ocorre dentro de cada grupo e de cada sequência de abas não agrupadas."
+  "shortcutSortingHelp": "As abas fixadas e os limites dos grupos são mantidos. A ordenação ocorre dentro de cada grupo e de cada sequência de abas não agrupadas.",
+  "externalLinks": "Links externos",
+  "externalDescription": "Links com protocolo, host ou porta diferentes são externos. Aplica-se a cliques normais com o botão esquerdo em links HTTP(S), inclusive em frames.",
+  "externalEnabled": "Abrir links externos em novas abas",
+  "externalRulesHelp": "Aceita expressões regulares. Prioridade: exclusões de páginas, regras de URL de links, regras de URL de páginas e, por fim, links externos. Usa a primeira correspondência de cada categoria.",
+  "externalPlacementHelp": "Regras explícitas de primeiro ou segundo plano têm prioridade sobre a ativação de novas abas. Regras de posição de novas abas, ativação e carregamento continuam valendo.",
+  "externalActionLabel": "Ação do link $1",
+  "externalExcludePage": "Página: excluir",
+  "externalNewPage": "Página: nova aba em primeiro plano",
+  "externalBackgroundPage": "Página: nova aba em segundo plano",
+  "externalCurrentPage": "Página: aba/frame atual",
+  "externalNewLink": "Link: nova aba em primeiro plano",
+  "externalBackgroundLink": "Link: nova aba em segundo plano",
+  "externalCurrentLink": "Link: aba/frame atual"
 }

@@ -3,6 +3,7 @@ import { parseSettingsFile, serializeSettings } from "@/src/settings/transfer";
 import { DEFAULT_SETTINGS, type Settings } from "@/src/types";
 
 const settings: Settings = {
+  externalLinks: { enabled: true, urlRules: [{ url: "example", action: "background-link" }] },
   newTab: {
     position: "right",
     openInBackground: true,
@@ -88,6 +89,14 @@ for (const [name, value] of [
   ["popup boolean", { ...settings, popup: { ...settings.popup, openAsNewTab: 1 } }],
   ["closing behavior", { ...settings, afterTabClosing: { activateTab: "middle" } }],
   ["activation behavior", { ...settings, tabOnActivate: { behavior: "right" } }],
+  ["external enabled", { ...settings, externalLinks: { enabled: "true", urlRules: [] } }],
+  [
+    "external action",
+    {
+      ...settings,
+      externalLinks: { enabled: true, urlRules: [{ url: "valid", action: "unknown" }] },
+    },
+  ],
   [
     "loading position",
     { ...settings, loadingPage: { urlRules: [{ url: "valid", position: "right" }] } },
@@ -117,6 +126,10 @@ for (const [name, value] of [
 
 for (const pattern of ["", "  ", "["]) {
   for (const value of [
+    {
+      ...settings,
+      externalLinks: { enabled: true, urlRules: [{ url: pattern, action: "new-page" }] },
+    },
     {
       ...settings,
       newTab: {

@@ -72,5 +72,18 @@
   "shortcutUnassigned": "Nicht zugewiesen",
   "shortcutsUnavailable": "Tastenkombinationen konnten nicht gelesen werden",
   "configureShortcuts": "Tastenkombinationen konfigurieren",
-  "shortcutSortingHelp": "Angeheftete Tabs und Gruppengrenzen bleiben erhalten. Sortiert wird innerhalb jeder Gruppe und jedes zusammenhängenden Bereichs nicht gruppierter Tabs."
+  "shortcutSortingHelp": "Angeheftete Tabs und Gruppengrenzen bleiben erhalten. Sortiert wird innerhalb jeder Gruppe und jedes zusammenhängenden Bereichs nicht gruppierter Tabs.",
+  "externalLinks": "Externe Links",
+  "externalDescription": "Links mit anderem Protokoll, Host oder Port gelten als extern. Gilt für normale Linksklicks auf HTTP(S)-Links, auch in Frames.",
+  "externalEnabled": "Externe Links in neuen Tabs öffnen",
+  "externalRulesHelp": "Reguläre Ausdrücke werden unterstützt. Priorität: Seitenausschlüsse, Link-URL-Regeln, Seiten-URL-Regeln, dann externe Links. Pro Kategorie gilt der erste Treffer.",
+  "externalPlacementHelp": "Explizite Vordergrund-/Hintergrundregeln haben Vorrang vor den Aktivierungseinstellungen für neue Tabs. Positionsregeln für neue Tabs, Tab-Aktivierung und Seitenladen gelten weiterhin.",
+  "externalActionLabel": "Link-Aktion $1",
+  "externalExcludePage": "Seite: ausschließen",
+  "externalNewPage": "Seite: neuer Vordergrund-Tab",
+  "externalBackgroundPage": "Seite: neuer Hintergrund-Tab",
+  "externalCurrentPage": "Seite: aktueller Tab/Frame",
+  "externalNewLink": "Link: neuer Vordergrund-Tab",
+  "externalBackgroundLink": "Link: neuer Hintergrund-Tab",
+  "externalCurrentLink": "Link: aktueller Tab/Frame"
 }

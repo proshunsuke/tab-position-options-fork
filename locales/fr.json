@@ -72,5 +72,18 @@
   "shortcutUnassigned": "Non attribué",
   "shortcutsUnavailable": "Impossible de lire les raccourcis",
   "configureShortcuts": "Configurer les raccourcis",
-  "shortcutSortingHelp": "Les onglets épinglés et les limites des groupes sont conservés. Le tri se fait dans chaque groupe et chaque suite d’onglets non groupés."
+  "shortcutSortingHelp": "Les onglets épinglés et les limites des groupes sont conservés. Le tri se fait dans chaque groupe et chaque suite d’onglets non groupés.",
+  "externalLinks": "Liens externes",
+  "externalDescription": "Les liens dont le protocole, l’hôte ou le port diffère sont externes. S’applique aux clics gauches ordinaires sur les liens HTTP(S), y compris dans les cadres.",
+  "externalEnabled": "Ouvrir les liens externes dans de nouveaux onglets",
+  "externalRulesHelp": "Les expressions régulières sont prises en charge. Priorité : exclusions de pages, règles d’URL des liens, règles d’URL des pages, puis liens externes. La première correspondance de chaque catégorie est utilisée.",
+  "externalPlacementHelp": "Les règles explicites de premier plan ou d’arrière-plan priment sur l’activation des nouveaux onglets. Les règles de position à la création, à l’activation et au chargement restent applicables.",
+  "externalActionLabel": "Action du lien $1",
+  "externalExcludePage": "Page : exclure",
+  "externalNewPage": "Page : nouvel onglet au premier plan",
+  "externalBackgroundPage": "Page : nouvel onglet en arrière-plan",
+  "externalCurrentPage": "Page : onglet/cadre actuel",
+  "externalNewLink": "Lien : nouvel onglet au premier plan",
+  "externalBackgroundLink": "Lien : nouvel onglet en arrière-plan",
+  "externalCurrentLink": "Lien : onglet/cadre actuel"
 }

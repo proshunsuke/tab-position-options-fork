@@ -21,7 +21,26 @@ export type LoadingPageUrlRule = {
   position: "first" | "middle" | "last";
 };
 
+export const EXTERNAL_LINK_ACTIONS = [
+  "exclude-page",
+  "new-page",
+  "background-page",
+  "current-page",
+  "new-link",
+  "background-link",
+  "current-link",
+] as const;
+
+export type ExternalLinkRule = {
+  url: string;
+  action: (typeof EXTERNAL_LINK_ACTIONS)[number];
+};
+
 export type Settings = {
+  externalLinks: {
+    enabled: boolean;
+    urlRules: ExternalLinkRule[];
+  };
   newTab: {
     position: TabPosition;
     openInBackground: boolean;
@@ -43,6 +62,7 @@ export type Settings = {
 };
 
 export const DEFAULT_SETTINGS: Settings = {
+  externalLinks: { enabled: false, urlRules: [] },
   newTab: {
     position: "default",
     openInBackground: false,

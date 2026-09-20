@@ -59,6 +59,17 @@ export const initializePopupState = async () => {
 };
 
 export const getWindowSnapshot = (windowId: number) => windows.get(windowId);
+export const getNormalWindowId = (incognito: boolean) => {
+  const preferred = state.lastNormalWindowId;
+  if (preferred !== null && windows.get(preferred)?.incognito === incognito) {
+    return preferred;
+  }
+  return (
+    [...windows].find(
+      ([, window]) => window.type === "normal" && window.incognito === incognito,
+    )?.[0] ?? null
+  );
+};
 export const getPendingPopup = (windowId: number) => state.pending[windowId];
 export const getPopupTab = (tabId: number) => popupTabs.get(tabId);
 export const getPopupTabs = (windowId: number) =>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { i18n } from "#i18n";
+import { ExternalLinks } from "@/entrypoints/options/ExternalLinks";
 import { KeyboardShortcuts } from "@/entrypoints/options/KeyboardShortcuts";
 import { TabBehavior } from "@/entrypoints/options/TabBehavior";
 import { TabClosing } from "@/entrypoints/options/TabClosing";
@@ -21,7 +22,13 @@ import type {
 } from "@/src/types";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<"behavior" | "closing" | "activation">("behavior");
+  const [activeTab, setActiveTab] = useState<"behavior" | "closing" | "activation" | "external">(
+    "behavior",
+  );
+  const [externalLinks, setExternalLinks] = useState<Settings["externalLinks"]>({
+    enabled: false,
+    urlRules: [],
+  });
   const [newTabPosition, setNewTabPosition] = useState<TabPosition>("default");
   const [openInBackground, setOpenInBackground] = useState(false);
   const [afterTabClosing, setAfterTabClosing] = useState<TabActivation>("default");
@@ -43,6 +50,7 @@ export default function App() {
     void (async () => {
       await initializeAppData();
       const settings = getSettings();
+      setExternalLinks(settings.externalLinks ?? { enabled: false, urlRules: [] });
       if (settings.newTab?.position) {
         setNewTabPosition(settings.newTab.position);
       }
@@ -83,6 +91,10 @@ export default function App() {
 
   const getDraftSettings = () =>
     ({
+      externalLinks: {
+        ...externalLinks,
+        urlRules: externalLinks.urlRules.map(rule => ({ ...rule, url: rule.url.trim() })),
+      },
       newTab: {
         position: newTabPosition,
         openInBackground,
@@ -115,6 +127,7 @@ export default function App() {
       setAfterTabClosing(settings.afterTabClosing.activateTab);
       setTabOnActivate(settings.tabOnActivate.behavior);
       setPopup(settings.popup);
+      setExternalLinks(settings.externalLinks);
       setSaveStatus("imported");
     } catch {
       setSaveStatus("importFailed");
@@ -146,7 +159,7 @@ export default function App() {
 
   const handleSave = () => {
     if (
-      [...urlRules, ...loadingRules, ...(popup.exceptions ?? [])].some(
+      [...urlRules, ...externalLinks.urlRules, ...loadingRules, ...(popup.exceptions ?? [])].some(
         rule => !isValidUrlPattern(rule.url.trim()),
       )
     ) {
@@ -215,6 +228,13 @@ export default function App() {
           >
             {i18n.t("tabOnActivate")}
           </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("external")}
+            className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${activeTab === "external" ? "border-chrome-blue text-chrome-blue" : "border-transparent text-gray-600 hover:text-gray-800"}`}
+          >
+            {i18n.t("externalLinks")}
+          </button>
         </div>
 
         {/* タブコンテンツと保存ボタンのコンテナ */}
@@ -241,6 +261,10 @@ export default function App() {
                 behavior={tabOnActivate}
                 onBehaviorChange={handleTabOnActivateChange}
               />
+            )}
+
+            {activeTab === "external" && (
+              <ExternalLinks settings={externalLinks} onChange={setExternalLinks} />
             )}
 
             {activeTab === "closing" && (

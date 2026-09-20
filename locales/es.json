@@ -72,5 +72,18 @@
   "shortcutUnassigned": "Sin asignar",
   "shortcutsUnavailable": "No se pudieron leer los atajos",
   "configureShortcuts": "Configurar atajos",
-  "shortcutSortingHelp": "Se conservan las pestañas fijadas y los límites de los grupos. Se ordena dentro de cada grupo y de cada conjunto continuo de pestañas sin agrupar."
+  "shortcutSortingHelp": "Se conservan las pestañas fijadas y los límites de los grupos. Se ordena dentro de cada grupo y de cada conjunto continuo de pestañas sin agrupar.",
+  "externalLinks": "Enlaces externos",
+  "externalDescription": "Los enlaces con distinto protocolo, host o puerto se consideran externos. Se aplica a clics izquierdos normales en enlaces HTTP(S), incluidos los de marcos.",
+  "externalEnabled": "Abrir enlaces externos en pestañas nuevas",
+  "externalRulesHelp": "Admite expresiones regulares. Prioridad: exclusiones de páginas, reglas de URL de enlaces, reglas de URL de páginas y, por último, enlaces externos. Se usa la primera coincidencia de cada categoría.",
+  "externalPlacementHelp": "Las reglas explícitas de primer o segundo plano tienen prioridad sobre la activación de pestañas nuevas. Las reglas de posición de pestañas nuevas, activación y carga de páginas siguen aplicándose.",
+  "externalActionLabel": "Acción del enlace $1",
+  "externalExcludePage": "Página: excluir",
+  "externalNewPage": "Página: nueva pestaña en primer plano",
+  "externalBackgroundPage": "Página: nueva pestaña en segundo plano",
+  "externalCurrentPage": "Página: pestaña/marco actual",
+  "externalNewLink": "Enlace: nueva pestaña en primer plano",
+  "externalBackgroundLink": "Enlace: nueva pestaña en segundo plano",
+  "externalCurrentLink": "Enlace: pestaña/marco actual"
 }
