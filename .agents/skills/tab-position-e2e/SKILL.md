@@ -42,6 +42,7 @@ xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" npm run test:e2
 ## 追加・変更
 
 - [e2e/fixtures.ts](../../../e2e/fixtures.ts)の`test`・`expect`を使用する。fixtureはビルド済みの`dist/chrome-mv3`をテストごとのプロファイル内にコピーし、終了時に削除する。コピーには英語の翻訳データだけを残し、`default_locale: "en"`へのフォールバックで設定画面を英語に固定する。ブラウザ自体の表示言語と通常のビルド出力は変更しない。
+- fixtureは初回インストールで設定画面の翻訳・設定が読み込まれるまで待ち、通常は設定画面を閉じて空白タブを残してからテストを開始する。Chromeが起動時の空白タブを設定画面に転用する場合も考慮する。初回表示・既存設定タブの再利用を検証する場合は`test.use({ keepInstallOptions: true })`で残す。
 - [e2e/utils/helpers.ts](../../../e2e/utils/helpers.ts)の既存helperを利用する。機能テストのタブ操作はService Worker経由のChrome APIを基本とし、UI操作や実際のリンク遷移を検証する場合はその操作を再現する。
 - 既存タブのURL遷移を検証する場合は、準備用の`createWindowWithTabs`で初期`about:blank`の読み込み完了まで待つ。作成APIの完了だけでは、初期navigationが次の遷移を中断することがある。新規作成中の挙動を検証する場合は、この準備待機と分ける。
 - 機能テストの設定は`setExtensionSettings`で用意する。このhelperは設定全体のマージではなく`settings`キーの置換なので、検証に必要な設定を渡す。

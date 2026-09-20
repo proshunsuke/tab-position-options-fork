@@ -3,6 +3,7 @@
  * テスト用エクスポートの収集とグローバル変数への登録を管理
  */
 
+import { openOptionsPage } from "@/src/action/handler";
 import { handleCommand } from "@/src/commands/handler";
 import { resetAppDataState } from "@/src/settings/state/appData";
 import { getInitializationState, resetInitializationState } from "@/src/state/initializer";
@@ -52,6 +53,7 @@ export const setupTestEnvironment = () => {
   try {
     // テスト用エクスポートを構築
     const exports: GlobalTestExports = {
+      actionHandlers: { openOptionsPage },
       tabHandlers: {
         handleCommand,
         handleBeforeNavigate,

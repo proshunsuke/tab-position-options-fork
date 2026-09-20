@@ -8,6 +8,7 @@ declare global {
    * テスト用エクスポートの統合インターフェース
    */
   interface GlobalTestExports {
+    actionHandlers: { openOptionsPage: () => Promise<void> };
     /**
      * タブハンドラー関連
      */
