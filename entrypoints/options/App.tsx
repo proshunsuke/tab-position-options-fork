@@ -37,6 +37,7 @@ export default function App() {
   const [loadingRules, setLoadingRules] = useState<LoadingPageUrlRule[]>([]);
   const [popup, setPopup] = useState<Settings["popup"]>({ openAsNewTab: false, exceptions: [] });
   const fileInput = useRef<HTMLInputElement>(null);
+  const isDirty = useRef(false);
   const [isReady, setIsReady] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -47,9 +48,9 @@ export default function App() {
 
   // 起動時に保存済みの設定を読み込む
   useEffect(() => {
-    void (async () => {
-      await initializeAppData();
-      const settings = getSettings();
+    let disposed = false;
+    let changed = false;
+    const applySettings = (settings: Settings) => {
       setExternalLinks(settings.externalLinks ?? { enabled: false, urlRules: [] });
       if (settings.newTab?.position) {
         setNewTabPosition(settings.newTab.position);
@@ -70,22 +71,50 @@ export default function App() {
         setTabOnActivate(settings.tabOnActivate.behavior);
       }
       setIsReady(true);
+    };
+    const handleStorageChange = (
+      changes: Record<string, chrome.storage.StorageChange>,
+      area: string,
+    ) => {
+      if (area !== "local" || !changes.settings?.newValue) {
+        return;
+      }
+      changed = true;
+      // 同期済み設定は未編集の画面だけに反映し、編集中の入力は保存まで維持する。
+      if (!isDirty.current) {
+        applySettings(changes.settings.newValue as Settings);
+      }
+    };
+    chrome.storage.onChanged.addListener(handleStorageChange);
+    void (async () => {
+      await initializeAppData();
+      if (!disposed && !changed) {
+        applySettings(getSettings());
+      }
     })();
+    return () => {
+      disposed = true;
+      chrome.storage.onChanged.removeListener(handleStorageChange);
+    };
   }, []);
 
   const handleNewTabPositionChange = (value: string) => {
+    isDirty.current = true;
     setNewTabPosition(value as TabPosition);
   };
 
   const handleOpenInBackgroundChange = (checked: boolean) => {
+    isDirty.current = true;
     setOpenInBackground(checked);
   };
 
   const handleAfterTabClosingChange = (value: string) => {
+    isDirty.current = true;
     setAfterTabClosing(value as TabActivation);
   };
 
   const handleTabOnActivateChange = (value: string) => {
+    isDirty.current = true;
     setTabOnActivate(value as TabOnActivateBehavior);
   };
 
@@ -116,6 +145,7 @@ export default function App() {
       return;
     }
     setIsImporting(true);
+    isDirty.current = true;
     setSaveStatus(null);
     try {
       // ファイル全体の読み込みと検証が終わるまで、画面にもストレージにも反映しない。
@@ -175,6 +205,7 @@ export default function App() {
         ...currentSettings,
         ...getDraftSettings(),
       });
+      isDirty.current = false;
 
       setSaveStatus("saved");
 
@@ -244,11 +275,20 @@ export default function App() {
             {activeTab === "behavior" && (
               <TabBehavior
                 popup={popup}
-                onPopupChange={setPopup}
+                onPopupChange={value => {
+                  isDirty.current = true;
+                  setPopup(value);
+                }}
                 loadingRules={loadingRules}
-                onLoadingRulesChange={setLoadingRules}
+                onLoadingRulesChange={value => {
+                  isDirty.current = true;
+                  setLoadingRules(value);
+                }}
                 urlRules={urlRules}
-                onUrlRulesChange={setUrlRules}
+                onUrlRulesChange={value => {
+                  isDirty.current = true;
+                  setUrlRules(value);
+                }}
                 newTabPosition={newTabPosition}
                 onNewTabPositionChange={handleNewTabPositionChange}
                 openInBackground={openInBackground}
@@ -264,7 +304,13 @@ export default function App() {
             )}
 
             {activeTab === "external" && (
-              <ExternalLinks settings={externalLinks} onChange={setExternalLinks} />
+              <ExternalLinks
+                settings={externalLinks}
+                onChange={value => {
+                  isDirty.current = true;
+                  setExternalLinks(value);
+                }}
+              />
             )}
 
             {activeTab === "closing" && (
@@ -305,6 +351,7 @@ export default function App() {
               />
             </div>
             <p className="text-sm text-gray-600">{i18n.t("settingsTransferHelp")}</p>
+            <p className="text-sm text-gray-600">{i18n.t("settingsSyncHelp")}</p>
           </div>
 
           {/* 保存ボタン（タブコンテンツの外に固定） */}

@@ -85,5 +85,6 @@
   "externalCurrentPage": "Seite: aktueller Tab/Frame",
   "externalNewLink": "Link: neuer Vordergrund-Tab",
   "externalBackgroundLink": "Link: neuer Hintergrund-Tab",
-  "externalCurrentLink": "Link: aktueller Tab/Frame"
+  "externalCurrentLink": "Link: aktueller Tab/Frame",
+  "settingsSyncHelp": "Einstellungen und URL-Regeln werden bei aktivierter Chrome-Synchronisierung automatisch synchronisiert. Ist die Synchronisierung nicht verfügbar oder das Speicherlimit überschritten, bleiben die Einstellungen auf diesem Gerät erhalten."
 }
