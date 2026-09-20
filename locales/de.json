@@ -64,5 +64,13 @@
   "imported": "Einstellungen in das Formular geladen. Klicken Sie auf Einstellungen speichern, um sie anzuwenden.",
   "importFailed": "Diese Datei konnte nicht importiert werden. Wählen Sie eine gültige Einstellungsdatei, die mit Tab Position Options Fork exportiert wurde.",
   "exportFailed": "Die Einstellungen konnten nicht exportiert werden. Prüfen Sie die URL-Muster und versuchen Sie es erneut.",
-  "settingsTransferHelp": "Exportiert die angezeigten Einstellungen einschließlich ungespeicherter Änderungen. Beim Import werden die Einstellungen im Formular ersetzt. Klicken Sie zum Anwenden auf Einstellungen speichern. Dateien werden lokal verarbeitet."
+  "settingsTransferHelp": "Exportiert die angezeigten Einstellungen einschließlich ungespeicherter Änderungen. Beim Import werden die Einstellungen im Formular ersetzt. Klicken Sie zum Anwenden auf Einstellungen speichern. Dateien werden lokal verarbeitet.",
+  "keyboardShortcuts": "Tastenkombinationen",
+  "sortByTitle": "Tabs nach Titel sortieren",
+  "sortByUrl": "Tabs nach URL sortieren",
+  "toggleLastActive": "Zum zuletzt aktiven Tab wechseln",
+  "shortcutUnassigned": "Nicht zugewiesen",
+  "shortcutsUnavailable": "Tastenkombinationen konnten nicht gelesen werden",
+  "configureShortcuts": "Tastenkombinationen konfigurieren",
+  "shortcutSortingHelp": "Angeheftete Tabs und Gruppengrenzen bleiben erhalten. Sortiert wird innerhalb jeder Gruppe und jedes zusammenhängenden Bereichs nicht gruppierter Tabs."
 }

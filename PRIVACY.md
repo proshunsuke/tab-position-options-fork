@@ -30,6 +30,10 @@ The pending navigation URL and its tab ID, timestamp, and restoration flag are t
 
 When pop-up conversion is enabled, the extension checks new pop-up URLs against your exception patterns. These URLs are processed in memory. It moves the existing tab to a normal window without reading page contents or sending URLs externally. Window type and incognito status are used locally to select a compatible destination.
 
+### Keyboard Shortcuts
+
+When you request tab sorting, the extension reads the current window’s tab titles, URLs, and group membership. These values are used in memory to sort tabs while preserving pinned tabs and group boundaries; they are not stored or transmitted. Switching to the last active tab uses the session activation order described below.
+
 ### Session Tab State
 
 To maintain tab behavior when Chrome stops and restarts the extension's background process, the extension stores the following information in `chrome.storage.session`:
@@ -41,7 +45,7 @@ To maintain tab behavior when Chrome stops and restarts the extension's backgrou
 - The order in which tabs became active
 - Tab IDs whose initial restored navigation should not change their position
 
-This state is used only for tab positioning and activation, including choosing a tab after another tab closes. Tab snapshots do not contain page URLs, page titles, or page contents; pending navigation URLs are handled separately as described above. Session storage is temporary and is cleared when the browser restarts; it is separate from your persistent settings.
+This state is used only for tab positioning and activation, including choosing a tab after another tab closes and switching to the last active tab. Tab snapshots do not contain page URLs, page titles, or page contents; pending navigation URLs are handled separately as described above. Session storage is temporary and is cleared when the browser restarts; it is separate from your persistent settings.
 
 ## Data Storage and Sharing
 
@@ -53,7 +57,7 @@ This state is used only for tab positioning and activation, including choosing a
 ## Permissions
 
 - **storage**: Saves your preferences and URL rules locally, and retains session tab and pending navigation state across background-process restarts.
-- **tabs**: Reads new-tab and pop-up URLs to apply your URL rules and pop-up exceptions. This permission is used for local matching, not for uploading or maintaining a history of visited pages.
+- **tabs**: Reads new-tab and pop-up URLs to apply your URL rules and pop-up exceptions. It also reads tab titles and URLs when you request sorting. This permission is used for local matching and sorting, not for uploading or maintaining a history of visited pages.
 - **webNavigation**: Detects top-level navigation commits and server redirects to apply Loading Page URL rules, and provides navigation URLs for pop-up exception checks.
 
 ## Your Controls

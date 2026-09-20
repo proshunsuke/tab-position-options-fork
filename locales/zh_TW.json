@@ -64,5 +64,13 @@
   "imported": "設定已載入畫面。請點選「儲存設定」以套用。",
   "importFailed": "無法匯入此檔案。請選擇由 Tab Position Options Fork 匯出的有效設定檔。",
   "exportFailed": "無法匯出設定。請檢查 URL 比對模式後再試一次。",
-  "settingsTransferHelp": "匯出目前畫面中的設定，包括尚未儲存的變更。匯入會取代畫面中的設定；請點選「儲存設定」以套用。檔案僅在本機處理。"
+  "settingsTransferHelp": "匯出目前畫面中的設定，包括尚未儲存的變更。匯入會取代畫面中的設定；請點選「儲存設定」以套用。檔案僅在本機處理。",
+  "keyboardShortcuts": "鍵盤快捷鍵",
+  "sortByTitle": "依標題排列分頁",
+  "sortByUrl": "依 URL 排列分頁",
+  "toggleLastActive": "切換至上次啟用的分頁",
+  "shortcutUnassigned": "未指派",
+  "shortcutsUnavailable": "無法讀取快捷鍵",
+  "configureShortcuts": "設定快捷鍵",
+  "shortcutSortingHelp": "排序時保留釘選分頁與群組邊界。僅在各群組內，以及連續的未分組分頁範圍內排序。"
 }

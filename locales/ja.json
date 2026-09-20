@@ -64,5 +64,13 @@
   "imported": "設定を画面に読み込みました。「設定を保存」で適用してください。",
   "importFailed": "ファイルを読み込めませんでした。Tab Position Options Fork でエクスポートした有効な設定ファイルを選択してください。",
   "exportFailed": "設定をエクスポートできませんでした。URL パターンを確認して、もう一度お試しください。",
-  "settingsTransferHelp": "未保存の変更を含む、現在画面に表示されている設定を書き出します。インポートすると画面の設定が置き換わります。「設定を保存」で適用してください。ファイルは端末内で処理します。"
+  "settingsTransferHelp": "未保存の変更を含む、現在画面に表示されている設定を書き出します。インポートすると画面の設定が置き換わります。「設定を保存」で適用してください。ファイルは端末内で処理します。",
+  "keyboardShortcuts": "キーボードショートカット",
+  "sortByTitle": "タイトル順にタブを並べ替える",
+  "sortByUrl": "URL 順にタブを並べ替える",
+  "toggleLastActive": "直前のアクティブタブに切り替える",
+  "shortcutUnassigned": "未割り当て",
+  "shortcutsUnavailable": "ショートカットを取得できません",
+  "configureShortcuts": "ショートカットを設定",
+  "shortcutSortingHelp": "ピン留めタブとグループの境界は維持します。各グループ内、およびグループに属さない連続したタブの範囲内で並べ替えます。"
 }

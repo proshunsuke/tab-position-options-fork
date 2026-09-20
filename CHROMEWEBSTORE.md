@@ -11,7 +11,7 @@ This file is the repository source of truth for submission information and copy 
 - Extension ID: `bimiahgcjenkoacmdfggckkaflnnebki`
 - Published package: **0.2.2**, with `storage` permission only.
 - Dashboard draft package: **0.2.2**, with `storage` permission only.
-- Current source: still version **0.2.2**, but includes unreleased Tab on Activate, new-tab URL rules, Loading Page URL rules, pop-up conversion, and options localized into 10 locales, and requests `storage`, `tabs`, and `webNavigation`. It is not the same package as the published 0.2.2.
+- Current source: still version **0.2.2**, but includes unreleased Tab on Activate, new-tab URL rules, Loading Page URL rules, pop-up conversion, settings import/export, keyboard shortcuts, and options localized into 10 locales, and requests `storage`, `tabs`, and `webNavigation`. It is not the same package as the published 0.2.2.
 - Dashboard fields were read only; no draft was saved or submitted during preparation of this document.
 
 Sections marked **Draft for next release** are proposed replacements, not claims about what is currently registered. Choose a new version during release preparation; do not reuse the published version for these changes.
@@ -39,6 +39,8 @@ Customize where tabs open and which tab becomes active when you close a tab.
 Tab Position Options Fork lets you choose tab positions, open new tabs in the background, and control which tab is selected after closing the current one. You can also move tabs when they become active, set URL-specific rules for new tabs and page navigation, and open pop-up windows as tabs with URL exceptions.
 
 The options page follows your browser’s UI language and supports English, Japanese, Simplified Chinese, Traditional Chinese, Korean, Spanish, French, German, Brazilian Portuguese, and Russian. Unsupported languages use English.
+
+Use keyboard shortcuts to sort tabs or switch to the last active tab.
 
 Export and import settings files to back up your configuration or transfer it between installations of this fork.
 
@@ -77,7 +79,7 @@ The extension does not include any unrelated functionality such as ads, analytic
 ### Draft for next release
 
 ```text
-Customize Chrome tab positioning and activation behavior, including where new tabs open, which tab is selected after closing a tab, where activated tabs move, URL-specific rules for new tabs and page navigation, and converting pop-up windows to tabs with URL exceptions.
+Customize Chrome tab positioning and activation behavior, including where new tabs open, which tab is selected after closing a tab, where activated tabs move, URL-specific rules for new tabs and page navigation, converting pop-up windows to tabs with URL exceptions, and sorting or switching tabs with keyboard shortcuts.
 ```
 
 ## Permissions justification
@@ -104,10 +106,10 @@ Evidence: [settings](src/settings/state/appData.ts), [activation history](src/ta
 ### tabs — Draft for next release; absent from current dashboard package
 
 ```text
-The tabs permission is required to read the URL of newly created tabs (Tab.pendingUrl or Tab.url) and match it against user-defined URL rules. These rules determine the new tab's position and whether it opens in the foreground or background. Matching applies automatically to newly created tabs without requiring the user to click the extension for each tab. URLs are processed locally and are not transmitted externally or saved as browsing history. The same URL access is used to check pop-up exception patterns before moving an existing tab into a normal window. The extension does not read page contents.
+The tabs permission is required to read the URL of newly created tabs (Tab.pendingUrl or Tab.url) and match it against user-defined URL rules. These rules determine the new tab's position and whether it opens in the foreground or background. Matching applies automatically to newly created tabs without requiring the user to click the extension for each tab. URLs are processed locally and are not transmitted externally or saved as browsing history. The same URL access is used to check pop-up exception patterns before moving an existing tab into a normal window. On an explicit sorting command, it also reads tab titles and URLs to order the current window’s tabs. Sorting data is used only in memory. The extension does not read page contents.
 ```
 
-Evidence: [new-tab handler](src/tabs/handleNewTab.ts), [pop-up handler](src/tabs/popup.ts), [URL matching](src/tabs/urlRules.ts). Unlike position-only tab operations, these properties require URL access. See the [Tabs API permission documentation](https://developer.chrome.com/docs/extensions/reference/api/tabs).
+Evidence: [new-tab handler](src/tabs/handleNewTab.ts), [pop-up handler](src/tabs/popup.ts), [URL matching](src/tabs/urlRules.ts), [shortcut handlers](src/commands/handler.ts). Unlike position-only tab operations, these properties require URL access. See the [Tabs API permission documentation](https://developer.chrome.com/docs/extensions/reference/api/tabs).
 
 ### webNavigation — Draft for next release; absent from current dashboard package
 
@@ -146,7 +148,8 @@ These are recorded dashboard values, not a new submission or certification.
 | Pop-up URL and window type/incognito status | Checked in memory to apply exceptions and choose a compatible destination; pop-up URLs are not persisted by the conversion feature | No / No |
 | Last focused normal window ID and pending pop-up window IDs | Stored in `chrome.storage.session` for conversion and worker restart recovery; cleared on browser restart | No / No |
 | Newly created tab URL | Read to evaluate matching rules; not saved as visited-URL history | No / No |
-| Tab IDs and activation order | Stored in `chrome.storage.session` for tab closing behavior | No / No |
+| Tab titles, URLs, and group membership for sorting | Read in memory only when a sorting command is invoked; not persisted | No / No |
+| Tab IDs and activation order | Stored in `chrome.storage.session` for tab closing behavior and switching to the last active tab | No / No |
 | Tab IDs, positions, active/pinned state, opener IDs | Stored in `chrome.storage.session` for tab positioning and restart recovery | No / No |
 
 The debug utility can store local diagnostic logs when explicitly instrumented; no production call sites of `debugLog` were found during this review. There is no extension telemetry or external reporting in the reviewed source. Developer tooling is separate from the shipped extension.
@@ -165,10 +168,16 @@ Dashboard uploads were observed; exact byte-for-byte identity with local files h
 | Asset | Local file / dimensions | Dashboard and preparation status |
 | --- | --- | --- |
 | Store icon | [public/icon-128.png](public/icon-128.png), 128×128 | Uploaded |
-| Screenshot 1 | [screenshot-1.png](store-assets/screenshots/screenshot-1.png), 1280×800 | Uploaded; review against the new options UI |
-| Screenshot 2 | [screenshot-2.png](store-assets/screenshots/screenshot-2.png), 1280×800 | Uploaded; review against the new options UI |
+| Screenshot 1 — New Tab | [screenshot-1.png](store-assets/screenshots/screenshot-1.png), 1280×800 | Updated locally; not uploaded. Opening position and background behavior |
+| Screenshot 2 — Tab Closing | [screenshot-2.png](store-assets/screenshots/screenshot-2.png), 1280×800 | Updated locally; not uploaded. Choosing the next active tab after closing |
+| Screenshot 3 — Tab on Activate | [screenshot-3.png](store-assets/screenshots/screenshot-3.png), 1280×800 | Created locally; not uploaded. Activation position |
+| Screenshot 4 — URL rules and pop-ups | [screenshot-4.png](store-assets/screenshots/screenshot-4.png), 1280×800 | Created locally; not uploaded. URL rules and pop-up exceptions with example.com patterns |
 | Small promo tile | [promotional-440x280.png](store-assets/promotional-440x280.png), 440×280 | Uploaded |
 | Marquee promo tile | Local source not identified | Uploaded; dashboard specifies 1400×560 |
+
+Upload screenshots 1–4 in the order above. All four are direct captures of 1280×800 regions of the English settings page at its original scale, without added headings, backgrounds, or rearrangement. They are verified as 24-bit RGB PNG without alpha. The settings shown are illustrative. The dashboard still contains the previous screenshots until these replacements are uploaded.
+
+[tab-behavior.png](store-assets/tab-behavior.png) is the separate 1280×1721 full-page image used in the READMEs; it is not a store screenshot.
 
 `store-assets/social-preview-1280x640.png` is 1280×640 and must not be assumed to be the uploaded 1400×560 marquee asset.
 
@@ -185,7 +194,7 @@ Dashboard uploads were observed; exact byte-for-byte identity with local files h
 
 | Version | Date | Changes | Status |
 | --- | --- | --- | --- |
-| Next version not assigned | Not submitted | Tab on Activate; new-tab and Loading Page URL rules; pop-up conversion; `tabs` and `webNavigation` permissions | Source only; release preparation pending |
+| Next version not assigned | Not submitted | Tab on Activate; new-tab and Loading Page URL rules; pop-up conversion; settings import/export; keyboard shortcuts; `tabs` and `webNavigation` permissions | Source only; release preparation pending |
 | 0.2.2 | Publication date not checked | Tab closing fixes for Chrome 147 and varying event order | Published; also present as dashboard draft |
 
 Older changes are in [CHANGELOG.md](CHANGELOG.md) and the current listing below. Submission/publication dates were not inferred from commit dates.
