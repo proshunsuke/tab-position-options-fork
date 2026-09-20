@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.0
+- Added the remaining original Tab Position Options features, completing the Manifest V3 reimplementation
+- Added Tab on Activate settings to move activated tabs to the first or last position
+- Added URL-specific rules for new-tab position and foreground/background behavior, and Loading Page rules for navigation
+- Added pop-up conversion to tabs with URL exceptions
+- Added external-link handling with page exclusions and current-tab, foreground-tab, and background-tab rules
+- Added keyboard shortcuts to sort tabs by title or URL and switch to the last active tab
+- Added settings import/export and automatic Chrome Sync, with local fallback and synchronization failure notices
+- Added options-page and store-description translations for 10 locales
+- Updated the options page with category navigation, a persistent save bar, and dedicated settings-management and shortcut sections
+- Added automatic settings display after installation and reuse of existing settings tabs
+- Fixed tab positions and selection changing when Chrome restores the previous session
+
 ## 0.2.2
 - Fixed tab closing behavior on Chrome 147.0.7727.56
 - Fixed tab closing behavior to keep working even if Chrome changes tab-close event order in future updates
