@@ -24,6 +24,8 @@
 
 設定ファイルのエクスポート・インポートで、設定のバックアップや、この Fork をインストールした別環境への移行ができます。
 
+キーボードショートカットでタブの並べ替えや、直前のアクティブタブへの切り替えができます。
+
 <img src="store-assets/screenshots/screenshot-1.png" alt="Tab Position Options Forkの設定画面" width="640">
 
 ## 使い始める

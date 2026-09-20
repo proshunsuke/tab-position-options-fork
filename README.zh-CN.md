@@ -24,6 +24,8 @@
 
 您可以导出和导入设置文件，以备份配置或将其迁移到安装了此分支扩展的其他环境。
 
+您可以使用键盘快捷键排列标签页，或切换回上次激活的标签页。
+
 <img src="store-assets/screenshots/screenshot-1.png" alt="Tab Position Options Fork设置界面" width="640">
 
 ## 开始使用

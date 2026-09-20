@@ -24,6 +24,8 @@ The options page follows your browser’s UI language and supports [10 locales](
 
 You can export and import settings files to back up your configuration or transfer it between installations of this fork.
 
+Keyboard shortcuts let you sort tabs and switch back to the last active tab.
+
 <img src="store-assets/screenshots/screenshot-1.png" alt="Tab Position Options Fork settings" width="640">
 
 ## Getting Started
