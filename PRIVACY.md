@@ -1,6 +1,6 @@
 # Privacy Policy for Tab Position Options Fork
 
-*Last updated: September 19, 2026*
+*Last updated: September 20, 2026*
 
 ## Overview
 
@@ -10,7 +10,7 @@ Tab Position Options Fork lets you customize tab positioning and activation beha
 
 ### Settings and URL Rules
 
-Your tab positioning, background-opening, and activation preferences are saved using `chrome.storage.local`. This includes URL patterns you enter in the extension's options page. Settings remain on your device until changed, removed, or deleted by uninstalling the extension.
+Your tab positioning, background-opening, activation, and pop-up conversion preferences are saved using `chrome.storage.local`. This includes URL patterns you enter in the extension's options page. Settings remain on your device until changed, removed, or deleted by uninstalling the extension.
 
 ### New-Tab URLs
 
@@ -24,11 +24,16 @@ When Loading Page rules are configured, the extension checks the destination URL
 
 The pending navigation URL and its tab ID, timestamp, and restoration flag are temporarily retained in `chrome.storage.session` so matching can survive a background-process restart. They are removed when the navigation commits or fails, or the tab closes. Browser restart clears this storage. This is temporary navigation state, not a history of visited pages. Page contents are not read and URLs are not transmitted externally.
 
+### Pop-up URLs
+
+When pop-up conversion is enabled, the extension checks new pop-up URLs against your exception patterns. These URLs are processed in memory. It moves the existing tab to a normal window without reading page contents or sending URLs externally. Window type and incognito status are used locally to select a compatible destination.
+
 ### Session Tab State
 
 To maintain tab behavior when Chrome stops and restarts the extension's background process, the extension stores the following information in `chrome.storage.session`:
 
 - Window and tab IDs
+- The last focused normal window ID and window IDs for pending pop-up conversions
 - Tab positions and active/pinned state
 - IDs identifying which tabs opened other tabs
 - The order in which tabs became active
@@ -46,8 +51,8 @@ This state is used only for tab positioning and activation, including choosing a
 ## Permissions
 
 - **storage**: Saves your preferences and URL rules locally, and retains session tab and pending navigation state across background-process restarts.
-- **tabs**: Reads new-tab URLs to apply your URL rules. This permission is used for local matching, not for uploading or maintaining a history of visited pages.
-- **webNavigation**: Detects top-level navigation commits and server redirects to apply Loading Page URL rules.
+- **tabs**: Reads new-tab and pop-up URLs to apply your URL rules and pop-up exceptions. This permission is used for local matching, not for uploading or maintaining a history of visited pages.
+- **webNavigation**: Detects top-level navigation commits and server redirects to apply Loading Page URL rules, and provides navigation URLs for pop-up exception checks.
 
 ## Your Controls
 
