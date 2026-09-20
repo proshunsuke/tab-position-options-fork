@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { i18n } from "#i18n";
 import { ExternalLinks } from "@/entrypoints/options/ExternalLinks";
 import { KeyboardShortcuts } from "@/entrypoints/options/KeyboardShortcuts";
+import { SettingsSyncStatus } from "@/entrypoints/options/SettingsSyncStatus";
 import { TabBehavior } from "@/entrypoints/options/TabBehavior";
 import { TabClosing } from "@/entrypoints/options/TabClosing";
 import { TabOnActivate } from "@/entrypoints/options/TabOnActivate";
@@ -352,6 +353,7 @@ export default function App() {
             </div>
             <p className="text-sm text-gray-600">{i18n.t("settingsTransferHelp")}</p>
             <p className="text-sm text-gray-600">{i18n.t("settingsSyncHelp")}</p>
+            <SettingsSyncStatus />
           </div>
 
           {/* 保存ボタン（タブコンテンツの外に固定） */}

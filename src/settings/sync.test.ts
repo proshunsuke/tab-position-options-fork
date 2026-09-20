@@ -81,6 +81,7 @@ test("retains unsent local changes after worker restart and retries a failed upl
   await sync.setupSettingsSync();
   expect(local.settings).toEqual(settings);
   expect(local.settingsSyncPending).toBe(true);
+  expect(local.settingsSyncError).toBe("unavailable");
   listeners = [];
   vi.resetModules();
   sync = await import("@/src/settings/sync");
@@ -88,6 +89,7 @@ test("retains unsent local changes after worker restart and retries a failed upl
   expect(remote).toEqual((await sync.encodeSyncedSettings(settings)).values);
   expect(local.settings).toEqual(settings);
   expect(local.settingsSyncPending).toBe(false);
+  expect(local.settingsSyncError).toBeNull();
 });
 
 test("detects a local change even if a previous completion overwrote its pending flag", async () => {
@@ -152,12 +154,30 @@ test("keeps oversized settings locally and retries when the user reduces their s
   await setupSettingsSync();
   expect(local.settings).toEqual(large);
   expect(local.settingsSyncPending).toBe(true);
+  expect(local.settingsSyncError).toBe("capacity");
   expect(chrome.storage.sync.set).not.toHaveBeenCalled();
   expect(remote).toEqual(previous.values);
   update("local", { settings, settingsSyncPending: true });
   await flush();
   expect(remote).toEqual((await encodeSyncedSettings(settings)).values);
+  expect(local.settingsSyncError).toBeNull();
 });
+
+for (const [message, expected] of [
+  ["QUOTA_BYTES quota exceeded", "capacity"],
+  ["MAX_WRITE_OPERATIONS_PER_MINUTE exceeded", "unavailable"],
+  ["service unavailable", "unavailable"],
+] as const) {
+  test(`reports a Chrome API failure: ${message}`, async () => {
+    const { setupSettingsSync } = await import("@/src/settings/sync");
+    local = { settings, settingsSyncPending: true };
+    vi.mocked(chrome.storage.sync.set).mockRejectedValueOnce(new Error(message));
+    await setupSettingsSync();
+    expect(local.settingsSyncError).toBe(expected);
+    expect(local.settings).toEqual(settings);
+    expect(local.settingsSyncPending).toBe(true);
+  });
+}
 
 test("does not let an in-flight remote read replace a newer local edit", async () => {
   const { setupSettingsSync, encodeSyncedSettings } = await import("@/src/settings/sync");

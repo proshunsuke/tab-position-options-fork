@@ -86,5 +86,8 @@
   "externalNewLink": "链接：新前台标签页",
   "externalBackgroundLink": "链接：新后台标签页",
   "externalCurrentLink": "链接：当前标签页或框架",
-  "settingsSyncHelp": "启用 Chrome 同步后，设置和 URL 规则会自动同步。无法同步或超出同步存储容量时，设置仍保留在此设备上。"
+  "settingsSyncHelp": "启用 Chrome 同步后，设置和 URL 规则会自动同步。无法同步或超出同步存储容量时，设置仍保留在此设备上。",
+  "settingsSyncCapacity": "设置超出了同步存储容量，现保留在此设备上。请减少 URL 规则的数量或长度，然后重新保存以重试。",
+  "settingsSyncUnavailable": "无法同步设置。已保存的设置仍保留在此设备上。下次更改设置或启动扩展时将重试。",
+  "settingsSyncStatusUnavailable": "无法读取同步状态。请重新打开设置页面查看。"
 }

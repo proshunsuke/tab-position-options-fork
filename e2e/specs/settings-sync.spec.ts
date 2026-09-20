@@ -134,3 +134,54 @@ test("partial delivery retains the current configuration until all chunks arrive
   await serviceWorker.evaluate(values => chrome.storage.sync.set(values), encoded.values);
   await expect(page.locator('input[name="newTabPosition"][value="first"]')).toBeChecked();
 });
+
+test("shows a failed upload across page reloads and clears the warning after retry", async ({
+  context,
+  extensionId,
+  serviceWorker,
+}) => {
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/options.html`);
+  await serviceWorker.evaluate(() => {
+    const original = chrome.storage.sync.set;
+    chrome.storage.sync.set = (() => {
+      chrome.storage.sync.set = original;
+      return Promise.reject(new Error("Sync service unavailable"));
+    }) as typeof chrome.storage.sync.set;
+  });
+  await page.locator('input[name="newTabPosition"][value="left"]').check();
+  await page.getByRole("button", { name: "Save Settings", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("Settings could not be synchronized.");
+  await page.reload();
+  await expect(page.getByRole("alert")).toContainText("Saved settings remain on this device.");
+  await expect(page.locator('input[name="newTabPosition"][value="left"]')).toBeChecked();
+  await page.locator('input[name="newTabPosition"][value="right"]').check();
+  await page.getByRole("button", { name: "Save Settings", exact: true }).click();
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  expect(
+    await serviceWorker.evaluate(
+      async () => (await chrome.storage.local.get("settingsSyncPending")).settingsSyncPending,
+    ),
+  ).toBe(false);
+});
+
+test("shows capacity fallback and clears the warning after reducing rules", async ({
+  context,
+  extensionId,
+  serviceWorker,
+}) => {
+  const large = {
+    ...DEFAULT_SETTINGS,
+    popup: { openAsNewTab: false, exceptions: [{ url: "x".repeat(110000) }] },
+  };
+  await setExtensionSettings(context, large);
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/options.html`);
+  await expect(page.getByRole("alert")).toContainText("Settings exceed the sync storage limit");
+  expect(
+    await serviceWorker.evaluate(async () => (await chrome.storage.local.get("settings")).settings),
+  ).toEqual(large);
+  await page.getByRole("button", { name: "Remove pop-up exception 1", exact: true }).click();
+  await page.getByRole("button", { name: "Save Settings", exact: true }).click();
+  await expect(page.getByRole("alert")).toHaveCount(0);
+});

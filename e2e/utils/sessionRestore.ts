@@ -64,6 +64,17 @@ export const installSessionRestoreExtension = async (
   try {
     const { id } = await client.send("Extensions.loadUnpacked", { path: extensionPath });
     const initialWorker = await waitForServiceWorker(context);
+    const optionsUrl = `chrome-extension://${id}/options.html`;
+    await expect.poll(() => context.pages().some(page => page.url() === optionsUrl)).toBe(true);
+    const installPage = context.pages().find(page => page.url() === optionsUrl)!;
+    await expect(installPage.getByRole("button").first()).toHaveText(/\S/);
+    await expect(installPage.locator("fieldset").first()).toBeEnabled();
+    await Promise.all(
+      context
+        .pages()
+        .filter(candidate => candidate !== page && candidate.url() === optionsUrl)
+        .map(page => page.close()),
+    );
     await page.goto("chrome://extensions");
     await page.evaluate(() => {
       const api = (chrome as typeof chrome & { developerPrivate: DeveloperPrivate })

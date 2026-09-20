@@ -86,5 +86,8 @@
   "externalNewLink": "링크: 새 전경 탭",
   "externalBackgroundLink": "링크: 새 배경 탭",
   "externalCurrentLink": "링크: 현재 탭/프레임",
-  "settingsSyncHelp": "Chrome 동기화가 활성화되어 있으면 설정과 URL 규칙이 자동으로 동기화됩니다. 동기화할 수 없거나 저장 용량 한도를 초과해도 설정은 이 기기에 유지됩니다."
+  "settingsSyncHelp": "Chrome 동기화가 활성화되어 있으면 설정과 URL 규칙이 자동으로 동기화됩니다. 동기화할 수 없거나 저장 용량 한도를 초과해도 설정은 이 기기에 유지됩니다.",
+  "settingsSyncCapacity": "설정이 동기화 저장 용량 한도를 초과하여 이 기기에 유지됩니다. URL 규칙의 수나 길이를 줄이고 다시 저장하면 재시도합니다.",
+  "settingsSyncUnavailable": "설정을 동기화하지 못했습니다. 저장된 설정은 이 기기에 유지됩니다. 다음 설정 변경 시 또는 확장 프로그램 시작 시 재시도합니다.",
+  "settingsSyncStatusUnavailable": "동기화 상태를 읽지 못했습니다. 설정 페이지를 다시 열어 확인하세요."
 }

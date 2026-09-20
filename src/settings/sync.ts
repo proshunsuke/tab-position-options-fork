@@ -1,6 +1,8 @@
 import { parseSettingsFile, serializeSettings } from "@/src/settings/transfer";
 import type { Settings } from "@/src/types";
 
+export type SettingsSyncError = "capacity" | "unavailable";
+
 type LocalSettings = {
   settings?: Settings;
   settingsSyncHash?: string;
@@ -12,6 +14,7 @@ type SyncChunk = { hash: string; text: string };
 const headerKey = "settingsSync";
 const chunkPrefix = "settingsSyncChunk:";
 const encoder = new TextEncoder();
+const capacityError = new Error("Settings exceed Chrome sync storage capacity");
 let generation = 0;
 let localChanged = false;
 let requested = false;
@@ -62,11 +65,22 @@ const synchronize = async () => {
   try {
     while (requested) {
       requested = false;
+      const currentGeneration = generation;
+      let failure: SettingsSyncError | null | undefined;
       try {
-        await synchronizeOnce();
-      } catch {
+        failure = await synchronizeOnce();
+      } catch (error) {
+        failure =
+          error === capacityError ||
+          (error instanceof Error && /QUOTA_BYTES|MAX_ITEMS/.test(error.message))
+            ? "capacity"
+            : "unavailable";
         // ローカル設定を保持し、次の変更・同期イベント・Worker起動で再試行する。
         // 失敗した処理自体は再要求しないが、処理中に届いた新しい変更は処理する。
+      }
+      if (currentGeneration === generation && failure !== undefined) {
+        // 表示用の状態は端末内だけに保存。同期処理やタブ操作の成否とは独立させる。
+        await chrome.storage.local.set({ settingsSyncError: failure }).catch(() => {});
       }
     }
   } finally {
@@ -110,11 +124,11 @@ const synchronizeOnce = async () => {
         settingsSyncPending: false,
       });
     }
-    return;
+    return null;
   }
   // 不完全な同期データで既存設定を上書きしない。未設定の端末からデフォルトも送らない。
   if (!encoded || (!pending && synced === null)) {
-    return;
+    return synced === null ? ("unavailable" as const) : null;
   }
   if (!local.settingsSyncPending) {
     await chrome.storage.local.set({ settingsSyncPending: true });
@@ -142,6 +156,7 @@ const synchronizeOnce = async () => {
   }
   await chrome.storage.local.set({ settingsSyncHash: encoded.hash, settingsSyncPending: false });
   localChanged = false;
+  return null;
 };
 
 const decodeSyncedSettings = async (values: Record<string, unknown>) => {
@@ -192,6 +207,6 @@ const assertSyncQuota = (values: Record<string, unknown>) => {
     sizes.some(size => size > 8192) ||
     sizes.reduce((a, b) => a + b, 0) > 102400
   ) {
-    throw new Error("Settings exceed Chrome sync storage capacity");
+    throw capacityError;
   }
 };
