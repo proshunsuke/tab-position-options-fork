@@ -11,7 +11,7 @@ This file is the repository source of truth for submission information and copy 
 - Extension ID: `bimiahgcjenkoacmdfggckkaflnnebki`
 - Published package: **0.2.2**, with `storage` permission only.
 - Dashboard draft package: **0.2.2**, with `storage` permission only.
-- Current source: still version **0.2.2**, but includes unreleased Tab on Activate, new-tab URL rules, Loading Page URL rules, pop-up conversion, settings import/export, keyboard shortcuts, and options localized into 10 locales, and requests `storage`, `tabs`, and `webNavigation`. It is not the same package as the published 0.2.2.
+- Current source: still version **0.2.2**, but includes unreleased Tab on Activate, new-tab URL rules, Loading Page URL rules, pop-up conversion, automatic settings sync, settings import/export, keyboard shortcuts, and options localized into 10 locales, and requests `storage`, `tabs`, and `webNavigation`. It is not the same package as the published 0.2.2.
 - Dashboard fields were read only; no draft was saved or submitted during preparation of this document.
 
 Sections marked **Draft for next release** are proposed replacements, not claims about what is currently registered. Choose a new version during release preparation; do not reuse the published version for these changes.
@@ -44,7 +44,7 @@ Use keyboard shortcuts to sort tabs or switch to the last active tab.
 
 Optionally open external links in new tabs, with page exclusions and rules for foreground, background, or current-tab navigation.
 
-Export and import settings files to back up your configuration or transfer it between installations of this fork.
+Settings and user-entered URL rules sync automatically when Chrome sync is enabled. A local copy remains available if synchronization fails or the settings exceed Chrome's sync capacity. You can also export and import settings files to back up your configuration.
 
 HOW TO USE
 1. Open the extension from Chrome's Extensions menu or its toolbar icon.
@@ -52,7 +52,7 @@ HOW TO USE
 3. Click Save Settings.
 
 PRIVACY
-Settings are stored locally on your device. New-tab and navigation URLs are processed locally to apply your URL rules. When external-link handling is enabled, a content script reads the clicked link and current page URL. These values are not sent to external services; following a link makes the normal browser request to its destination. The extension does not use analytics or tracking services.
+Settings and user-entered URL rules are stored locally and synchronized through Google's Chrome Sync service when enabled. Browsing URLs and session tab state are not synchronized. New-tab and navigation URLs are processed locally to apply your URL rules. When external-link handling is enabled, a content script reads the clicked link and current page URL. These browsing values are not sent to external services; following a link makes the normal browser request to its destination. The extension does not use analytics or tracking services.
 
 SUPPORT AND SOURCE CODE
 https://github.com/proshunsuke/tab-position-options-fork
@@ -100,10 +100,10 @@ No data is transmitted to external servers. All data remains on the user's local
 ### storage — Draft for next release
 
 ```text
-The storage permission saves tab positioning and activation preferences, including user-defined URL rules, locally using chrome.storage.local. The extension also uses chrome.storage.session to retain tab activation order and tab snapshots across service worker restarts so tab positioning and closing behavior remain consistent. Session storage also retains restored tab identities and initial selection markers to preserve restored positions, and temporarily retains pending navigation URLs and restoration markers for Loading Page rules; navigation URLs are removed on commit, error, or tab closure. The last focused normal window and pending pop-up window IDs are also retained to resume conversions after service worker restarts. This is not a browsing history. Data stays on the user's device and is not transmitted to external servers.
+The storage permission saves tab positioning and activation preferences, including user-defined URL rules, locally using chrome.storage.local and synchronizes those settings using chrome.storage.sync when Chrome sync is enabled. Settings remain locally available when sync fails or exceeds its capacity. The extension also uses chrome.storage.session to retain tab activation order and tab snapshots across service worker restarts so tab positioning and closing behavior remain consistent. Session storage also retains restored tab identities and initial selection markers to preserve restored positions, and temporarily retains pending navigation URLs and restoration markers for Loading Page rules; navigation URLs are removed on commit, error, or tab closure. The last focused normal window and pending pop-up window IDs are also retained to resume conversions after service worker restarts. Session state and browsing URLs stay on the device and are not included in synchronized settings.
 ```
 
-Evidence: [settings](src/settings/state/appData.ts), [activation history](src/tabs/state/activationHistory.ts), [tab snapshots](src/tabs/state/tabSnapshot.ts), [restoration state](src/tabs/sessionRestoreDetector.ts), [pop-up state](src/tabs/state/popup.ts).
+Evidence: [settings](src/settings/state/appData.ts), [automatic sync](src/settings/sync.ts), [activation history](src/tabs/state/activationHistory.ts), [tab snapshots](src/tabs/state/tabSnapshot.ts), [restoration state](src/tabs/sessionRestoreDetector.ts), [pop-up state](src/tabs/state/popup.ts).
 
 ### tabs — Draft for next release; absent from current dashboard package
 
@@ -151,8 +151,8 @@ These are recorded dashboard values, not a new submission or certification.
 
 | Data | Use and retention | Sent off device / shared |
 | --- | --- | --- |
-| Preferences and user-entered URL patterns | Saved in `chrome.storage.local`; editable in options | No / No |
-| Settings files selected for import or downloaded on export | Processed locally on request; exports contain the current form settings and user-entered URL patterns, not session state; downloaded files remain until the user deletes them | No automatic transmission / No |
+| Preferences and user-entered URL patterns | Saved in `chrome.storage.local` and `chrome.storage.sync`; editable in options; local fallback for sync failures or capacity limits | Google Chrome Sync when enabled; no developer-operated server |
+| Settings files selected for import or downloaded on export | Processed locally on request; exports contain the current form settings and user-entered URL patterns, not session state; downloaded files remain until the user deletes them; imported settings join automatic sync when saved | Files are not uploaded; saved settings use Chrome Sync |
 | Pending navigation URL, tab ID, timestamp and restoration flag | Temporarily stored in `chrome.storage.session` until commit, error or tab closure; cleared on browser restart | No / No |
 | Restored tab and window IDs, including the initial selected tab | Stored in `chrome.storage.session` to preserve restored positions and selection across worker restarts; tab identities remain until tab closure or browser restart, selection markers until the selection event is handled, and navigation markers until the initial navigation ends or the tab closes | No / No |
 | Pop-up URL and window type/incognito status | Checked in memory to apply exceptions and choose a compatible destination; pop-up URLs are not persisted by the conversion feature | No / No |
@@ -168,9 +168,9 @@ The debug utility can store local diagnostic logs when explicitly instrumented; 
 ### Privacy policy
 
 - Registered URL: https://github.com/proshunsuke/tab-position-options-fork/blob/main/PRIVACY.md
-- Local file: [PRIVACY.md](PRIVACY.md), updated September 20, 2026, to describe user-entered URL rules, transient URL matching, temporary navigation URLs, pop-up URL checks, external-link processing and site access, and session-only tab/window metadata and activation order.
+- Local file: [PRIVACY.md](PRIVACY.md), updated September 20, 2026, to describe automatic Chrome Sync for settings and user-entered URL rules, transient URL matching, temporary navigation URLs, pop-up URL checks, external-link processing and site access, and session-only tab/window metadata and activation order.
 - The public policy URL must serve this updated text before submission. A local edit alone does not update the published policy.
-- Reconcile the dashboard data-use answers with that updated policy and the then-current Chrome Web Store definitions. The recorded unchecked boxes above must not be treated as a substitute for reviewing the latest URL-handling behavior.
+- Reconcile the dashboard data-use answers with that updated policy and the then-current Chrome Web Store definitions, including automatic transmission of user-entered URL patterns through Chrome Sync. The recorded unchecked boxes above must not be treated as a substitute for reviewing the current data handling.
 
 ## Graphics and assets
 
@@ -205,7 +205,7 @@ Upload screenshots 1–4 in the order above. All four are direct captures of 128
 
 | Version | Date | Changes | Status |
 | --- | --- | --- | --- |
-| Next version not assigned | Not submitted | Tab on Activate; new-tab and Loading Page URL rules; pop-up conversion; settings import/export; keyboard shortcuts; external-link rules and HTTP/HTTPS site access; `tabs` and `webNavigation` permissions | Source only; release preparation pending |
+| Next version not assigned | Not submitted | Tab on Activate; new-tab and Loading Page URL rules; pop-up conversion; automatic settings sync; settings import/export; keyboard shortcuts; external-link rules and HTTP/HTTPS site access; `tabs` and `webNavigation` permissions | Source only; release preparation pending |
 | 0.2.2 | Publication date not checked | Tab closing fixes for Chrome 147 and varying event order | Published; also present as dashboard draft |
 
 Older changes are in [CHANGELOG.md](CHANGELOG.md) and the current listing below. Submission/publication dates were not inferred from commit dates.

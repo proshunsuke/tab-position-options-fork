@@ -34,7 +34,7 @@ For installation from source, see [Manual Installation](#manual-installation).
 
 ## Privacy
 
-Settings are stored locally on your device. The extension does not send data to external servers.
+Settings and user-entered URL rules sync automatically through Chrome Sync when enabled, with a local copy retained on your device. Browsing and session tab data stay on your device.
 
 See the [Privacy Policy](PRIVACY.md) for details.
 

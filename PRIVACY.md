@@ -4,13 +4,15 @@
 
 ## Overview
 
-Tab Position Options Fork lets you customize tab positioning and activation behavior in Chrome. The extension processes the information described below locally on your device. It does not transmit this information to external servers or share it with third parties.
+Tab Position Options Fork lets you customize tab positioning and activation behavior in Chrome. Tab and browsing information is processed locally on your device. Settings and user-entered URL rules are automatically synchronized through Google's Chrome Sync service when Chrome sync is enabled. The developer does not operate a server that receives your data.
 
 ## Information We Handle
 
 ### Settings and URL Rules
 
-Your tab positioning, background-opening, activation, pop-up conversion, and external-link preferences are saved using `chrome.storage.local`. This includes URL patterns you enter in the extension's options page. Settings remain on your device until changed, removed, or deleted by uninstalling the extension.
+Your tab positioning, background-opening, activation, pop-up conversion, and external-link preferences are saved using `chrome.storage.local` and automatically copied to `chrome.storage.sync`. This includes URL patterns you enter in the extension's options page. When Chrome sync is enabled, Google synchronizes these settings between your Chrome installations using the same account. Chrome's sync settings and Google's privacy policy govern that service. There is no separate synchronization switch in this extension.
+
+Local settings remain usable when sync is unavailable. Settings that exceed Chrome's sync storage capacity are kept locally; other devices may retain the last successfully synchronized settings. On startup, synchronized settings are used unless this device has unsent local changes. Settings are synchronized as a whole, rather than merging individual rules; concurrent edits on different devices may replace one another.
 
 When you export settings, the extension downloads a JSON file containing the settings currently shown, including unsaved changes and user-entered URL patterns. It does not include session tab state or browsing history. Import reads only the file you select and processes it locally; imported settings are applied when you click **Save Settings**. The extension does not upload these files.
 
@@ -55,14 +57,14 @@ This state is used only for tab positioning and activation, including choosing a
 
 ## Data Storage and Sharing
 
-- Settings and session tab state remain on your device.
-- The extension does not use Chrome storage sync to synchronize this data between devices.
+- Settings and user-entered URL patterns are stored locally and synchronized through Chrome Sync when enabled.
+- Browsing URLs, titles, tab/window identifiers, activation order, and temporary navigation state are never included in synchronized settings.
 - The extension does not use analytics, advertising, or tracking services.
-- The extension does not sell, transmit, or share the information described above with third parties.
+- The extension does not sell data or send it to the developer. Automatic settings synchronization uses Google's browser service; there is no other external reporting.
 
 ## Permissions
 
-- **storage**: Saves your preferences and URL rules locally, and retains session tab and pending navigation state across background-process restarts.
+- **storage**: Saves your preferences and URL rules locally and synchronizes them through Chrome Sync, and retains local session tab and pending navigation state across background-process restarts.
 - **tabs**: Reads new-tab and pop-up URLs to apply your URL rules and pop-up exceptions. It also reads tab titles and URLs when you request sorting. This permission is used for local matching and sorting, not for uploading or maintaining a history of visited pages.
 - **webNavigation**: Detects top-level navigation commits and server redirects to apply Loading Page URL rules, and provides navigation URLs for pop-up exception checks.
 - **HTTP/HTTPS site access**: Requested at installation through the content script's URL matches so external-link handling can run on websites and their HTTP/HTTPS frames. It is used to inspect clicked links locally when the feature is enabled; it does not require the `scripting` permission.
@@ -71,7 +73,9 @@ This state is used only for tab positioning and activation, including choosing a
 
 You can view and change preferences, and edit or remove URL rules, in the extension's options page. Click **Save Settings** to apply changes. Disable **Open external links in new tabs** to stop external-link handling; changes apply to already open pages that have the content script. Removing its rules alone leaves origin-based external-link handling enabled. Chrome's extension site-access controls can also restrict where the content script runs. Other tab settings continue to apply independently.
 
-Restarting the browser clears session tab state. Uninstalling the extension removes its stored settings and extension data from that browser profile.
+Use Chrome's sync settings to control synchronization between devices. Removing a saved URL rule also removes it from the next successfully synchronized settings snapshot. Disabling Chrome sync does not itself delete previously synchronized data; manage that data through Chrome and your Google account.
+
+Restarting the browser clears session tab state. Uninstalling the extension removes its local extension data from that browser profile; do not rely on uninstalling one copy to erase settings already synchronized to other devices.
 
 Exported files remain wherever you saved them, even after uninstalling the extension. You can delete them yourself when no longer needed.
 
