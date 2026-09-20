@@ -1,7 +1,6 @@
 {
   "language": "ja",
   "optionsTitle": "Tab Position Options - 設定",
-  "tabBehavior": "タブの動作",
   "tabClosing": "タブを閉じたとき",
   "tabOnActivate": "タブをアクティブにしたとき",
   "newTab": "新規タブ",
@@ -89,5 +88,10 @@
   "settingsSyncHelp": "Chrome の同期が有効な場合、設定と URL ルールは自動同期されます。同期できない場合や保存容量の上限を超えた場合も、この端末に設定を保持します。",
   "settingsSyncCapacity": "同期の保存容量を超えたため、設定はこの端末に保持されています。URL ルールの数や長さを減らして保存すると、再試行します。",
   "settingsSyncUnavailable": "設定を同期できませんでした。保存済みの設定はこの端末に保持されています。次の設定変更時や拡張機能の起動時に再試行します。",
-  "settingsSyncStatusUnavailable": "同期状態を読み取れませんでした。設定画面を開き直して確認してください。"
+  "settingsSyncStatusUnavailable": "同期状態を読み取れませんでした。設定画面を開き直して確認してください。",
+  "settingsManagement": "設定の管理",
+  "settingsCategories": "設定カテゴリ",
+  "unsavedChanges": "未保存の変更があります。",
+  "details": "詳細",
+  "shortcutsSaveHelp": "ショートカットの変更は Chrome 側で適用されます。この画面での保存は不要です。"
 }

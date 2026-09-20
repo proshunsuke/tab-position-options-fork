@@ -1,18 +1,13 @@
 import type { FC } from "react";
 import { i18n } from "#i18n";
-import { LoadingPage } from "@/entrypoints/options/LoadingPage";
-import { Popup } from "@/entrypoints/options/Popup";
 import { Checkbox } from "@/entrypoints/options/ui/Checkbox";
+import { HelpDetails } from "@/entrypoints/options/ui/HelpDetails";
 import { RadioGroup, type RadioOption } from "@/entrypoints/options/ui/RadioGroup";
 import { TabContent } from "@/entrypoints/options/ui/TabContent";
 import { TabSection } from "@/entrypoints/options/ui/TabSection";
-import type { LoadingPageUrlRule, NewTabUrlRule, Settings, TabPosition } from "@/src/types";
+import type { NewTabUrlRule, TabPosition } from "@/src/types";
 
 type Props = {
-  popup: Settings["popup"];
-  onPopupChange: (settings: Settings["popup"]) => void;
-  loadingRules: LoadingPageUrlRule[];
-  onLoadingRulesChange: (rules: LoadingPageUrlRule[]) => void;
   urlRules: NewTabUrlRule[];
   onUrlRulesChange: (rules: NewTabUrlRule[]) => void;
   newTabPosition: TabPosition;
@@ -29,11 +24,7 @@ const NewTabOptions: RadioOption<TabPosition>[] = [
   { value: "default", label: i18n.t("browserDefault") },
 ];
 
-export const TabBehavior: FC<Props> = ({
-  popup,
-  onPopupChange,
-  loadingRules,
-  onLoadingRulesChange,
+export const NewTab: FC<Props> = ({
   urlRules,
   onUrlRulesChange,
   newTabPosition,
@@ -50,23 +41,19 @@ export const TabBehavior: FC<Props> = ({
           value={newTabPosition}
           onChange={onNewTabPositionChange}
         />
-        <div className="mt-4 grid grid-cols-2 gap-4">
+        <div className="mt-4">
           <Checkbox
             name="openInBackground"
             label={i18n.t("newTabBackground")}
             checked={openInBackground}
             onChange={onOpenInBackgroundChange}
           />
-          <div></div>
         </div>
       </TabSection>
 
       <TabSection title={i18n.t("matchingUrls")} description={i18n.t("matchingUrlsDescription")}>
         <div className="space-y-3">
-          <fieldset
-            aria-label={i18n.t("matchingUrls")}
-            className="min-w-0 max-h-80 overflow-y-auto space-y-3 p-1"
-          >
+          <fieldset aria-label={i18n.t("matchingUrls")} className="min-w-0 space-y-3">
             {urlRules.map((rule, index) => (
               <div
                 // biome-ignore lint/suspicious/noArrayIndexKey: Controlled rows have no independent state or persisted identity.
@@ -74,6 +61,7 @@ export const TabBehavior: FC<Props> = ({
                 className="flex flex-wrap items-center gap-3 rounded-md bg-gray-50 p-3"
               >
                 <input
+                  id={`new-rule-${index}`}
                   aria-label={i18n.t("urlPatternLabel", [String(index + 1)])}
                   placeholder={i18n.t("urlPattern")}
                   value={rule.url}
@@ -84,7 +72,7 @@ export const TabBehavior: FC<Props> = ({
                       ),
                     )
                   }
-                  className="min-w-48 flex-1 rounded-md border border-gray-300 bg-white px-3 py-2"
+                  className="min-w-0 w-full sm:min-w-48 sm:w-auto sm:flex-1 rounded-md border border-gray-300 bg-white px-3 py-2"
                 />
                 <select
                   aria-label={i18n.t("positionLabel", [String(index + 1)])}
@@ -98,7 +86,7 @@ export const TabBehavior: FC<Props> = ({
                       ),
                     )
                   }
-                  className="rounded-md border border-gray-300 bg-white px-3 py-2"
+                  className="max-w-full rounded-md border border-gray-300 bg-white px-3 py-2"
                 >
                   {NewTabOptions.map(option => (
                     <option key={option.value} value={option.value}>
@@ -118,7 +106,7 @@ export const TabBehavior: FC<Props> = ({
                       ),
                     )
                   }
-                  className="rounded-md border border-gray-300 bg-white px-3 py-2"
+                  className="max-w-full rounded-md border border-gray-300 bg-white px-3 py-2"
                 >
                   <option value="foreground">{i18n.t("foreground")}</option>
                   <option value="background">{i18n.t("background")}</option>
@@ -146,12 +134,9 @@ export const TabBehavior: FC<Props> = ({
           >
             {i18n.t("addRule")}
           </button>
-          <p className="text-sm text-gray-600">{i18n.t("matchingUrlsHelp")}</p>
+          <HelpDetails>{i18n.t("matchingUrlsHelp")}</HelpDetails>
         </div>
       </TabSection>
-
-      <LoadingPage rules={loadingRules} onRulesChange={onLoadingRulesChange} />
-      <Popup settings={popup} onChange={onPopupChange} />
     </TabContent>
   );
 };

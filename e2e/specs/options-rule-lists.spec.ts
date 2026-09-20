@@ -37,19 +37,20 @@ for (const [section, groupName, inputName, addName, removeName] of [
     await setExtensionSettings(context, settings);
     const page = await context.newPage();
     await page.goto(`chrome-extension://${extensionId}/options.html`);
-    if (section === "externalLinks") {
-      await page.getByRole("button", { name: "External Links", exact: true }).click();
-    }
+    const category = {
+      newTab: "New Tab",
+      loadingPage: "Loading Page",
+      popup: "Pop-up",
+      externalLinks: "External Links",
+    }[section];
+    await page.getByRole("button", { name: category, exact: true }).click();
     const list = page.getByRole("group", { name: groupName, exact: true });
     await expect(list.getByRole("textbox")).toHaveCount(30);
-    expect(
-      await list.evaluate(
-        element => element.scrollHeight > element.clientHeight && element.clientHeight <= 320,
-      ),
-    ).toBe(true);
+    expect(await list.evaluate(element => element.scrollHeight <= element.clientHeight)).toBe(true);
     expect(await list.getByRole("button", { name: addName, exact: true }).count()).toBe(0);
     await list.getByRole("textbox", { name: `${inputName} 30`, exact: true }).fill("edited.test");
-    expect(await list.evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+    expect(await page.getByRole("main").evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+    await expect(page.getByRole("button", { name: "Save Settings", exact: true })).toBeInViewport();
     await page.getByRole("button", { name: addName, exact: true }).click();
     await list.getByRole("textbox", { name: `${inputName} 31`, exact: true }).fill("added.test");
     await list.getByRole("button", { name: `${removeName} 1`, exact: true }).click();

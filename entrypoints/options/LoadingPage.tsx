@@ -1,5 +1,6 @@
 import type { FC } from "react";
 import { i18n } from "#i18n";
+import { HelpDetails } from "@/entrypoints/options/ui/HelpDetails";
 import { TabSection } from "@/entrypoints/options/ui/TabSection";
 import type { LoadingPageUrlRule } from "@/src/types";
 
@@ -11,10 +12,7 @@ type Props = {
 export const LoadingPage: FC<Props> = ({ rules, onRulesChange }) => (
   <TabSection title={i18n.t("loadingPage")} description={i18n.t("loadingPageDescription")}>
     <div className="space-y-3">
-      <fieldset
-        aria-label={i18n.t("loadingPage")}
-        className="min-w-0 max-h-80 overflow-y-auto space-y-3 p-1"
-      >
+      <fieldset aria-label={i18n.t("loadingPage")} className="min-w-0 space-y-3">
         {rules.map((rule, index) => (
           <div
             // biome-ignore lint/suspicious/noArrayIndexKey: Controlled rows have no independent state or persisted identity.
@@ -22,6 +20,7 @@ export const LoadingPage: FC<Props> = ({ rules, onRulesChange }) => (
             className="flex flex-wrap items-center gap-3 rounded-md bg-gray-50 p-3"
           >
             <input
+              id={`loading-rule-${index}`}
               aria-label={i18n.t("loadingUrlPatternLabel", [String(index + 1)])}
               placeholder={i18n.t("urlPattern")}
               value={rule.url}
@@ -32,7 +31,7 @@ export const LoadingPage: FC<Props> = ({ rules, onRulesChange }) => (
                   ),
                 )
               }
-              className="min-w-48 flex-1 rounded-md border border-gray-300 bg-white px-3 py-2"
+              className="min-w-0 w-full sm:min-w-48 sm:w-auto sm:flex-1 rounded-md border border-gray-300 bg-white px-3 py-2"
             />
             <select
               aria-label={i18n.t("loadingPositionLabel", [String(index + 1)])}
@@ -46,7 +45,7 @@ export const LoadingPage: FC<Props> = ({ rules, onRulesChange }) => (
                   ),
                 )
               }
-              className="rounded-md border border-gray-300 bg-white px-3 py-2"
+              className="max-w-full rounded-md border border-gray-300 bg-white px-3 py-2"
             >
               <option value="last">{i18n.t("positionLast")}</option>
               <option value="middle">{i18n.t("positionMiddle")}</option>
@@ -70,7 +69,7 @@ export const LoadingPage: FC<Props> = ({ rules, onRulesChange }) => (
       >
         {i18n.t("addLoadingRule")}
       </button>
-      <p className="text-sm text-gray-600">{i18n.t("loadingPageHelp")}</p>
+      <HelpDetails>{i18n.t("loadingPageHelp")}</HelpDetails>
     </div>
   </TabSection>
 );

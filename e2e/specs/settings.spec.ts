@@ -14,8 +14,8 @@ test.describe("Settings Storage", () => {
     await optionsPage.waitForLoadState("networkidle");
 
     // 各設定を変更
-    // Tab Behaviorタブ
-    await optionsPage.click('button:has-text("Tab Behavior")');
+    // New Tabタブ
+    await optionsPage.click('button:has-text("New Tab")');
     await optionsPage.locator('input[value="first"]').click();
     // New Tab Backgroundチェックボックスを有効にする
     const backgroundCheckbox = optionsPage.locator('input[name="openInBackground"]');
@@ -54,7 +54,7 @@ test.describe("Settings Storage", () => {
     const positions = ["first", "last", "right", "left", "default"];
 
     for (const position of positions) {
-      await optionsPage.click('button:has-text("Tab Behavior")');
+      await optionsPage.click('button:has-text("New Tab")');
       await optionsPage.locator(`input[value="${position}"]`).click();
       await optionsPage.click('button:has-text("Save")');
       await expect(optionsPage.locator("text=Settings saved successfully")).toBeVisible();
@@ -106,8 +106,8 @@ test.describe("Settings Storage", () => {
     await optionsPage.goto(`chrome-extension://${extensionId}/options.html`);
     await optionsPage.waitForLoadState("networkidle");
 
-    // Tab Behaviorタブに移動
-    await optionsPage.click('button:has-text("Tab Behavior")');
+    // New Tabタブに移動
+    await optionsPage.click('button:has-text("New Tab")');
 
     const backgroundCheckbox = optionsPage.locator('input[name="openInBackground"]');
 
@@ -131,7 +131,7 @@ test.describe("Settings Storage", () => {
     // ページをリロードして設定が永続化されていることを確認
     await optionsPage.reload();
     await optionsPage.waitForLoadState("networkidle");
-    await optionsPage.click('button:has-text("Tab Behavior")');
+    await optionsPage.click('button:has-text("New Tab")');
     await expect(backgroundCheckbox).toBeChecked();
 
     // チェックボックスを無効にする
@@ -149,7 +149,7 @@ test.describe("Settings Storage", () => {
     // 再度リロードして設定が永続化されていることを確認
     await optionsPage.reload();
     await optionsPage.waitForLoadState("networkidle");
-    await optionsPage.click('button:has-text("Tab Behavior")');
+    await optionsPage.click('button:has-text("New Tab")');
     await expect(backgroundCheckbox).not.toBeChecked();
   });
 });

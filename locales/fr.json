@@ -1,7 +1,6 @@
 {
   "language": "fr",
   "optionsTitle": "Tab Position Options - Paramètres",
-  "tabBehavior": "Comportement des onglets",
   "tabClosing": "À la fermeture d’un onglet",
   "tabOnActivate": "À l’activation d’un onglet",
   "newTab": "Nouvel onglet",
@@ -89,5 +88,10 @@
   "settingsSyncHelp": "Les paramètres et les règles d’URL sont synchronisés automatiquement lorsque la synchronisation Chrome est activée. Si la synchronisation est indisponible ou si sa limite de stockage est dépassée, les paramètres restent sur cet appareil.",
   "settingsSyncCapacity": "Les paramètres dépassent la limite de stockage de synchronisation et restent sur cet appareil. Réduisez le nombre ou la longueur des règles d’URL, puis enregistrez à nouveau.",
   "settingsSyncUnavailable": "Les paramètres n’ont pas pu être synchronisés. Les paramètres enregistrés restent sur cet appareil. Une nouvelle tentative aura lieu à la prochaine modification ou au démarrage de l’extension.",
-  "settingsSyncStatusUnavailable": "Impossible de lire l’état de synchronisation. Rouvrez la page des paramètres."
+  "settingsSyncStatusUnavailable": "Impossible de lire l’état de synchronisation. Rouvrez la page des paramètres.",
+  "settingsManagement": "Gestion des paramètres",
+  "settingsCategories": "Catégories de paramètres",
+  "unsavedChanges": "Des modifications ne sont pas enregistrées.",
+  "details": "Détails",
+  "shortcutsSaveHelp": "Les modifications des raccourcis sont appliquées dans Chrome. Il est inutile de les enregistrer ici."
 }

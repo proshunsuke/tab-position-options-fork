@@ -55,6 +55,7 @@ test("a complete remote snapshot updates the open form and subsequent tab operat
   // Chromeから受信する同期ストレージ変更を再現。実アカウントのクラウド転送は使わない。
   await serviceWorker.evaluate(values => chrome.storage.sync.set(values), encoded.values);
   await expect(page.locator('input[name="newTabPosition"][value="first"]')).toBeChecked();
+  await page.getByRole("button", { name: "Pop-up", exact: true }).click();
   await expect(page.getByRole("textbox", { name: "Pop-up exception 50", exact: true })).toHaveValue(
     settings.popup.exceptions![49].url,
   );
@@ -181,6 +182,7 @@ test("shows capacity fallback and clears the warning after reducing rules", asyn
   expect(
     await serviceWorker.evaluate(async () => (await chrome.storage.local.get("settings")).settings),
   ).toEqual(large);
+  await page.getByRole("button", { name: "Pop-up", exact: true }).click();
   await page.getByRole("button", { name: "Remove pop-up exception 1", exact: true }).click();
   await page.getByRole("button", { name: "Save Settings", exact: true }).click();
   await expect(page.getByRole("alert")).toHaveCount(0);

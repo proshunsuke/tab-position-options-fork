@@ -35,6 +35,7 @@ test("imports into the form, exports drafts, and persists only on Save Settings"
   const page = await context.newPage();
   await page.goto(`chrome-extension://${extensionId}/options.html`);
   const chooser = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: "Settings management", exact: true }).click();
   await page.getByRole("button", { name: "Import Settings", exact: true }).click();
   await (await chooser).setFiles({
     name: "settings.json",
@@ -42,6 +43,7 @@ test("imports into the form, exports drafts, and persists only on Save Settings"
     buffer: Buffer.from(JSON.stringify(file)),
   });
   await expect(page.getByRole("status")).toHaveText(importedMessage);
+  await page.getByRole("button", { name: "New Tab", exact: true }).click();
   await expect(page.locator('input[name="newTabPosition"][value="left"]')).toBeChecked();
   await expect(
     page.getByRole("checkbox", { name: "New Tab Background", exact: true }),
@@ -58,12 +60,14 @@ test("imports into the form, exports drafts, and persists only on Save Settings"
   await expect(page.getByRole("textbox", { name: "URL pattern 2", exact: true })).toHaveValue(
     "second",
   );
+  await page.getByRole("button", { name: "Loading Page", exact: true }).click();
   await expect(
     page.getByRole("textbox", { name: "Loading URL pattern 1", exact: true }),
   ).toHaveValue("loading");
   await expect(page.getByRole("combobox", { name: "Loading position 1", exact: true })).toHaveValue(
     "middle",
   );
+  await page.getByRole("button", { name: "Pop-up", exact: true }).click();
   await expect(
     page.getByRole("checkbox", { name: "Open pop-up window as new tab", exact: true }),
   ).toBeChecked();
@@ -87,6 +91,7 @@ test("imports into the form, exports drafts, and persists only on Save Settings"
   await page.screenshot({ path: testInfo.outputPath("settings-transfer.png"), fullPage: true });
 
   const downloadEvent = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Settings management", exact: true }).click();
   await page.getByRole("button", { name: "Export Settings", exact: true }).click();
   const download = await downloadEvent;
   expect(download.suggestedFilename()).toBe("tab-position-options-fork-settings.json");
@@ -100,11 +105,16 @@ test("imports into the form, exports drafts, and persists only on Save Settings"
   // 未保存の読み込みはリロードで破棄され、書き出したファイルから復元できる。
   await page.reload();
   await expect(page.locator('input[name="newTabPosition"][value="default"]')).toBeChecked();
+  await page.getByRole("button", { name: "Settings management", exact: true }).click();
   await page.locator('input[type="file"]').setInputFiles(exportedPath);
   await expect(page.getByRole("status")).toHaveText(importedMessage);
+  await page.getByRole("button", { name: "New Tab", exact: true }).click();
   // 同じファイルを選び直してもchangeが発生することを確認する。
   await page.locator('input[name="newTabPosition"][value="first"]').check();
+  await page.getByRole("button", { name: "Settings management", exact: true }).click();
   await page.locator('input[type="file"]').setInputFiles(exportedPath);
+  await expect(page.getByRole("status")).toHaveText(importedMessage);
+  await page.getByRole("button", { name: "New Tab", exact: true }).click();
   await expect(page.locator('input[name="newTabPosition"][value="left"]')).toBeChecked();
   await page.getByRole("button", { name: "Save Settings", exact: true }).click();
   await expect
@@ -135,12 +145,14 @@ test("invalid files preserve both draft and saved settings, then allow retry", a
       settings: { ...settings, popup: { openAsNewTab: true, exceptions: [{ url: "[" }] } },
     }),
   ]) {
+    await page.getByRole("button", { name: "Settings management", exact: true }).click();
     await page.locator('input[type="file"]').setInputFiles({
       name: "settings.json",
       mimeType: "application/json",
       buffer: Buffer.from(content),
     });
     await expect(page.getByRole("status")).toHaveText(importError);
+    await page.getByRole("button", { name: "New Tab", exact: true }).click();
     await expect(page.locator('input[name="newTabPosition"][value="first"]')).toBeChecked();
     await expect(page.getByRole("textbox", { name: "URL pattern 1", exact: true })).toHaveCount(0);
     expect(
@@ -149,12 +161,14 @@ test("invalid files preserve both draft and saved settings, then allow retry", a
       ),
     ).toEqual(DEFAULT_SETTINGS);
   }
+  await page.getByRole("button", { name: "Settings management", exact: true }).click();
   await page.locator('input[type="file"]').setInputFiles({
     name: "settings.json",
     mimeType: "application/json",
     buffer: Buffer.from(JSON.stringify(file)),
   });
   await expect(page.getByRole("status")).toHaveText(importedMessage);
+  await page.getByRole("button", { name: "New Tab", exact: true }).click();
   await expect(page.locator('input[name="newTabPosition"][value="left"]')).toBeChecked();
 });
 
@@ -167,16 +181,19 @@ test("invalid draft rules cannot be exported", async ({ context, extensionId }) 
   page.on("download", () => {
     downloaded = true;
   });
+  await page.getByRole("button", { name: "Settings management", exact: true }).click();
   await page.getByRole("button", { name: "Export Settings", exact: true }).click();
   await expect(page.getByRole("status")).toHaveText(
     "Could not export settings. Check the URL patterns and try again.",
   );
   expect(downloaded).toBe(false);
+  await page.getByRole("button", { name: "New Tab", exact: true }).click();
   await page.getByRole("textbox", { name: "URL pattern 1", exact: true }).fill("valid");
   const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Settings management", exact: true }).click();
   await page.getByRole("button", { name: "Export Settings", exact: true }).click();
   await download;
-  await expect(page.getByRole("status")).not.toBeVisible();
+  await expect(page.getByRole("status")).toHaveText("You have unsaved changes.");
 });
 
 test("file read failures leave settings editable and unchanged", async ({
@@ -193,12 +210,14 @@ test("file read failures leave settings editable and unchanged", async ({
       return Promise.reject(new Error("File read failed"));
     };
   });
+  await page.getByRole("button", { name: "Settings management", exact: true }).click();
   await page.locator('input[type="file"]').setInputFiles({
     name: "settings.json",
     mimeType: "application/json",
     buffer: Buffer.from(JSON.stringify(file)),
   });
   await expect(page.getByRole("status")).toHaveText(importError);
+  await page.getByRole("button", { name: "New Tab", exact: true }).click();
   await expect(page.locator('input[name="newTabPosition"][value="first"]')).toBeChecked();
   await expect(page.getByRole("button", { name: "Save Settings", exact: true })).toBeEnabled();
 });

@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { i18n } from "#i18n";
 import { ExternalLinks } from "@/entrypoints/options/ExternalLinks";
 import { KeyboardShortcuts } from "@/entrypoints/options/KeyboardShortcuts";
+import { LoadingPage } from "@/entrypoints/options/LoadingPage";
+import { NewTab } from "@/entrypoints/options/NewTab";
+import { Popup } from "@/entrypoints/options/Popup";
 import { SettingsSyncStatus } from "@/entrypoints/options/SettingsSyncStatus";
-import { TabBehavior } from "@/entrypoints/options/TabBehavior";
 import { TabClosing } from "@/entrypoints/options/TabClosing";
 import { TabOnActivate } from "@/entrypoints/options/TabOnActivate";
 import {
@@ -22,10 +24,22 @@ import type {
   TabPosition,
 } from "@/src/types";
 
-export default function App() {
-  const [activeTab, setActiveTab] = useState<"behavior" | "closing" | "activation" | "external">(
-    "behavior",
-  );
+const Categories = [
+  ["new", "newTab"],
+  ["closing", "tabClosing"],
+  ["activation", "tabOnActivate"],
+  ["loading", "loadingPage"],
+  ["popup", "popup"],
+  ["external", "externalLinks"],
+  ["shortcuts", "keyboardShortcuts"],
+  ["management", "settingsManagement"],
+] as const;
+type Category = (typeof Categories)[number][0];
+
+const App = () => {
+  const [activeTab, setActiveTab] = useState<Category>("new");
+  const [invalidRule, setInvalidRule] = useState<{ id: string } | null>(null);
+  const content = useRef<HTMLElement>(null);
   const [externalLinks, setExternalLinks] = useState<Settings["externalLinks"]>({
     enabled: false,
     urlRules: [],
@@ -45,7 +59,28 @@ export default function App() {
   const [saveStatus, setSaveStatus] = useState<
     "saved" | "invalidPattern" | "saveFailed" | "imported" | "importFailed" | "exportFailed" | null
   >(null);
-  const saveMessage = saveStatus ? i18n.t(saveStatus) : "";
+  const saveMessage = saveStatus
+    ? i18n.t(saveStatus)
+    : isDirty.current
+      ? i18n.t("unsavedChanges")
+      : "";
+
+  const changeCategory = (category: Category) => {
+    setActiveTab(category);
+    content.current?.scrollTo({ top: 0 });
+  };
+
+  useEffect(() => {
+    if (invalidRule) {
+      document.getElementById(invalidRule.id)?.focus();
+    }
+  }, [invalidRule]);
+
+  const markDirty = () => {
+    isDirty.current = true;
+    setSaveStatus(null);
+    setInvalidRule(null);
+  };
 
   // 起動時に保存済みの設定を読み込む
   useEffect(() => {
@@ -100,22 +135,22 @@ export default function App() {
   }, []);
 
   const handleNewTabPositionChange = (value: string) => {
-    isDirty.current = true;
+    markDirty();
     setNewTabPosition(value as TabPosition);
   };
 
   const handleOpenInBackgroundChange = (checked: boolean) => {
-    isDirty.current = true;
+    markDirty();
     setOpenInBackground(checked);
   };
 
   const handleAfterTabClosingChange = (value: string) => {
-    isDirty.current = true;
+    markDirty();
     setAfterTabClosing(value as TabActivation);
   };
 
   const handleTabOnActivateChange = (value: string) => {
-    isDirty.current = true;
+    markDirty();
     setTabOnActivate(value as TabOnActivateBehavior);
   };
 
@@ -189,14 +224,22 @@ export default function App() {
   };
 
   const handleSave = () => {
-    if (
-      [...urlRules, ...externalLinks.urlRules, ...loadingRules, ...(popup.exceptions ?? [])].some(
-        rule => !isValidUrlPattern(rule.url.trim()),
-      )
-    ) {
-      setSaveStatus("invalidPattern");
-      return;
+    const groups = [
+      { category: "new", prefix: "new-rule", rules: urlRules },
+      { category: "loading", prefix: "loading-rule", rules: loadingRules },
+      { category: "popup", prefix: "popup-rule", rules: popup.exceptions ?? [] },
+      { category: "external", prefix: "external-rule", rules: externalLinks.urlRules },
+    ] as const;
+    for (const group of groups) {
+      const index = group.rules.findIndex(rule => !isValidUrlPattern(rule.url.trim()));
+      if (index !== -1) {
+        changeCategory(group.category);
+        setInvalidRule({ id: `${group.prefix}-${index}` });
+        setSaveStatus("invalidPattern");
+        return;
+      }
     }
+    setInvalidRule(null);
     setIsSaving(true);
     setSaveStatus(null);
 
@@ -221,73 +264,56 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Tab Position Options</h1>
-
-        {/* タブナビゲーション */}
-        <div className="flex border-b border-gray-200 mb-6">
-          <button
-            type="button"
-            onClick={() => setActiveTab("behavior")}
-            className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${
-              activeTab === "behavior"
-                ? "border-chrome-blue text-chrome-blue"
-                : "border-transparent text-gray-600 hover:text-gray-800"
-            }`}
+    <div className="flex h-dvh flex-col bg-gray-50 text-gray-900">
+      <header className="shrink-0 border-b border-gray-200 bg-white px-4 py-4 md:px-8">
+        <h1 className="text-xl font-bold">Tab Position Options</h1>
+        <div className="mt-3 md:hidden">
+          <label htmlFor="settings-category" className="mb-1 block text-sm font-medium">
+            {i18n.t("settingsCategories")}
+          </label>
+          <select
+            id="settings-category"
+            value={activeTab}
+            onChange={event => changeCategory(event.target.value as Category)}
+            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2"
           >
-            {i18n.t("tabBehavior")}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("closing")}
-            className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${
-              activeTab === "closing"
-                ? "border-chrome-blue text-chrome-blue"
-                : "border-transparent text-gray-600 hover:text-gray-800"
-            }`}
-          >
-            {i18n.t("tabClosing")}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("activation")}
-            className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${
-              activeTab === "activation"
-                ? "border-chrome-blue text-chrome-blue"
-                : "border-transparent text-gray-600 hover:text-gray-800"
-            }`}
-          >
-            {i18n.t("tabOnActivate")}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("external")}
-            className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${activeTab === "external" ? "border-chrome-blue text-chrome-blue" : "border-transparent text-gray-600 hover:text-gray-800"}`}
-          >
-            {i18n.t("externalLinks")}
-          </button>
+            {Categories.map(([key, label]) => (
+              <option key={key} value={key}>
+                {i18n.t(label)}
+              </option>
+            ))}
+          </select>
         </div>
+      </header>
 
-        {/* タブコンテンツと保存ボタンのコンテナ */}
-        <fieldset disabled={!isReady || isImporting} className="flex min-w-0 flex-col gap-6">
-          {/* タブコンテンツ */}
-          <div className="bg-white rounded-lg shadow-lg p-10 min-h-[500px]">
-            {activeTab === "behavior" && (
-              <TabBehavior
-                popup={popup}
-                onPopupChange={value => {
-                  isDirty.current = true;
-                  setPopup(value);
-                }}
-                loadingRules={loadingRules}
-                onLoadingRulesChange={value => {
-                  isDirty.current = true;
-                  setLoadingRules(value);
-                }}
+      <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1">
+        <nav
+          aria-label={i18n.t("settingsCategories")}
+          className="hidden w-60 shrink-0 overflow-y-auto border-r border-gray-200 p-4 md:block"
+        >
+          {Categories.map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              aria-current={activeTab === key ? "page" : undefined}
+              onClick={() => changeCategory(key)}
+              className={`mb-1 w-full rounded-md px-4 py-3 text-left text-sm font-medium ${key === "shortcuts" ? "mt-6" : ""} ${activeTab === key ? "bg-blue-100 text-blue-900" : "text-gray-700 hover:bg-gray-100"}`}
+            >
+              {i18n.t(label)}
+            </button>
+          ))}
+        </nav>
+
+        <main ref={content} className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4 md:p-8">
+          <fieldset
+            disabled={!isReady || isImporting}
+            className="min-w-0 rounded-lg border border-gray-200 bg-white p-4 md:p-6"
+          >
+            {activeTab === "new" && (
+              <NewTab
                 urlRules={urlRules}
                 onUrlRulesChange={value => {
-                  isDirty.current = true;
+                  markDirty();
                   setUrlRules(value);
                 }}
                 newTabPosition={newTabPosition}
@@ -296,92 +322,110 @@ export default function App() {
                 onOpenInBackgroundChange={handleOpenInBackgroundChange}
               />
             )}
-
+            {activeTab === "loading" && (
+              <LoadingPage
+                rules={loadingRules}
+                onRulesChange={value => {
+                  markDirty();
+                  setLoadingRules(value);
+                }}
+              />
+            )}
+            {activeTab === "popup" && (
+              <Popup
+                settings={popup}
+                onChange={value => {
+                  markDirty();
+                  setPopup(value);
+                }}
+              />
+            )}
             {activeTab === "activation" && (
               <TabOnActivate
                 behavior={tabOnActivate}
                 onBehaviorChange={handleTabOnActivateChange}
               />
             )}
-
             {activeTab === "external" && (
               <ExternalLinks
                 settings={externalLinks}
                 onChange={value => {
-                  isDirty.current = true;
+                  markDirty();
                   setExternalLinks(value);
                 }}
               />
             )}
-
             {activeTab === "closing" && (
               <TabClosing
                 afterTabClosing={afterTabClosing}
                 onAfterTabClosingChange={handleAfterTabClosingChange}
               />
             )}
-          </div>
+            {activeTab === "shortcuts" && <KeyboardShortcuts />}
+            {activeTab === "management" && (
+              <section className="space-y-6">
+                <h2 className="text-xl font-semibold">{i18n.t("settingsManagement")}</h2>
+                <div className="space-y-3">
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={handleExport}
+                      className="rounded-md border border-gray-300 bg-white px-4 py-2 hover:bg-gray-100 disabled:opacity-50"
+                    >
+                      {i18n.t("exportSettings")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => fileInput.current?.click()}
+                      className="rounded-md border border-gray-300 bg-white px-4 py-2 hover:bg-gray-100 disabled:opacity-50"
+                    >
+                      {isImporting ? i18n.t("importing") : i18n.t("importSettings")}
+                    </button>
+                    <input
+                      ref={fileInput}
+                      type="file"
+                      accept=".json,application/json"
+                      hidden
+                      aria-label={i18n.t("importSettings")}
+                      onChange={event => {
+                        const file = event.currentTarget.files?.[0];
+                        event.currentTarget.value = "";
+                        void handleImport(file);
+                      }}
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600">{i18n.t("settingsTransferHelp")}</p>
+                </div>
+                <p className="text-sm text-gray-600">{i18n.t("settingsSyncHelp")}</p>
+              </section>
+            )}
+          </fieldset>
+        </main>
+      </div>
 
-          <div className="space-y-3">
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={handleExport}
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 hover:bg-gray-100 disabled:opacity-50"
-              >
-                {i18n.t("exportSettings")}
-              </button>
-              <button
-                type="button"
-                onClick={() => fileInput.current?.click()}
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 hover:bg-gray-100 disabled:opacity-50"
-              >
-                {isImporting ? i18n.t("importing") : i18n.t("importSettings")}
-              </button>
-              <input
-                ref={fileInput}
-                type="file"
-                accept=".json,application/json"
-                hidden
-                aria-label={i18n.t("importSettings")}
-                onChange={event => {
-                  const file = event.currentTarget.files?.[0];
-                  event.currentTarget.value = "";
-                  void handleImport(file);
-                }}
-              />
-            </div>
-            <p className="text-sm text-gray-600">{i18n.t("settingsTransferHelp")}</p>
-            <p className="text-sm text-gray-600">{i18n.t("settingsSyncHelp")}</p>
-            <SettingsSyncStatus />
-          </div>
-
-          {/* 保存ボタン（タブコンテンツの外に固定） */}
-          <div className="flex flex-wrap items-center justify-end gap-4">
+      <footer className="shrink-0 border-t border-gray-200 bg-white px-4 py-3 md:px-8">
+        <div className="mx-auto max-w-7xl space-y-3">
+          <SettingsSyncStatus />
+          <div className="flex items-center justify-between gap-4">
             <p
               role="status"
-              className={`text-sm ${
-                !saveMessage
-                  ? "invisible"
-                  : (saveStatus === "saved" || saveStatus === "imported")
-                    ? "text-green-600"
-                    : "text-red-600"
-              }`}
+              className={`text-sm ${saveStatus && saveStatus !== "saved" && saveStatus !== "imported" ? "text-red-700" : "text-gray-600"}`}
             >
-              {saveMessage || "\u00a0"}
+              {saveMessage}
             </p>
             <button
               type="button"
               onClick={handleSave}
-              disabled={isSaving}
-              className="bg-chrome-blue text-white px-8 py-3 rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-md"
+              disabled={!isReady || isImporting || isSaving}
+              className="shrink-0 rounded-md bg-blue-600 px-5 py-2.5 font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSaving ? i18n.t("saving") : i18n.t("saveSettings")}
             </button>
           </div>
-        </fieldset>
-        <KeyboardShortcuts />
-      </div>
+        </div>
+      </footer>
     </div>
   );
-}
+};
+
+export default App;

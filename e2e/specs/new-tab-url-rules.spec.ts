@@ -138,11 +138,16 @@ test("URL rules can be added, validated, saved, reloaded, and removed", async ({
   await clearExtensionStorage(serviceWorker);
   const page = await context.newPage();
   await page.goto(`chrome-extension://${extensionId}/options.html`);
+  const savedBeforeEdit = await serviceWorker.evaluate(() => chrome.storage.local.get("settings"));
   await page.getByRole("button", { name: "Add rule", exact: true }).click();
   await page.getByLabel("URL pattern 1", { exact: true }).fill("[");
   await page.getByRole("button", { name: "Save Settings", exact: true }).click();
-  await expect(page.getByText("Enter a valid URL pattern for each rule.")).toBeVisible();
-  await expect(page.getByRole("status")).toHaveClass(/text-red-600/);
+  await expect(page.getByRole("status")).toHaveText("Enter a valid URL pattern for each rule.");
+  await expect(page.getByRole("status")).toBeVisible();
+  await expect(page.getByLabel("URL pattern 1", { exact: true })).toBeFocused();
+  expect(await serviceWorker.evaluate(() => chrome.storage.local.get("settings"))).toEqual(
+    savedBeforeEdit,
+  );
   await page.getByLabel("URL pattern 1", { exact: true }).fill("example.com");
   await page.getByLabel("Position 1", { exact: true }).selectOption("right");
   await page.getByLabel("Activation 1", { exact: true }).selectOption("background");

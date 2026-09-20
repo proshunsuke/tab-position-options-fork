@@ -1,7 +1,6 @@
 {
   "language": "pt-BR",
   "optionsTitle": "Tab Position Options - Configurações",
-  "tabBehavior": "Comportamento das abas",
   "tabClosing": "Ao fechar uma aba",
   "tabOnActivate": "Ao ativar uma aba",
   "newTab": "Nova aba",
@@ -89,5 +88,10 @@
   "settingsSyncHelp": "As configurações e regras de URL são sincronizadas automaticamente quando a sincronização do Chrome está ativada. Se a sincronização estiver indisponível ou o limite de armazenamento for excedido, as configurações permanecem neste dispositivo.",
   "settingsSyncCapacity": "As configurações excedem o limite de armazenamento da sincronização e permanecem neste dispositivo. Reduza a quantidade ou o tamanho das regras de URL e salve novamente.",
   "settingsSyncUnavailable": "Não foi possível sincronizar as configurações. As configurações salvas permanecem neste dispositivo. Uma nova tentativa ocorrerá na próxima alteração ou inicialização da extensão.",
-  "settingsSyncStatusUnavailable": "Não foi possível ler o status da sincronização. Abra novamente a página de configurações."
+  "settingsSyncStatusUnavailable": "Não foi possível ler o status da sincronização. Abra novamente a página de configurações.",
+  "settingsManagement": "Gerenciar configurações",
+  "settingsCategories": "Categorias de configurações",
+  "unsavedChanges": "Há alterações não salvas.",
+  "details": "Detalhes",
+  "shortcutsSaveHelp": "As alterações nos atalhos são aplicadas no Chrome. Não é necessário salvá-las aqui."
 }

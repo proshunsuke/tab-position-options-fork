@@ -51,7 +51,7 @@ HOW TO USE
 2. Choose your tab preferences and add URL rules if needed.
 3. Click Save Settings.
 
-Long URL rule lists scroll within their sections. If settings cannot be synchronized, the settings page explains whether the sync storage limit was exceeded or another sync failure occurred; saved local settings remain available.
+Settings are organized by category, with a Save Settings button that stays visible while scrolling. Import/export and keyboard shortcuts have dedicated sections. If settings cannot be synchronized, a shared notice explains whether the sync storage limit was exceeded or another sync failure occurred; saved local settings remain available.
 
 PRIVACY
 Settings and user-entered URL rules are stored locally and synchronized through Google's Chrome Sync service when enabled. Browsing URLs and session tab state are not synchronized. New-tab and navigation URLs are processed locally to apply your URL rules. When external-link handling is enabled, a content script reads the clicked link and current page URL. These browsing values are not sent to external services; following a link makes the normal browser request to its destination. The extension does not use analytics or tracking services.
@@ -183,14 +183,15 @@ Dashboard uploads were observed; exact byte-for-byte identity with local files h
 | Store icon | [public/icon-128.png](public/icon-128.png), 128×128 | Uploaded |
 | Screenshot 1 — New Tab | [screenshot-1.png](store-assets/screenshots/screenshot-1.png), 1280×800 | Updated locally; not uploaded. Opening position and background behavior |
 | Screenshot 2 — Tab Closing | [screenshot-2.png](store-assets/screenshots/screenshot-2.png), 1280×800 | Updated locally; not uploaded. Choosing the next active tab after closing |
-| Screenshot 3 — Tab on Activate | [screenshot-3.png](store-assets/screenshots/screenshot-3.png), 1280×800 | Created locally; not uploaded. Activation position |
-| Screenshot 4 — URL rules and pop-ups | [screenshot-4.png](store-assets/screenshots/screenshot-4.png), 1280×800 | Created locally; not uploaded. URL rules and pop-up exceptions with example.com patterns |
+| Screenshot 3 — Tab on Activate | [screenshot-3.png](store-assets/screenshots/screenshot-3.png), 1280×800 | Updated locally; not uploaded. Activation position |
+| Screenshot 4 — Pop-up | [screenshot-4.png](store-assets/screenshots/screenshot-4.png), 1280×800 | Updated locally; not uploaded. Pop-up conversion and an example.com exception |
+| Screenshot 5 — External Links | [screenshot-5.png](store-assets/screenshots/screenshot-5.png), 1280×800 | Created locally; not uploaded. External link handling and a background-tab URL rule |
 | Small promo tile | [promotional-440x280.png](store-assets/promotional-440x280.png), 440×280 | Uploaded |
 | Marquee promo tile | Local source not identified | Uploaded; dashboard specifies 1400×560 |
 
-Upload screenshots 1–4 in the order above. All four are direct captures of 1280×800 regions of the English settings page at its original scale, without added headings, backgrounds, or rearrangement. They are verified as 24-bit RGB PNG without alpha. The settings shown are illustrative. The dashboard still contains the previous screenshots until these replacements are uploaded.
+Upload screenshots 1–5 in the order above. All five are direct 1280×800 viewport captures of the English settings page with the new category navigation and persistent save bar, at its original scale, without added headings, backgrounds, or rearrangement. They are verified as 24-bit RGB PNG without alpha. The settings shown are illustrative. The dashboard still contains the previous screenshots until these replacements are uploaded.
 
-[tab-behavior.png](store-assets/tab-behavior.png) is the separate 1280×1721 full-page image used in the READMEs; it is not a store screenshot.
+[new-tab.png](store-assets/new-tab.png) is the 1280×800 New Tab image used in all three READMEs. It uses the same capture as screenshot 1 and replaces the previous tab-behavior.png image.
 
 `store-assets/social-preview-1280x640.png` is 1280×640 and must not be assumed to be the uploaded 1400×560 marquee asset.
 

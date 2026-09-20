@@ -174,6 +174,7 @@ test("popup settings and validated exceptions persist across options reloads", a
 }) => {
   const page = await context.newPage();
   await page.goto(`chrome-extension://${extensionId}/options.html`);
+  await page.getByRole("button", { name: "Pop-up", exact: true }).click();
   await page.getByLabel("Open pop-up window as new tab", { exact: true }).check();
   await page.getByRole("button", { name: "Add pop-up exception" }).click();
   await page.getByLabel("Pop-up exception 1", { exact: true }).fill("[");
@@ -188,6 +189,7 @@ test("popup settings and validated exceptions persist across options reloads", a
     expect(settings.popup).toEqual({ openAsNewTab: true, exceptions: [{ url: "login.test" }] });
   }).toPass();
   await page.reload();
+  await page.getByRole("button", { name: "Pop-up", exact: true }).click();
   await expect(page.getByLabel("Open pop-up window as new tab", { exact: true })).toBeChecked();
   await expect(page.getByLabel("Pop-up exception 1", { exact: true })).toHaveValue("login.test");
   await page.getByRole("button", { name: "Remove pop-up exception 1", exact: true }).click();

@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import { i18n } from "#i18n";
 import { Checkbox } from "@/entrypoints/options/ui/Checkbox";
+import { HelpDetails } from "@/entrypoints/options/ui/HelpDetails";
 import { TabContent } from "@/entrypoints/options/ui/TabContent";
 import { TabSection } from "@/entrypoints/options/ui/TabSection";
 import { EXTERNAL_LINK_ACTIONS, type ExternalLinkRule, type Settings } from "@/src/types";
@@ -31,10 +32,7 @@ export const ExternalLinks: FC<Props> = ({ settings, onChange }) => (
     </TabSection>
     <TabSection title={i18n.t("matchingUrls")} description={i18n.t("externalRulesHelp")}>
       <div className="space-y-3">
-        <fieldset
-          aria-label={i18n.t("matchingUrls")}
-          className="min-w-0 max-h-80 overflow-y-auto space-y-3 p-1"
-        >
+        <fieldset aria-label={i18n.t("matchingUrls")} className="min-w-0 space-y-3">
           {settings.urlRules.map((rule, index) => (
             <div
               // biome-ignore lint/suspicious/noArrayIndexKey: Controlled rows have no independent state or persisted identity.
@@ -42,6 +40,7 @@ export const ExternalLinks: FC<Props> = ({ settings, onChange }) => (
               className="flex flex-wrap items-center gap-3 rounded-md bg-gray-50 p-3"
             >
               <input
+                id={`external-rule-${index}`}
                 aria-label={i18n.t("urlPatternLabel", [String(index + 1)])}
                 placeholder={i18n.t("urlPattern")}
                 value={rule.url}
@@ -53,7 +52,7 @@ export const ExternalLinks: FC<Props> = ({ settings, onChange }) => (
                     ),
                   })
                 }
-                className="min-w-48 flex-1 rounded-md border border-gray-300 bg-white px-3 py-2"
+                className="min-w-0 w-full sm:min-w-48 sm:w-auto sm:flex-1 rounded-md border border-gray-300 bg-white px-3 py-2"
               />
               <select
                 aria-label={i18n.t("externalActionLabel", [String(index + 1)])}
@@ -68,7 +67,7 @@ export const ExternalLinks: FC<Props> = ({ settings, onChange }) => (
                     ),
                   })
                 }
-                className="rounded-md border border-gray-300 bg-white px-3 py-2"
+                className="max-w-full rounded-md border border-gray-300 bg-white px-3 py-2"
               >
                 {EXTERNAL_LINK_ACTIONS.map(action => (
                   <option key={action} value={action}>
@@ -105,7 +104,7 @@ export const ExternalLinks: FC<Props> = ({ settings, onChange }) => (
         >
           {i18n.t("addRule")}
         </button>
-        <p className="text-sm text-gray-600">{i18n.t("externalPlacementHelp")}</p>
+        <HelpDetails>{i18n.t("externalPlacementHelp")}</HelpDetails>
       </div>
     </TabSection>
   </TabContent>

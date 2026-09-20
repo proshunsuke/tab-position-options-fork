@@ -14,7 +14,7 @@ type Props<T extends string = string> = {
 };
 
 export const RadioGroup: FC<Props> = ({ name, options, value, onChange, columns = 2 }) => {
-  const gridCols = columns === 1 ? "grid-cols-1" : "grid-cols-2";
+  const gridCols = columns === 1 ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2";
 
   return (
     <div className={`grid ${gridCols} gap-4`}>

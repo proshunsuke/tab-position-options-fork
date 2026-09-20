@@ -155,6 +155,7 @@ test("options display actual assignments and open Chrome shortcut settings", asy
 }, testInfo) => {
   const page = await context.newPage();
   await page.goto(`chrome-extension://${extensionId}/options.html`);
+  await page.getByRole("button", { name: "Keyboard shortcuts", exact: true }).click();
   const commands = (await serviceWorker.evaluate(() => chrome.commands.getAll())).filter(
     command => command.name !== "_execute_action",
   );
