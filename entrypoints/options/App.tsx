@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { i18n } from "#i18n";
 import { TabBehavior } from "@/entrypoints/options/TabBehavior";
 import { TabClosing } from "@/entrypoints/options/TabClosing";
@@ -8,6 +8,7 @@ import {
   initializeAppData,
   saveSettingsWithVersion,
 } from "@/src/settings/state/appData";
+import { parseSettingsFile, SETTINGS_FILE_NAME, serializeSettings } from "@/src/settings/transfer";
 import { isValidUrlPattern } from "@/src/tabs/urlRules";
 import type {
   LoadingPageUrlRule,
@@ -27,10 +28,13 @@ export default function App() {
   const [urlRules, setUrlRules] = useState<NewTabUrlRule[]>([]);
   const [loadingRules, setLoadingRules] = useState<LoadingPageUrlRule[]>([]);
   const [popup, setPopup] = useState<Settings["popup"]>({ openAsNewTab: false, exceptions: [] });
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [isReady, setIsReady] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<"saved" | "invalidPattern" | "saveFailed" | null>(
-    null,
-  );
+  const [saveStatus, setSaveStatus] = useState<
+    "saved" | "invalidPattern" | "saveFailed" | "imported" | "importFailed" | "exportFailed" | null
+  >(null);
   const saveMessage = saveStatus ? i18n.t(saveStatus) : "";
 
   // 起動時に保存済みの設定を読み込む
@@ -56,6 +60,7 @@ export default function App() {
       if (settings.tabOnActivate?.behavior) {
         setTabOnActivate(settings.tabOnActivate.behavior);
       }
+      setIsReady(true);
     })();
   }, []);
 
@@ -75,6 +80,69 @@ export default function App() {
     setTabOnActivate(value as TabOnActivateBehavior);
   };
 
+  const getDraftSettings = () =>
+    ({
+      newTab: {
+        position: newTabPosition,
+        openInBackground,
+        urlRules: urlRules.map(rule => ({ ...rule, url: rule.url.trim() })),
+      },
+      loadingPage: { urlRules: loadingRules.map(rule => ({ ...rule, url: rule.url.trim() })) },
+      afterTabClosing: {
+        activateTab: afterTabClosing,
+      },
+      tabOnActivate: { behavior: tabOnActivate },
+      popup: {
+        openAsNewTab: popup.openAsNewTab,
+        exceptions: popup.exceptions?.map(rule => ({ url: rule.url.trim() })) ?? [],
+      },
+    }) satisfies Settings;
+
+  const handleImport = async (file: File | undefined) => {
+    if (!file) {
+      return;
+    }
+    setIsImporting(true);
+    setSaveStatus(null);
+    try {
+      // ファイル全体の読み込みと検証が終わるまで、画面にもストレージにも反映しない。
+      const settings = parseSettingsFile(await file.text());
+      setNewTabPosition(settings.newTab.position);
+      setOpenInBackground(settings.newTab.openInBackground);
+      setUrlRules(settings.newTab.urlRules);
+      setLoadingRules(settings.loadingPage.urlRules);
+      setAfterTabClosing(settings.afterTabClosing.activateTab);
+      setTabOnActivate(settings.tabOnActivate.behavior);
+      setPopup(settings.popup);
+      setSaveStatus("imported");
+    } catch {
+      setSaveStatus("importFailed");
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const handleExport = () => {
+    try {
+      const content = serializeSettings(getDraftSettings());
+      const url = URL.createObjectURL(new Blob([content], { type: "application/json" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = SETTINGS_FILE_NAME;
+      document.body.append(link);
+      try {
+        link.click();
+        setSaveStatus(null);
+      } finally {
+        link.remove();
+        // ダウンロード開始後に解放する。タブ操作とは独立した画面内の後処理。
+        setTimeout(() => URL.revokeObjectURL(url), 0);
+      }
+    } catch {
+      setSaveStatus("exportFailed");
+    }
+  };
+
   const handleSave = () => {
     if (
       [...urlRules, ...loadingRules, ...(popup.exceptions ?? [])].some(
@@ -91,26 +159,13 @@ export default function App() {
       const currentSettings = getSettings();
       saveSettingsWithVersion({
         ...currentSettings,
-        newTab: {
-          position: newTabPosition,
-          openInBackground,
-          urlRules: urlRules.map(rule => ({ ...rule, url: rule.url.trim() })),
-        },
-        loadingPage: { urlRules: loadingRules.map(rule => ({ ...rule, url: rule.url.trim() })) },
-        afterTabClosing: {
-          activateTab: afterTabClosing,
-        },
-        tabOnActivate: { behavior: tabOnActivate },
-        popup: {
-          openAsNewTab: popup.openAsNewTab,
-          exceptions: popup.exceptions?.map(rule => ({ url: rule.url.trim() })) ?? [],
-        },
+        ...getDraftSettings(),
       });
 
       setSaveStatus("saved");
 
       // 3秒後にメッセージを消す
-      setTimeout(() => setSaveStatus(null), 3000);
+      setTimeout(() => setSaveStatus(status => (status === "saved" ? null : status)), 3000);
     } catch (error) {
       console.error("Failed to save settings:", error);
       setSaveStatus("saveFailed");
@@ -162,7 +217,7 @@ export default function App() {
         </div>
 
         {/* タブコンテンツと保存ボタンのコンテナ */}
-        <div className="flex flex-col gap-6">
+        <fieldset disabled={!isReady || isImporting} className="flex min-w-0 flex-col gap-6">
           {/* タブコンテンツ */}
           <div className="bg-white rounded-lg shadow-lg p-10 min-h-[500px]">
             {activeTab === "behavior" && (
@@ -195,14 +250,46 @@ export default function App() {
             )}
           </div>
 
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={handleExport}
+                className="rounded-md border border-gray-300 bg-white px-4 py-2 hover:bg-gray-100 disabled:opacity-50"
+              >
+                {i18n.t("exportSettings")}
+              </button>
+              <button
+                type="button"
+                onClick={() => fileInput.current?.click()}
+                className="rounded-md border border-gray-300 bg-white px-4 py-2 hover:bg-gray-100 disabled:opacity-50"
+              >
+                {isImporting ? i18n.t("importing") : i18n.t("importSettings")}
+              </button>
+              <input
+                ref={fileInput}
+                type="file"
+                accept=".json,application/json"
+                hidden
+                aria-label={i18n.t("importSettings")}
+                onChange={event => {
+                  const file = event.currentTarget.files?.[0];
+                  event.currentTarget.value = "";
+                  void handleImport(file);
+                }}
+              />
+            </div>
+            <p className="text-sm text-gray-600">{i18n.t("settingsTransferHelp")}</p>
+          </div>
+
           {/* 保存ボタン（タブコンテンツの外に固定） */}
-          <div className="flex items-center justify-end gap-4">
+          <div className="flex flex-wrap items-center justify-end gap-4">
             <p
               role="status"
               className={`text-sm ${
                 !saveMessage
                   ? "invisible"
-                  : saveStatus === "saved"
+                  : (saveStatus === "saved" || saveStatus === "imported")
                     ? "text-green-600"
                     : "text-red-600"
               }`}
@@ -218,7 +305,7 @@ export default function App() {
               {isSaving ? i18n.t("saving") : i18n.t("saveSettings")}
             </button>
           </div>
-        </div>
+        </fieldset>
       </div>
     </div>
   );

@@ -57,5 +57,12 @@
   "saving": "Wird gespeichert…",
   "saved": "Einstellungen gespeichert!",
   "invalidPattern": "Geben Sie für jede Regel ein gültiges URL-Muster ein.",
-  "saveFailed": "Die Einstellungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut."
+  "saveFailed": "Die Einstellungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+  "exportSettings": "Einstellungen exportieren",
+  "importSettings": "Einstellungen importieren",
+  "importing": "Wird importiert…",
+  "imported": "Einstellungen in das Formular geladen. Klicken Sie auf Einstellungen speichern, um sie anzuwenden.",
+  "importFailed": "Diese Datei konnte nicht importiert werden. Wählen Sie eine gültige Einstellungsdatei, die mit Tab Position Options Fork exportiert wurde.",
+  "exportFailed": "Die Einstellungen konnten nicht exportiert werden. Prüfen Sie die URL-Muster und versuchen Sie es erneut.",
+  "settingsTransferHelp": "Exportiert die angezeigten Einstellungen einschließlich ungespeicherter Änderungen. Beim Import werden die Einstellungen im Formular ersetzt. Klicken Sie zum Anwenden auf Einstellungen speichern. Dateien werden lokal verarbeitet."
 }

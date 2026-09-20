@@ -22,6 +22,8 @@ A Chrome extension that lets you customize where new tabs open, whether they ope
 
 The options page follows your browser’s UI language and supports [10 locales](locales/). Unsupported languages fall back to English.
 
+You can export and import settings files to back up your configuration or transfer it between installations of this fork.
+
 <img src="store-assets/screenshots/screenshot-1.png" alt="Tab Position Options Fork settings" width="640">
 
 ## Getting Started

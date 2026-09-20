@@ -12,6 +12,8 @@ Tab Position Options Fork lets you customize tab positioning and activation beha
 
 Your tab positioning, background-opening, activation, and pop-up conversion preferences are saved using `chrome.storage.local`. This includes URL patterns you enter in the extension's options page. Settings remain on your device until changed, removed, or deleted by uninstalling the extension.
 
+When you export settings, the extension downloads a JSON file containing the settings currently shown, including unsaved changes and user-entered URL patterns. It does not include session tab state or browsing history. Import reads only the file you select and processes it locally; imported settings are applied when you click **Save Settings**. The extension does not upload these files.
+
 ### New-Tab URLs
 
 When a tab is created, the extension reads its URL, including its pending navigation URL when available, to check your URL rules. Matching rules determine the tab's position and whether it opens in the foreground or background.
@@ -59,6 +61,8 @@ This state is used only for tab positioning and activation, including choosing a
 You can view and change preferences, and edit or remove URL rules, in the extension's options page. Click **Save Settings** to apply changes. Removing all URL rules stops URL-based matching; other tab settings continue to apply.
 
 Restarting the browser clears session tab state. Uninstalling the extension removes its stored settings and extension data from that browser profile.
+
+Exported files remain wherever you saved them, even after uninstalling the extension. You can delete them yourself when no longer needed.
 
 ## Changes to This Policy
 

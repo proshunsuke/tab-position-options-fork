@@ -40,6 +40,8 @@ Tab Position Options Fork lets you choose tab positions, open new tabs in the ba
 
 The options page follows your browser’s UI language and supports English, Japanese, Simplified Chinese, Traditional Chinese, Korean, Spanish, French, German, Brazilian Portuguese, and Russian. Unsupported languages use English.
 
+Export and import settings files to back up your configuration or transfer it between installations of this fork.
+
 HOW TO USE
 1. Open the extension from Chrome's Extensions menu or its toolbar icon.
 2. Choose your tab preferences and add URL rules if needed.
@@ -138,6 +140,7 @@ These are recorded dashboard values, not a new submission or certification.
 | Data | Use and retention | Sent off device / shared |
 | --- | --- | --- |
 | Preferences and user-entered URL patterns | Saved in `chrome.storage.local`; editable in options | No / No |
+| Settings files selected for import or downloaded on export | Processed locally on request; exports contain the current form settings and user-entered URL patterns, not session state; downloaded files remain until the user deletes them | No automatic transmission / No |
 | Pending navigation URL, tab ID, timestamp and restoration flag | Temporarily stored in `chrome.storage.session` until commit, error or tab closure; cleared on browser restart | No / No |
 | Restored tab IDs | Retained in session storage until initial navigation ends or the tab closes | No / No |
 | Pop-up URL and window type/incognito status | Checked in memory to apply exceptions and choose a compatible destination; pop-up URLs are not persisted by the conversion feature | No / No |

@@ -57,5 +57,12 @@
   "saving": "Guardando…",
   "saved": "¡Configuración guardada!",
   "invalidPattern": "Introduce un patrón de URL válido para cada regla.",
-  "saveFailed": "No se pudo guardar la configuración. Inténtalo de nuevo."
+  "saveFailed": "No se pudo guardar la configuración. Inténtalo de nuevo.",
+  "exportSettings": "Exportar configuración",
+  "importSettings": "Importar configuración",
+  "importing": "Importando…",
+  "imported": "Configuración cargada en el formulario. Pulsa Guardar configuración para aplicarla.",
+  "importFailed": "No se pudo importar el archivo. Elige un archivo de configuración válido exportado por Tab Position Options Fork.",
+  "exportFailed": "No se pudo exportar la configuración. Revisa los patrones de URL e inténtalo de nuevo.",
+  "settingsTransferHelp": "Exporta la configuración que se muestra, incluidos los cambios sin guardar. La importación reemplaza la configuración del formulario; pulsa Guardar configuración para aplicarla. Los archivos se procesan localmente."
 }
