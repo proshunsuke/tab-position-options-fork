@@ -10,8 +10,7 @@ export default defineConfig({
     default_locale: "en",
     name: "Tab Position Options Fork",
     version: APP_VERSION,
-    description:
-      "Fork of Tab Position Options - Select the tab opening position, new tab behavior and behavior after closing a tab",
+    description: "__MSG_extensionDescription__",
     permissions: ["storage", "tabs", "webNavigation"],
     host_permissions: [],
     commands: {

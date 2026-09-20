@@ -1,5 +1,6 @@
 {
   "language": "fr",
+  "extensionDescription": "Tab Position Options pour Manifest V3. Réglez la position des onglets et leur comportement à l’ouverture et à la fermeture.",
   "optionsTitle": "Tab Position Options - Paramètres",
   "tabClosing": "À la fermeture d’un onglet",
   "tabOnActivate": "À l’activation d’un onglet",

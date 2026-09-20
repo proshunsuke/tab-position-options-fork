@@ -1,5 +1,6 @@
 {
   "language": "zh-TW",
+  "extensionDescription": "Tab Position Options 的 Manifest V3 重製版。自訂新分頁的位置、前景或背景開啟方式，以及關閉分頁後的行為。",
   "optionsTitle": "Tab Position Options - 設定",
   "tabClosing": "關閉分頁時",
   "tabOnActivate": "啟用分頁時",
