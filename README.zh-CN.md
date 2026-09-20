@@ -20,13 +20,15 @@
 
 这是一款Chrome扩展，可设置新标签页的打开位置、是否在后台打开，以及关闭当前标签页后激活哪个标签页。项目基于原版Tab Position Options，针对Manifest V3重新实现。
 
+设置页面会根据浏览器的界面语言显示，支持 [10 种语言区域设置](locales/)。不支持的语言使用英语。
+
 <img src="store-assets/screenshots/screenshot-1.png" alt="Tab Position Options Fork设置界面" width="640">
 
 ## 开始使用
 
 1. 从Chrome Web Store安装扩展。
 2. 通过Chrome的扩展菜单或工具栏图标打开扩展。
-3. 选择所需设置，然后点击**Save Settings**。
+3. 选择所需设置，然后点击**保存设置（Save Settings）**。
 
 如需从源代码安装，请参阅[手动安装](#手动安装)。
 
@@ -67,7 +69,7 @@ npm run lint:check   # 检查代码和格式，不修改文件
 1. 运行`npm run build`。
 2. 在Chrome中打开`chrome://extensions`，启用**Developer mode**。
 3. 点击**Load unpacked**，选择`dist/chrome-mv3`目录。
-4. 打开扩展，选择所需设置，然后点击**Save Settings**。
+4. 打开扩展，选择所需设置，然后点击**保存设置（Save Settings）**。
 
 重新构建后，请在`chrome://extensions`中重新加载扩展以应用更新。
 

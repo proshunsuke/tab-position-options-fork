@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { i18n } from "#i18n";
 import { LoadingPage } from "@/entrypoints/options/LoadingPage";
 import { Popup } from "@/entrypoints/options/Popup";
 import { Checkbox } from "@/entrypoints/options/ui/Checkbox";
@@ -21,11 +22,11 @@ type Props = {
 };
 
 const NewTabOptions: RadioOption<TabPosition>[] = [
-  { value: "first", label: "Always first" },
-  { value: "last", label: "Always last" },
-  { value: "right", label: "Right of current tab" },
-  { value: "left", label: "Left of current tab" },
-  { value: "default", label: "Default (Browser default)" },
+  { value: "first", label: i18n.t("positionFirst") },
+  { value: "last", label: i18n.t("positionLast") },
+  { value: "right", label: i18n.t("positionRight") },
+  { value: "left", label: i18n.t("positionLeft") },
+  { value: "default", label: i18n.t("browserDefault") },
 ];
 
 export const TabBehavior: FC<Props> = ({
@@ -42,10 +43,7 @@ export const TabBehavior: FC<Props> = ({
 }) => {
   return (
     <TabContent>
-      <TabSection
-        title="New Tab"
-        description="Choose where new tabs are opened when you create them"
-      >
+      <TabSection title={i18n.t("newTab")} description={i18n.t("newTabDescription")}>
         <RadioGroup
           name="newTabPosition"
           options={NewTabOptions}
@@ -55,7 +53,7 @@ export const TabBehavior: FC<Props> = ({
         <div className="mt-4 grid grid-cols-2 gap-4">
           <Checkbox
             name="openInBackground"
-            label="New Tab Background"
+            label={i18n.t("newTabBackground")}
             checked={openInBackground}
             onChange={onOpenInBackgroundChange}
           />
@@ -63,10 +61,7 @@ export const TabBehavior: FC<Props> = ({
         </div>
       </TabSection>
 
-      <TabSection
-        title="Matching URLs"
-        description="Match the new tab's URL. The first matching rule wins. Patterns support regular expressions."
-      >
+      <TabSection title={i18n.t("matchingUrls")} description={i18n.t("matchingUrlsDescription")}>
         <div className="space-y-3">
           {urlRules.map((rule, index) => (
             <div
@@ -75,8 +70,8 @@ export const TabBehavior: FC<Props> = ({
               className="flex flex-wrap items-center gap-3 rounded-md bg-gray-50 p-3"
             >
               <input
-                aria-label={`URL pattern ${index + 1}`}
-                placeholder="URL pattern"
+                aria-label={i18n.t("urlPatternLabel", [String(index + 1)])}
+                placeholder={i18n.t("urlPattern")}
                 value={rule.url}
                 onChange={event =>
                   onUrlRulesChange(
@@ -88,7 +83,7 @@ export const TabBehavior: FC<Props> = ({
                 className="min-w-48 flex-1 rounded-md border border-gray-300 bg-white px-3 py-2"
               />
               <select
-                aria-label={`Position ${index + 1}`}
+                aria-label={i18n.t("positionLabel", [String(index + 1)])}
                 value={rule.position}
                 onChange={event =>
                   onUrlRulesChange(
@@ -106,7 +101,7 @@ export const TabBehavior: FC<Props> = ({
                 ))}
               </select>
               <select
-                aria-label={`Activation ${index + 1}`}
+                aria-label={i18n.t("activationLabel", [String(index + 1)])}
                 value={rule.active}
                 onChange={event =>
                   onUrlRulesChange(
@@ -119,16 +114,16 @@ export const TabBehavior: FC<Props> = ({
                 }
                 className="rounded-md border border-gray-300 bg-white px-3 py-2"
               >
-                <option value="foreground">Foreground</option>
-                <option value="background">Background</option>
+                <option value="foreground">{i18n.t("foreground")}</option>
+                <option value="background">{i18n.t("background")}</option>
               </select>
               <button
                 type="button"
-                aria-label={`Remove rule ${index + 1}`}
+                aria-label={i18n.t("removeRuleLabel", [String(index + 1)])}
                 onClick={() => onUrlRulesChange(urlRules.filter((_, i) => i !== index))}
                 className="text-red-600 hover:text-red-800"
               >
-                Remove
+                {i18n.t("remove")}
               </button>
             </div>
           ))}
@@ -142,12 +137,9 @@ export const TabBehavior: FC<Props> = ({
             }
             className="rounded-md bg-chrome-blue px-4 py-2 text-white hover:bg-blue-600"
           >
-            Add rule
+            {i18n.t("addRule")}
           </button>
-          <p className="text-sm text-gray-600">
-            Default keeps the browser's position. Tab on Activate can override the position when the
-            tab becomes active.
-          </p>
+          <p className="text-sm text-gray-600">{i18n.t("matchingUrlsHelp")}</p>
         </div>
       </TabSection>
 

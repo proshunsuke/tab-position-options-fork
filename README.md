@@ -20,6 +20,8 @@
 
 A Chrome extension that lets you customize where new tabs open, whether they open in the background, and which tab becomes active after closing the current tab. Reimplemented from the original Tab Position Options for Manifest V3.
 
+The options page follows your browser’s UI language and supports [10 locales](locales/). Unsupported languages fall back to English.
+
 <img src="store-assets/screenshots/screenshot-1.png" alt="Tab Position Options Fork settings" width="640">
 
 ## Getting Started

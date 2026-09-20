@@ -20,13 +20,15 @@
 
 新しいタブを開く位置、バックグラウンドで開くかどうか、現在のタブを閉じた後にアクティブにするタブを設定できるChrome拡張機能です。原版のTab Position OptionsをManifest V3向けに再実装しています。
 
+設定画面はブラウザの表示言語に合わせて表示し、[10 ロケール](locales/)に対応しています。未対応の言語では英語を使用します。
+
 <img src="store-assets/screenshots/screenshot-1.png" alt="Tab Position Options Forkの設定画面" width="640">
 
 ## 使い始める
 
 1. Chrome Web Storeから拡張機能をインストールします。
 2. Chromeの拡張機能メニューまたはツールバーのアイコンから開きます。
-3. 設定を選び、**Save Settings**をクリックします。
+3. 設定を選び、**設定を保存（Save Settings）**をクリックします。
 
 ソースコードからインストールする場合は、[手動インストール](#手動インストール)を参照してください。
 
@@ -67,7 +69,7 @@ npm run lint:check   # ファイルを変更せずlintとフォーマットを�
 1. `npm run build`を実行します。
 2. Chromeで`chrome://extensions`を開き、**Developer mode**を有効にします。
 3. **Load unpacked**をクリックし、`dist/chrome-mv3`ディレクトリを選択します。
-4. 拡張機能を開き、設定を選んで**Save Settings**をクリックします。
+4. 拡張機能を開き、設定を選んで**設定を保存（Save Settings）**をクリックします。
 
 再ビルド後は、`chrome://extensions`から拡張機能を再読み込みして更新を反映してください。
 

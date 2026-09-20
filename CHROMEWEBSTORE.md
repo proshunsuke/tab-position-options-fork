@@ -1,6 +1,6 @@
 # Chrome Web Store — Tab Position Options Fork
 
-Last updated: 2026-09-19
+Last updated: 2026-09-20
 
 This file is the repository source of truth for submission information and copy for the Developer Dashboard. Update and verify the repository documents first, then apply the corresponding content to the dashboard. It is not uploaded automatically. Keep it aligned with user-facing features, permissions, data handling, and release assets when these change. See the [release procedure](.agents/skills/tab-position-release/SKILL.md).
 
@@ -11,7 +11,7 @@ This file is the repository source of truth for submission information and copy 
 - Extension ID: `bimiahgcjenkoacmdfggckkaflnnebki`
 - Published package: **0.2.2**, with `storage` permission only.
 - Dashboard draft package: **0.2.2**, with `storage` permission only.
-- Current source: still version **0.2.2**, but includes unreleased Tab on Activate, new-tab URL rules, Loading Page URL rules, and pop-up conversion, and requests `storage`, `tabs`, and `webNavigation`. It is not the same package as the published 0.2.2.
+- Current source: still version **0.2.2**, but includes unreleased Tab on Activate, new-tab URL rules, Loading Page URL rules, pop-up conversion, and options localized into 10 locales, and requests `storage`, `tabs`, and `webNavigation`. It is not the same package as the published 0.2.2.
 - Dashboard fields were read only; no draft was saved or submitted during preparation of this document.
 
 Sections marked **Draft for next release** are proposed replacements, not claims about what is currently registered. Choose a new version during release preparation; do not reuse the published version for these changes.
@@ -37,6 +37,8 @@ The current detailed description is preserved in the appendix. The draft below d
 Customize where tabs open and which tab becomes active when you close a tab.
 
 Tab Position Options Fork lets you choose tab positions, open new tabs in the background, and control which tab is selected after closing the current one. You can also move tabs when they become active, set URL-specific rules for new tabs and page navigation, and open pop-up windows as tabs with URL exceptions.
+
+The options page follows your browser’s UI language and supports English, Japanese, Simplified Chinese, Traditional Chinese, Korean, Spanish, French, German, Brazilian Portuguese, and Russian. Unsupported languages use English.
 
 HOW TO USE
 1. Open the extension from Chrome's Extensions menu or its toolbar icon.

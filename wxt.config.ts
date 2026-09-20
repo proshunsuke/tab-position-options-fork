@@ -3,10 +3,11 @@ import { APP_VERSION } from "./src/version";
 
 export default defineConfig({
   // Module configuration
-  modules: ["@wxt-dev/module-react"],
+  modules: ["@wxt-dev/module-react", "@wxt-dev/i18n/module"],
 
   // Manifest configuration
   manifest: {
+    default_locale: "en",
     name: "Tab Position Options Fork",
     version: APP_VERSION,
     description:

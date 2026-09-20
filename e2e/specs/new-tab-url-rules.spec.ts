@@ -142,6 +142,7 @@ test("URL rules can be added, validated, saved, reloaded, and removed", async ({
   await page.getByLabel("URL pattern 1", { exact: true }).fill("[");
   await page.getByRole("button", { name: "Save Settings", exact: true }).click();
   await expect(page.getByText("Enter a valid URL pattern for each rule.")).toBeVisible();
+  await expect(page.getByRole("status")).toHaveClass(/text-red-600/);
   await page.getByLabel("URL pattern 1", { exact: true }).fill("example.com");
   await page.getByLabel("Position 1", { exact: true }).selectOption("right");
   await page.getByLabel("Activation 1", { exact: true }).selectOption("background");

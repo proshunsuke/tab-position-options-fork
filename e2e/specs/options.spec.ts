@@ -19,6 +19,7 @@ test.describe("Options Page", () => {
 
     // オプションページが正しく開かれたことを確認
     await expect(optionsPage).toHaveTitle("Tab Position Options - Settings");
+    await expect(optionsPage.locator("html")).toHaveAttribute("lang", "en");
     await expect(optionsPage.locator("h1")).toContainText("Tab Position Options");
 
     // タブとして開かれていることを確認（ポップアップではない）
@@ -49,6 +50,7 @@ test.describe("Options Page", () => {
 
     // 保存成功メッセージを確認
     await expect(optionsPage.locator("text=Settings saved successfully")).toBeVisible();
+    await expect(optionsPage.getByRole("status")).toHaveClass(/text-green-600/);
 
     // ページをリロード
     await optionsPage.reload();

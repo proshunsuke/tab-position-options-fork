@@ -21,6 +21,7 @@
     "test:e2e:sharded": "npm run build && node e2e/runShards.mjs"
   },
   "dependencies": {
+    "@wxt-dev/i18n": "^0.2.7",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "webextension-polyfill": "^0.12.0"

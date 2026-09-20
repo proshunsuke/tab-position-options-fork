@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { i18n } from "#i18n";
 import { RadioGroup, type RadioOption } from "@/entrypoints/options/ui/RadioGroup";
 import { TabContent } from "@/entrypoints/options/ui/TabContent";
 import { TabSection } from "@/entrypoints/options/ui/TabSection";
@@ -10,17 +11,14 @@ type Props = {
 };
 
 const ActivationOptions: RadioOption<TabOnActivateBehavior>[] = [
-  { value: "default", label: "Default (Keep position)" },
-  { value: "first", label: "First" },
-  { value: "last", label: "Last" },
+  { value: "default", label: i18n.t("activationDefault") },
+  { value: "first", label: i18n.t("activationFirst") },
+  { value: "last", label: i18n.t("activationLast") },
 ];
 
 export const TabOnActivate: FC<Props> = ({ behavior, onBehaviorChange }) => (
   <TabContent>
-    <TabSection
-      title="Tab on Activate"
-      description="Move a tab to the first or last position when it becomes active. Pinned tabs stay in place."
-    >
+    <TabSection title={i18n.t("tabOnActivate")} description={i18n.t("activationDescription")}>
       <RadioGroup
         name="tabOnActivate"
         options={ActivationOptions}
