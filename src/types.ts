@@ -38,6 +38,7 @@ export type Settings = {
   };
   popup: {
     openAsNewTab: boolean;
+    exceptions?: { url: string }[];
   };
 };
 
@@ -58,5 +59,6 @@ export const DEFAULT_SETTINGS: Settings = {
   },
   popup: {
     openAsNewTab: false,
+    exceptions: [],
   },
 };

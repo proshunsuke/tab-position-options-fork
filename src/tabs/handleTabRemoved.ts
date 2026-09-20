@@ -8,6 +8,7 @@ import {
 import { clearLoadingTab } from "@/src/tabs/state/loadingPage";
 import { recordPendingCloseTarget } from "@/src/tabs/state/pendingCloseTarget";
 import { consumePendingCloseTransition } from "@/src/tabs/state/pendingCloseTransition";
+import { clearPopupTab } from "@/src/tabs/state/popup";
 import type { TabSnapshot } from "@/src/tabs/state/tabSnapshot";
 import {
   getActiveTabSnapshot,
@@ -35,6 +36,7 @@ export const handleTabRemoved = async (
   }
 
   clearLoadingTab(tabId);
+  clearPopupTab(tabId);
   const windowId = removeInfo.windowId;
   const settings = getSettings();
   const tabs = getTabSnapshot(windowId);

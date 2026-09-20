@@ -1,12 +1,15 @@
 import type { FC } from "react";
 import { LoadingPage } from "@/entrypoints/options/LoadingPage";
+import { Popup } from "@/entrypoints/options/Popup";
 import { Checkbox } from "@/entrypoints/options/ui/Checkbox";
 import { RadioGroup, type RadioOption } from "@/entrypoints/options/ui/RadioGroup";
 import { TabContent } from "@/entrypoints/options/ui/TabContent";
 import { TabSection } from "@/entrypoints/options/ui/TabSection";
-import type { LoadingPageUrlRule, NewTabUrlRule, TabPosition } from "@/src/types";
+import type { LoadingPageUrlRule, NewTabUrlRule, Settings, TabPosition } from "@/src/types";
 
 type Props = {
+  popup: Settings["popup"];
+  onPopupChange: (settings: Settings["popup"]) => void;
   loadingRules: LoadingPageUrlRule[];
   onLoadingRulesChange: (rules: LoadingPageUrlRule[]) => void;
   urlRules: NewTabUrlRule[];
@@ -26,6 +29,8 @@ const NewTabOptions: RadioOption<TabPosition>[] = [
 ];
 
 export const TabBehavior: FC<Props> = ({
+  popup,
+  onPopupChange,
   loadingRules,
   onLoadingRulesChange,
   urlRules,
@@ -147,6 +152,7 @@ export const TabBehavior: FC<Props> = ({
       </TabSection>
 
       <LoadingPage rules={loadingRules} onRulesChange={onLoadingRulesChange} />
+      <Popup settings={popup} onChange={onPopupChange} />
     </TabContent>
   );
 };

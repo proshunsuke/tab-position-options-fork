@@ -41,7 +41,7 @@ test.describe("Settings Storage", () => {
       afterTabClosing: { activateTab: "inActivatedOrder" },
       loadingPage: { urlRules: [] },
       tabOnActivate: { behavior: "default" },
-      popup: { openAsNewTab: false },
+      popup: { openAsNewTab: false, exceptions: [] },
     });
   });
 

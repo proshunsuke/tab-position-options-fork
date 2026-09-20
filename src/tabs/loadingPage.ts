@@ -1,5 +1,6 @@
 import { getSettings } from "@/src/settings/state/appData";
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
+import { handlePopupUrl } from "@/src/tabs/popup";
 import {
   handleBrowserStartup,
   isSessionRestoreInProgress,
@@ -10,6 +11,7 @@ import {
   recordLoadingNavigation,
   recordLoadingPosition,
 } from "@/src/tabs/state/loadingPage";
+import { deferPopupNavigation } from "@/src/tabs/state/popup";
 import {
   findTabWindowId,
   getTabSnapshot,
@@ -32,6 +34,7 @@ export const handleBeforeNavigate = async (
     // Worker再起動時のみ、保存したnavigationと設定の復元が必要。
     await initializeAllStates();
   }
+  handlePopupUrl(details.tabId, details.url);
   if (!getSettings().loadingPage?.urlRules?.length) {
     return;
   }
@@ -49,6 +52,9 @@ export const handleNavigationCommitted = async (
   if (needsInitialization()) {
     // Worker再起動時のみ、URLルール・遷移元・タブ配置の復元を待つ。
     await initializeAllStates();
+  }
+  if (deferPopupNavigation(details)) {
+    return;
   }
   const navigation = consumeLoadingNavigation(details.tabId, details.timeStamp);
   // 初期化時点で読み込み済みのタブからの新しい遷移は、復元のreloadと区別する。

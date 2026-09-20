@@ -1,3 +1,4 @@
+import { getSettings } from "@/src/settings/state/appData";
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
 import { applyPendingCloseTargetActivation } from "@/src/tabs/pendingCloseTargetActivation";
 import { isSessionRestoreInProgress } from "@/src/tabs/sessionRestoreDetector";
@@ -13,6 +14,7 @@ import {
   getPendingCloseTarget,
 } from "@/src/tabs/state/pendingCloseTarget";
 import { recordPendingCloseTransition } from "@/src/tabs/state/pendingCloseTransition";
+import { getWindowSnapshot, isPopupMoving } from "@/src/tabs/state/popup";
 import {
   getActiveTabSnapshot,
   getRestoredTabSnapshot,
@@ -32,6 +34,13 @@ export const handleTabActivated = async (activeInfo: { tabId: number; windowId: 
   const shouldInitialize = needsInitialization();
   if (shouldInitialize) {
     await initializeAllStates();
+  }
+
+  if (
+    isPopupMoving(activeInfo.tabId) ||
+    (getSettings().popup?.openAsNewTab && getWindowSnapshot(activeInfo.windowId)?.type === "popup")
+  ) {
+    return;
   }
 
   const isNewTabActivation = consumeNewTabActivation(activeInfo.windowId, activeInfo.tabId);

@@ -11,6 +11,7 @@ import { isValidUrlPattern } from "@/src/tabs/urlRules";
 import type {
   LoadingPageUrlRule,
   NewTabUrlRule,
+  Settings,
   TabActivation,
   TabOnActivateBehavior,
   TabPosition,
@@ -24,6 +25,7 @@ export default function App() {
   const [tabOnActivate, setTabOnActivate] = useState<TabOnActivateBehavior>("default");
   const [urlRules, setUrlRules] = useState<NewTabUrlRule[]>([]);
   const [loadingRules, setLoadingRules] = useState<LoadingPageUrlRule[]>([]);
+  const [popup, setPopup] = useState<Settings["popup"]>({ openAsNewTab: false, exceptions: [] });
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
@@ -40,6 +42,10 @@ export default function App() {
       }
       setUrlRules(settings.newTab?.urlRules ?? []);
       setLoadingRules(settings.loadingPage?.urlRules ?? []);
+      setPopup({
+        openAsNewTab: settings.popup?.openAsNewTab ?? false,
+        exceptions: settings.popup?.exceptions ?? [],
+      });
       if (settings.afterTabClosing?.activateTab) {
         setAfterTabClosing(settings.afterTabClosing.activateTab);
       }
@@ -66,7 +72,11 @@ export default function App() {
   };
 
   const handleSave = () => {
-    if ([...urlRules, ...loadingRules].some(rule => !isValidUrlPattern(rule.url.trim()))) {
+    if (
+      [...urlRules, ...loadingRules, ...(popup.exceptions ?? [])].some(
+        rule => !isValidUrlPattern(rule.url.trim()),
+      )
+    ) {
       setSaveMessage("Enter a valid URL pattern for each rule.");
       return;
     }
@@ -87,6 +97,10 @@ export default function App() {
           activateTab: afterTabClosing,
         },
         tabOnActivate: { behavior: tabOnActivate },
+        popup: {
+          openAsNewTab: popup.openAsNewTab,
+          exceptions: popup.exceptions?.map(rule => ({ url: rule.url.trim() })) ?? [],
+        },
       });
 
       setSaveMessage("Settings saved successfully!");
@@ -149,6 +163,8 @@ export default function App() {
           <div className="bg-white rounded-lg shadow-lg p-10 min-h-[500px]">
             {activeTab === "behavior" && (
               <TabBehavior
+                popup={popup}
+                onPopupChange={setPopup}
                 loadingRules={loadingRules}
                 onLoadingRulesChange={setLoadingRules}
                 urlRules={urlRules}
