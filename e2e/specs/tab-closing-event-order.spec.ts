@@ -168,11 +168,12 @@ const simulateActiveTabCloseWithEventOrder = async (
 
         if (eventOrder === "activated-first") {
           await chrome.tabs.update(successorTab.id, { active: true });
+          await chrome.tabs.remove(activeTab.id);
+          // 操作APIの待ち時間をイベント間に含めず、同じcloseの通知を連続再生する。
           await handleTabActivated({
             tabId: successorTab.id,
             windowId: successorTab.windowId,
           });
-          await chrome.tabs.remove(activeTab.id);
           await handleTabRemoved(activeTab.id, {
             windowId: activeTab.windowId,
             isWindowClosing: false,
@@ -231,12 +232,12 @@ const simulateActivatedFirstCloseRaceAfterTargetActivation = async (serviceWorke
       }
 
       await chrome.tabs.update(rightTab.id, { active: true });
+      await chrome.tabs.remove(activeTab.id);
       await handleTabActivated({
         tabId: rightTab.id,
         windowId: rightTab.windowId,
       });
 
-      await chrome.tabs.remove(activeTab.id);
       await handleTabRemoved(activeTab.id, {
         windowId: activeTab.windowId,
         isWindowClosing: false,
@@ -290,12 +291,12 @@ const simulateActivatedFirstCloseWithBackgroundRemoveBeforeLateActivation = asyn
       }
 
       await chrome.tabs.update(rightTab.id, { active: true });
+      await chrome.tabs.remove(activeTab.id);
       await handleTabActivated({
         tabId: rightTab.id,
         windowId: rightTab.windowId,
       });
 
-      await chrome.tabs.remove(activeTab.id);
       await handleTabRemoved(activeTab.id, {
         windowId: activeTab.windowId,
         isWindowClosing: false,

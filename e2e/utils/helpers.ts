@@ -182,8 +182,8 @@ export const createTabsInWindow = async (serviceWorker: Worker, windowId: number
     { windowId, count },
   );
 
-export const createWindowWithTabs = async (serviceWorker: Worker, totalTabs: number) =>
-  serviceWorker.evaluate(async totalTabs => {
+export const createWindowWithTabs = async (serviceWorker: Worker, totalTabs: number) => {
+  const window = await serviceWorker.evaluate(async totalTabs => {
     const createdWindow = await chrome.windows.create({
       url: "about:blank",
       focused: false,
@@ -205,6 +205,20 @@ export const createWindowWithTabs = async (serviceWorker: Worker, totalTabs: num
       windowId: createdWindow.id,
     };
   }, totalTabs);
+
+  // 作成APIの完了は初期navigationの完了を保証しない。既存タブとして操作する前に、
+  // 遅れて確定するabout:blankが次のURL遷移を中断しない状態まで待つ。
+  await expect(async () => {
+    const tabs = await serviceWorker.evaluate(
+      windowId => chrome.tabs.query({ windowId }),
+      window.windowId,
+    );
+    expect(tabs).toHaveLength(totalTabs);
+    expect(tabs.every(tab => tab.url === "about:blank" && tab.status === "complete")).toBe(true);
+  }).toPass({ timeout: 5000 });
+
+  return window;
+};
 
 export const activateTabByIndexInWindow = async (
   serviceWorker: Worker,
