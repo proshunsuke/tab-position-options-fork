@@ -86,5 +86,8 @@
   "externalNewLink": "Link: new foreground tab",
   "externalBackgroundLink": "Link: new background tab",
   "externalCurrentLink": "Link: current tab/frame",
-  "settingsSyncHelp": "Settings and URL rules sync automatically when Chrome sync is enabled. If sync is unavailable or its storage limit is exceeded, settings stay on this device."
+  "settingsSyncHelp": "Settings and URL rules sync automatically when Chrome sync is enabled. If sync is unavailable or its storage limit is exceeded, settings stay on this device.",
+  "settingsSyncCapacity": "Settings exceed the sync storage limit and are kept on this device. Reduce the number or length of URL rules and save again to retry.",
+  "settingsSyncUnavailable": "Settings could not be synchronized. Saved settings remain on this device. Synchronization will retry on the next settings change or extension startup.",
+  "settingsSyncStatusUnavailable": "The sync status could not be read. Reopen the settings page to check again."
 }
