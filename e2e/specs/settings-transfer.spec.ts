@@ -4,6 +4,7 @@ import { setExtensionSettings } from "@/e2e/utils/helpers";
 import { DEFAULT_SETTINGS, type Settings } from "@/src/types";
 
 const settings: Settings = {
+  externalLinks: { enabled: true, urlRules: [{ url: "example", action: "background-link" }] },
   newTab: {
     position: "left",
     openInBackground: true,
@@ -73,6 +74,16 @@ test("imports into the form, exports drafts, and persists only on Save Settings"
   await expect(page.locator('input[value="sourceTabAndOrder"]')).toBeChecked();
   await page.getByRole("button", { name: "Tab on Activate", exact: true }).click();
   await expect(page.locator('input[name="tabOnActivate"][value="last"]')).toBeChecked();
+  await page.getByRole("button", { name: "External Links", exact: true }).click();
+  await expect(
+    page.getByRole("checkbox", { name: "Open external links in new tabs", exact: true }),
+  ).toBeChecked();
+  await expect(page.getByRole("textbox", { name: "URL pattern 1", exact: true })).toHaveValue(
+    "example",
+  );
+  await expect(page.getByRole("combobox", { name: "Link action 1", exact: true })).toHaveValue(
+    "background-link",
+  );
   await page.screenshot({ path: testInfo.outputPath("settings-transfer.png"), fullPage: true });
 
   const downloadEvent = page.waitForEvent("download");

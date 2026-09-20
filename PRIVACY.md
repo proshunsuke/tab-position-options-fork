@@ -10,7 +10,7 @@ Tab Position Options Fork lets you customize tab positioning and activation beha
 
 ### Settings and URL Rules
 
-Your tab positioning, background-opening, activation, and pop-up conversion preferences are saved using `chrome.storage.local`. This includes URL patterns you enter in the extension's options page. Settings remain on your device until changed, removed, or deleted by uninstalling the extension.
+Your tab positioning, background-opening, activation, pop-up conversion, and external-link preferences are saved using `chrome.storage.local`. This includes URL patterns you enter in the extension's options page. Settings remain on your device until changed, removed, or deleted by uninstalling the extension.
 
 When you export settings, the extension downloads a JSON file containing the settings currently shown, including unsaved changes and user-entered URL patterns. It does not include session tab state or browsing history. Import reads only the file you select and processes it locally; imported settings are applied when you click **Save Settings**. The extension does not upload these files.
 
@@ -18,7 +18,13 @@ When you export settings, the extension downloads a JSON file containing the set
 
 When a tab is created, the extension reads its URL, including its pending navigation URL when available, to check your URL rules. Matching rules determine the tab's position and whether it opens in the foreground or background.
 
-The extension processes these URLs in memory. It does not save them as browsing history or send them to external servers. User-entered URL patterns are saved as settings, as described above. The extension does not read the contents of web pages.
+The extension processes these URLs in memory. It does not save them as browsing history or send them to external servers. User-entered URL patterns are saved as settings, as described above.
+
+### External Links
+
+A bundled content script runs on HTTP and HTTPS pages, including frames. When **Open external links in new tabs** is enabled, it handles ordinary link clicks by reading the current page URL and the clicked link's URL and attributes, such as whether it is a download. It compares origins and your URL rules to choose whether to use the current tab/frame or create a foreground or background tab. The feature is disabled by default; its click handler returns without inspecting the link when disabled.
+
+These values are processed in memory. For new tabs, the page and destination URLs are sent only to the extension's local background process. The extension does not store a click history, extract page text or form values, or send these values to external services. Following a link makes the normal browser request to the destination site.
 
 ### Page Navigation URLs
 
@@ -59,10 +65,11 @@ This state is used only for tab positioning and activation, including choosing a
 - **storage**: Saves your preferences and URL rules locally, and retains session tab and pending navigation state across background-process restarts.
 - **tabs**: Reads new-tab and pop-up URLs to apply your URL rules and pop-up exceptions. It also reads tab titles and URLs when you request sorting. This permission is used for local matching and sorting, not for uploading or maintaining a history of visited pages.
 - **webNavigation**: Detects top-level navigation commits and server redirects to apply Loading Page URL rules, and provides navigation URLs for pop-up exception checks.
+- **HTTP/HTTPS site access**: Requested at installation through the content script's URL matches so external-link handling can run on websites and their HTTP/HTTPS frames. It is used to inspect clicked links locally when the feature is enabled; it does not require the `scripting` permission.
 
 ## Your Controls
 
-You can view and change preferences, and edit or remove URL rules, in the extension's options page. Click **Save Settings** to apply changes. Removing all URL rules stops URL-based matching; other tab settings continue to apply.
+You can view and change preferences, and edit or remove URL rules, in the extension's options page. Click **Save Settings** to apply changes. Disable **Open external links in new tabs** to stop external-link handling; changes apply to already open pages that have the content script. Removing its rules alone leaves origin-based external-link handling enabled. Chrome's extension site-access controls can also restrict where the content script runs. Other tab settings continue to apply independently.
 
 Restarting the browser clears session tab state. Uninstalling the extension removes its stored settings and extension data from that browser profile.
 

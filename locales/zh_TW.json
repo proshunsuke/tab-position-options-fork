@@ -72,5 +72,18 @@
   "shortcutUnassigned": "未指派",
   "shortcutsUnavailable": "無法讀取快捷鍵",
   "configureShortcuts": "設定快捷鍵",
-  "shortcutSortingHelp": "排序時保留釘選分頁與群組邊界。僅在各群組內，以及連續的未分組分頁範圍內排序。"
+  "shortcutSortingHelp": "排序時保留釘選分頁與群組邊界。僅在各群組內，以及連續的未分組分頁範圍內排序。",
+  "externalLinks": "外部連結",
+  "externalDescription": "通訊協定、主機名稱或連接埠不同的連結屬於外部連結。適用於一般滑鼠左鍵點擊的 HTTP(S) 連結，包括框架內的連結。",
+  "externalEnabled": "在新分頁開啟外部連結",
+  "externalRulesHelp": "支援正規表示式。優先順序：頁面排除、連結 URL 規則、頁面 URL 規則，最後為一般外部連結。每類採用首個符合的規則。",
+  "externalPlacementHelp": "明確的前景或背景規則優先於新分頁的啟用設定。新分頁位置、分頁啟用及頁面載入的位置規則仍然適用。",
+  "externalActionLabel": "連結動作 $1",
+  "externalExcludePage": "頁面：排除",
+  "externalNewPage": "頁面：新前景分頁",
+  "externalBackgroundPage": "頁面：新背景分頁",
+  "externalCurrentPage": "頁面：目前分頁或框架",
+  "externalNewLink": "連結：新前景分頁",
+  "externalBackgroundLink": "連結：新背景分頁",
+  "externalCurrentLink": "連結：目前分頁或框架"
 }

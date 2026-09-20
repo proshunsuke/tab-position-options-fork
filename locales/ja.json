@@ -72,5 +72,18 @@
   "shortcutUnassigned": "未割り当て",
   "shortcutsUnavailable": "ショートカットを取得できません",
   "configureShortcuts": "ショートカットを設定",
-  "shortcutSortingHelp": "ピン留めタブとグループの境界は維持します。各グループ内、およびグループに属さない連続したタブの範囲内で並べ替えます。"
+  "shortcutSortingHelp": "ピン留めタブとグループの境界は維持します。各グループ内、およびグループに属さない連続したタブの範囲内で並べ替えます。",
+  "externalLinks": "外部リンク",
+  "externalDescription": "プロトコル・ホスト名・ポートのいずれかが異なるリンクを外部リンクと判定します。フレーム内を含むHTTP(S)リンクの通常の左クリックに適用します。",
+  "externalEnabled": "外部リンクを新規タブで開く",
+  "externalRulesHelp": "正規表現を使用できます。ページ除外、リンク先URL、ページURL、通常の外部リンク判定の順に優先し、各分類で最初に一致したルールを適用します。",
+  "externalPlacementHelp": "明示的な前面・背景ルールは新規タブの前面・背景設定より優先されます。新規タブの配置、タブのアクティブ化、ページ読み込みの配置ルールも適用します。",
+  "externalActionLabel": "リンクの動作 $1",
+  "externalExcludePage": "ページ：除外",
+  "externalNewPage": "ページ：新規タブを前面で開く",
+  "externalBackgroundPage": "ページ：新規タブを背景で開く",
+  "externalCurrentPage": "ページ：現在のタブ・フレームで開く",
+  "externalNewLink": "リンク先：新規タブを前面で開く",
+  "externalBackgroundLink": "リンク先：新規タブを背景で開く",
+  "externalCurrentLink": "リンク先：現在のタブ・フレームで開く"
 }

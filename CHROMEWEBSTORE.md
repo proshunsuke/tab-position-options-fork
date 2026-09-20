@@ -42,6 +42,8 @@ The options page follows your browser’s UI language and supports English, Japa
 
 Use keyboard shortcuts to sort tabs or switch to the last active tab.
 
+Optionally open external links in new tabs, with page exclusions and rules for foreground, background, or current-tab navigation.
+
 Export and import settings files to back up your configuration or transfer it between installations of this fork.
 
 HOW TO USE
@@ -50,7 +52,7 @@ HOW TO USE
 3. Click Save Settings.
 
 PRIVACY
-Settings are stored locally on your device. New-tab and navigation URLs are processed locally to apply your URL rules; they are not sent to external servers. The extension does not use analytics or tracking services.
+Settings are stored locally on your device. New-tab and navigation URLs are processed locally to apply your URL rules. When external-link handling is enabled, a content script reads the clicked link and current page URL. These values are not sent to external services; following a link makes the normal browser request to its destination. The extension does not use analytics or tracking services.
 
 SUPPORT AND SOURCE CODE
 https://github.com/proshunsuke/tab-position-options-fork
@@ -79,12 +81,12 @@ The extension does not include any unrelated functionality such as ads, analytic
 ### Draft for next release
 
 ```text
-Customize Chrome tab positioning and activation behavior, including where new tabs open, which tab is selected after closing a tab, where activated tabs move, URL-specific rules for new tabs and page navigation, converting pop-up windows to tabs with URL exceptions, and sorting or switching tabs with keyboard shortcuts.
+Customize Chrome tab positioning and activation behavior, including where new tabs open, which tab is selected after closing a tab, where activated tabs move, URL-specific rules for new tabs and page navigation, converting pop-up windows to tabs with URL exceptions, opening external links according to page and link rules, and sorting or switching tabs with keyboard shortcuts.
 ```
 
 ## Permissions justification
 
-Source of truth: [wxt.config.ts](wxt.config.ts). Current source requests `storage`, `tabs`, and `webNavigation`; host permissions are empty. There are no optional permissions or content scripts.
+Sources of truth: [wxt.config.ts](wxt.config.ts) and [content script](entrypoints/externalLinks.content.ts). Current source requests `storage`, `tabs`, and `webNavigation`. WXT also generates a static content-script declaration matching `http://*/*` and `https://*/*`, including frames, at `document_start`. This requests site access at installation. `host_permissions` remains empty because static content-script matches provide the required access; there are no optional permissions or `scripting` permission.
 
 ### storage — Current dashboard text
 
@@ -106,7 +108,7 @@ Evidence: [settings](src/settings/state/appData.ts), [activation history](src/ta
 ### tabs — Draft for next release; absent from current dashboard package
 
 ```text
-The tabs permission is required to read the URL of newly created tabs (Tab.pendingUrl or Tab.url) and match it against user-defined URL rules. These rules determine the new tab's position and whether it opens in the foreground or background. Matching applies automatically to newly created tabs without requiring the user to click the extension for each tab. URLs are processed locally and are not transmitted externally or saved as browsing history. The same URL access is used to check pop-up exception patterns before moving an existing tab into a normal window. On an explicit sorting command, it also reads tab titles and URLs to order the current window’s tabs. Sorting data is used only in memory. The extension does not read page contents.
+The tabs permission is required to read the URL of newly created tabs (Tab.pendingUrl or Tab.url) and match it against user-defined URL rules. These rules determine the new tab's position and whether it opens in the foreground or background. Matching applies automatically to newly created tabs without requiring the user to click the extension for each tab. URLs are processed locally and are not transmitted externally or saved as browsing history. The same URL access is used to check pop-up exception patterns before moving an existing tab into a normal window. On an explicit sorting command, it also reads tab titles and URLs to order the current window’s tabs. Sorting data is used only in memory. These tab API operations do not read page contents; the separate external-link content script is described below.
 ```
 
 Evidence: [new-tab handler](src/tabs/handleNewTab.ts), [pop-up handler](src/tabs/popup.ts), [URL matching](src/tabs/urlRules.ts), [shortcut handlers](src/commands/handler.ts). Unlike position-only tab operations, these properties require URL access. See the [Tabs API permission documentation](https://developer.chrome.com/docs/extensions/reference/api/tabs).
@@ -114,10 +116,18 @@ Evidence: [new-tab handler](src/tabs/handleNewTab.ts), [pop-up handler](src/tabs
 ### webNavigation — Draft for next release; absent from current dashboard package
 
 ```text
-The webNavigation permission is required to apply user-defined Loading Page positioning rules when a top-level navigation commits. The extension checks the destination URL first and, for server redirects without a destination match, the original navigation URL. Pending navigation state is retained temporarily in local session storage to survive background-process restarts, then removed when the navigation commits, fails, or its tab closes. Navigation target and before-navigation events also provide pop-up URLs early enough to check exceptions without waiting for page loading. No page content is read and no URLs are transmitted externally. Tab update events alone do not provide the navigation commit and server-redirect information this behavior needs.
+The webNavigation permission is required to apply user-defined Loading Page positioning rules when a top-level navigation commits. The extension checks the destination URL first and, for server redirects without a destination match, the original navigation URL. Pending navigation state is retained temporarily in local session storage to survive background-process restarts, then removed when the navigation commits, fails, or its tab closes. Navigation target and before-navigation events also provide pop-up URLs early enough to check exceptions without waiting for page loading. These navigation API operations do not read page content, and no URLs are transmitted to external services. Tab update events alone do not provide the navigation commit and server-redirect information this behavior needs.
 ```
 
 Evidence: [navigation handlers](src/tabs/loadingPage.ts), [temporary navigation state](src/tabs/state/loadingPage.ts), [Web Navigation API](https://developer.chrome.com/docs/extensions/reference/api/webNavigation).
+
+### HTTP/HTTPS site access — Draft for next release
+
+```text
+The extension declares a bundled content script for all HTTP and HTTPS pages and their HTTP/HTTPS frames. When the user enables external-link handling, the script intercepts ordinary link clicks and reads the current page URL and clicked link URL/attributes to apply page exclusions, link rules, and exact-origin comparisons. It opens the destination in the current tab/frame or a new foreground/background tab. Site access is needed so this works on the websites chosen by the user without requiring the extension toolbar to be clicked for every link. The feature is off by default; when disabled, the click handler does not inspect links. Page and link URLs are processed locally and only passed to the extension background process when a new tab is requested. The extension does not extract page text, read form values, or retain a click history. No data is sent to external services. Normal link navigation contacts the destination website.
+```
+
+Evidence: [content script](entrypoints/externalLinks.content.ts), [rule matching](src/externalLinks/rules.ts), [tab creation](src/externalLinks/handler.ts). Browser-restricted pages and sites where the user withholds extension access are not covered. Pages open before installation or extension reload need reloading to receive the script. Enabling/disabling the setting itself updates pages that already have the script.
 
 ### Remote code
 
@@ -147,6 +157,7 @@ These are recorded dashboard values, not a new submission or certification.
 | Restored tab IDs | Retained in session storage until initial navigation ends or the tab closes | No / No |
 | Pop-up URL and window type/incognito status | Checked in memory to apply exceptions and choose a compatible destination; pop-up URLs are not persisted by the conversion feature | No / No |
 | Last focused normal window ID and pending pop-up window IDs | Stored in `chrome.storage.session` for conversion and worker restart recovery; cleared on browser restart | No / No |
+| Clicked link URL/attributes and current page/frame URL | Read in memory only while external-link handling is enabled; page and destination URLs sent to the local extension background process for new-tab creation; no stored click history | No analytics or external reporting / No |
 | Newly created tab URL | Read to evaluate matching rules; not saved as visited-URL history | No / No |
 | Tab titles, URLs, and group membership for sorting | Read in memory only when a sorting command is invoked; not persisted | No / No |
 | Tab IDs and activation order | Stored in `chrome.storage.session` for tab closing behavior and switching to the last active tab | No / No |
@@ -157,7 +168,7 @@ The debug utility can store local diagnostic logs when explicitly instrumented; 
 ### Privacy policy
 
 - Registered URL: https://github.com/proshunsuke/tab-position-options-fork/blob/main/PRIVACY.md
-- Local file: [PRIVACY.md](PRIVACY.md), updated September 20, 2026, to describe user-entered URL rules, transient URL matching, temporary navigation URLs, pop-up URL checks, and session-only tab/window metadata and activation order.
+- Local file: [PRIVACY.md](PRIVACY.md), updated September 20, 2026, to describe user-entered URL rules, transient URL matching, temporary navigation URLs, pop-up URL checks, external-link processing and site access, and session-only tab/window metadata and activation order.
 - The public policy URL must serve this updated text before submission. A local edit alone does not update the published policy.
 - Reconcile the dashboard data-use answers with that updated policy and the then-current Chrome Web Store definitions. The recorded unchecked boxes above must not be treated as a substitute for reviewing the latest URL-handling behavior.
 
@@ -194,7 +205,7 @@ Upload screenshots 1–4 in the order above. All four are direct captures of 128
 
 | Version | Date | Changes | Status |
 | --- | --- | --- | --- |
-| Next version not assigned | Not submitted | Tab on Activate; new-tab and Loading Page URL rules; pop-up conversion; settings import/export; keyboard shortcuts; `tabs` and `webNavigation` permissions | Source only; release preparation pending |
+| Next version not assigned | Not submitted | Tab on Activate; new-tab and Loading Page URL rules; pop-up conversion; settings import/export; keyboard shortcuts; external-link rules and HTTP/HTTPS site access; `tabs` and `webNavigation` permissions | Source only; release preparation pending |
 | 0.2.2 | Publication date not checked | Tab closing fixes for Chrome 147 and varying event order | Published; also present as dashboard draft |
 
 Older changes are in [CHANGELOG.md](CHANGELOG.md) and the current listing below. Submission/publication dates were not inferred from commit dates.
@@ -207,7 +218,7 @@ The developer reports that an earlier submission requesting `tabs` was rejected 
 
 - Assign the next version through the existing release workflow.
 - Publish the updated privacy policy at its registered URL and reconcile data-use disclosures with the repository text.
-- Upload the new package before entering the new `tabs` and `webNavigation` justifications; the inspected draft still requests only `storage`.
+- Upload the new package before entering the new `tabs`, `webNavigation`, and HTTP/HTTPS site-access justifications; the inspected draft still requests only `storage`.
 - Finalize and verify the listing, single-purpose statement, permission explanations, disclosures, and screenshots in the repository first, then apply them to the dashboard and verify the saved result.
 - Record actual submission and publication dates/status when they occur.
 

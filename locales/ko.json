@@ -72,5 +72,18 @@
   "shortcutUnassigned": "할당되지 않음",
   "shortcutsUnavailable": "단축키를 읽을 수 없습니다",
   "configureShortcuts": "단축키 설정",
-  "shortcutSortingHelp": "고정 탭과 그룹 경계는 유지됩니다. 각 그룹 내부와 그룹에 속하지 않은 연속된 탭 범위 안에서 정렬합니다."
+  "shortcutSortingHelp": "고정 탭과 그룹 경계는 유지됩니다. 각 그룹 내부와 그룹에 속하지 않은 연속된 탭 범위 안에서 정렬합니다.",
+  "externalLinks": "외부 링크",
+  "externalDescription": "프로토콜, 호스트 또는 포트가 다른 링크를 외부 링크로 판단합니다. 프레임 내부를 포함한 HTTP(S) 링크의 일반 왼쪽 클릭에 적용됩니다.",
+  "externalEnabled": "외부 링크를 새 탭에서 열기",
+  "externalRulesHelp": "정규 표현식을 지원합니다. 페이지 제외, 링크 URL 규칙, 페이지 URL 규칙, 일반 외부 링크 순으로 우선 적용하며 각 분류의 첫 번째 일치 규칙을 사용합니다.",
+  "externalPlacementHelp": "명시적인 전경·배경 규칙이 새 탭 활성화 설정보다 우선합니다. 새 탭 위치, 탭 활성화 및 페이지 로딩 위치 규칙도 적용됩니다.",
+  "externalActionLabel": "링크 동작 $1",
+  "externalExcludePage": "페이지: 제외",
+  "externalNewPage": "페이지: 새 전경 탭",
+  "externalBackgroundPage": "페이지: 새 배경 탭",
+  "externalCurrentPage": "페이지: 현재 탭/프레임",
+  "externalNewLink": "링크: 새 전경 탭",
+  "externalBackgroundLink": "링크: 새 배경 탭",
+  "externalCurrentLink": "링크: 현재 탭/프레임"
 }

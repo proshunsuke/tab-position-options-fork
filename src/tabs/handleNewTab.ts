@@ -1,3 +1,4 @@
+import { consumeExternalLinkTab } from "@/src/externalLinks/state";
 import { getSettings } from "@/src/settings/state/appData";
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
 import { handlePopupTabCreated } from "@/src/tabs/popup";
@@ -22,6 +23,7 @@ import { findUrlRule } from "@/src/tabs/urlRules";
 import type { TabPosition } from "@/src/types";
 
 export const handleNewTab = async (tab: chrome.tabs.Tab) => {
+  const externalLink = consumeExternalLinkTab(tab);
   const shouldInitialize = needsInitialization();
   // 初期化がliveのactive tabを履歴に取り込む前に、後続activationの処理済み印を付ける。
   if (
@@ -40,6 +42,13 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
   const windowId = tab.windowId;
 
   if (!tabId) {
+    return;
+  }
+
+  if (externalLink) {
+    // 配置とactiveはcreate時に適用済み。通常設定で明示ルールを上書きしない。
+    addTabToSnapshot(tab);
+    void refreshWindowTabSnapshot(windowId);
     return;
   }
 

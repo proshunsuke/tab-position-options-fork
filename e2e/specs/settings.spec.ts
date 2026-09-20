@@ -37,6 +37,7 @@ test.describe("Settings Storage", () => {
 
     // デフォルト設定とマージされた状態を期待
     expect(savedSettings).toEqual({
+      externalLinks: { enabled: false, urlRules: [] },
       newTab: { position: "first", openInBackground: true, urlRules: [] },
       afterTabClosing: { activateTab: "inActivatedOrder" },
       loadingPage: { urlRules: [] },
