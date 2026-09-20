@@ -83,10 +83,10 @@ npm run test:unit
 
 ```fish
 npx playwright install chromium
-npm run test:e2e
+npm run test:e2e:sharded
 ```
 
-`test:e2e`は拡張機能をビルドしてからテストを実行します。ディスプレイのないLinux環境では、[CIワークフロー](.github/workflows/test.yml)のXvfb設定を使用してください。環境構築とテスト固有の手順は[E2Eガイド](.agents/skills/tab-position-e2e/SKILL.md)を参照してください。
+`test:e2e:sharded`は1回のビルド後にヘッドレスChromiumで3分割を並列実行し、レポートを統合します。順次実行する場合は`test:e2e`を使用してください。ディスプレイのないLinux環境で`test:e2e`を使う場合は、[CIワークフロー](.github/workflows/test.yml)のXvfb設定を使用してください。環境構築とテスト固有の手順は[E2Eガイド](.agents/skills/tab-position-e2e/SKILL.md)を参照してください。
 
 ## リリース
 

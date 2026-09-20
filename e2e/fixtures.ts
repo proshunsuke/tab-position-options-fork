@@ -10,21 +10,17 @@ export type TestFixtures = {
 };
 
 export const test = base.extend<TestFixtures>({
-  // biome-ignore lint/correctness/noEmptyPattern: Playwright fixture pattern requires empty object
-  context: async ({}, use) => {
+  context: async ({ channel, headless }, use, testInfo) => {
     // 拡張機能のパス（WXTのビルド出力）
     const pathToExtension = path.join(process.cwd(), "dist", "chrome-mv3");
 
-    // テストごとに分離したプロフィールを使用して、状態リークを防ぐ
-    const userDataRootDir = path.join(process.cwd(), "test-results");
-    if (!fs.existsSync(userDataRootDir)) {
-      fs.mkdirSync(userDataRootDir, { recursive: true });
-    }
-
-    const userDataDir = fs.mkdtempSync(path.join(userDataRootDir, "chrome-user-data-"));
+    // 各テスト・分割の出力先に置き、別プロセスの後片付けから分離する。
+    const userDataDir = fs.mkdtempSync(testInfo.outputPath("chrome-user-data-"));
 
     // 永続的なコンテキストでブラウザを起動
     const context = await chromium.launchPersistentContext(userDataDir, {
+      channel,
+      headless,
       args: [
         `--disable-extensions-except=${pathToExtension}`,
         `--load-extension=${pathToExtension}`,
