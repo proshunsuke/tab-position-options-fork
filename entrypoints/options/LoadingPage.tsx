@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { i18n } from "#i18n";
 import { TabSection } from "@/entrypoints/options/ui/TabSection";
 import type { LoadingPageUrlRule } from "@/src/types";
 
@@ -8,10 +9,7 @@ type Props = {
 };
 
 export const LoadingPage: FC<Props> = ({ rules, onRulesChange }) => (
-  <TabSection
-    title="Loading Page"
-    description="Move tabs when navigating to a matching URL. The first matching rule wins. Patterns support regular expressions."
-  >
+  <TabSection title={i18n.t("loadingPage")} description={i18n.t("loadingPageDescription")}>
     <div className="space-y-3">
       {rules.map((rule, index) => (
         <div
@@ -20,8 +18,8 @@ export const LoadingPage: FC<Props> = ({ rules, onRulesChange }) => (
           className="flex flex-wrap items-center gap-3 rounded-md bg-gray-50 p-3"
         >
           <input
-            aria-label={`Loading URL pattern ${index + 1}`}
-            placeholder="URL pattern"
+            aria-label={i18n.t("loadingUrlPatternLabel", [String(index + 1)])}
+            placeholder={i18n.t("urlPattern")}
             value={rule.url}
             onChange={event =>
               onRulesChange(
@@ -31,7 +29,7 @@ export const LoadingPage: FC<Props> = ({ rules, onRulesChange }) => (
             className="min-w-48 flex-1 rounded-md border border-gray-300 bg-white px-3 py-2"
           />
           <select
-            aria-label={`Loading position ${index + 1}`}
+            aria-label={i18n.t("loadingPositionLabel", [String(index + 1)])}
             value={rule.position}
             onChange={event =>
               onRulesChange(
@@ -44,17 +42,17 @@ export const LoadingPage: FC<Props> = ({ rules, onRulesChange }) => (
             }
             className="rounded-md border border-gray-300 bg-white px-3 py-2"
           >
-            <option value="last">Always last</option>
-            <option value="middle">Always middle</option>
-            <option value="first">Always first</option>
+            <option value="last">{i18n.t("positionLast")}</option>
+            <option value="middle">{i18n.t("positionMiddle")}</option>
+            <option value="first">{i18n.t("positionFirst")}</option>
           </select>
           <button
             type="button"
-            aria-label={`Remove loading rule ${index + 1}`}
+            aria-label={i18n.t("removeLoadingRuleLabel", [String(index + 1)])}
             onClick={() => onRulesChange(rules.filter((_, i) => i !== index))}
             className="text-red-600 hover:text-red-800"
           >
-            Remove
+            {i18n.t("remove")}
           </button>
         </div>
       ))}
@@ -63,13 +61,9 @@ export const LoadingPage: FC<Props> = ({ rules, onRulesChange }) => (
         onClick={() => onRulesChange([...rules, { url: "", position: "last" }])}
         className="rounded-md bg-chrome-blue px-4 py-2 text-white hover:bg-chrome-blue/90"
       >
-        Add loading rule
+        {i18n.t("addLoadingRule")}
       </button>
-      <p className="text-sm text-gray-600">
-        The destination URL takes priority; server redirects can also match the original URL.
-        Loading rules override initial tab placement. Switching tabs later applies Tab on Activate.
-        Pinned tabs and restored pages keep their positions.
-      </p>
+      <p className="text-sm text-gray-600">{i18n.t("loadingPageHelp")}</p>
     </div>
   </TabSection>
 );

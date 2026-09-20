@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { i18n } from "#i18n";
 import { Checkbox } from "@/entrypoints/options/ui/Checkbox";
 import { TabSection } from "@/entrypoints/options/ui/TabSection";
 import type { Settings } from "@/src/types";
@@ -11,19 +12,16 @@ type Props = {
 export const Popup: FC<Props> = ({ settings, onChange }) => {
   const exceptions = settings.exceptions ?? [];
   return (
-    <TabSection
-      title="Pop-up"
-      description="Open pop-up windows as tabs in the last focused normal window."
-    >
+    <TabSection title={i18n.t("popup")} description={i18n.t("popupDescription")}>
       <Checkbox
         name="popupAsNewTab"
-        label="Open pop-up window as new tab"
+        label={i18n.t("popupAsNewTab")}
         checked={settings.openAsNewTab}
         onChange={openAsNewTab => onChange({ ...settings, openAsNewTab })}
       />
       <div className="mt-4 space-y-3">
         <p id="popup-exceptions-help" className="text-sm text-gray-600">
-          Matching URLs keep their pop-up window. Patterns support regular expressions.
+          {i18n.t("popupExceptionsHelp")}
         </p>
         {exceptions.map((rule, index) => (
           <div
@@ -32,9 +30,9 @@ export const Popup: FC<Props> = ({ settings, onChange }) => {
             className="flex flex-wrap items-center gap-3 rounded-md bg-gray-50 p-3"
           >
             <input
-              aria-label={`Pop-up exception ${index + 1}`}
+              aria-label={i18n.t("popupExceptionLabel", [String(index + 1)])}
               aria-describedby="popup-exceptions-help"
-              placeholder="URL pattern"
+              placeholder={i18n.t("urlPattern")}
               value={rule.url}
               onChange={event =>
                 onChange({
@@ -48,13 +46,13 @@ export const Popup: FC<Props> = ({ settings, onChange }) => {
             />
             <button
               type="button"
-              aria-label={`Remove pop-up exception ${index + 1}`}
+              aria-label={i18n.t("removePopupExceptionLabel", [String(index + 1)])}
               onClick={() =>
                 onChange({ ...settings, exceptions: exceptions.filter((_, i) => i !== index) })
               }
               className="text-red-600 hover:text-red-800"
             >
-              Remove
+              {i18n.t("remove")}
             </button>
           </div>
         ))}
@@ -63,12 +61,9 @@ export const Popup: FC<Props> = ({ settings, onChange }) => {
           onClick={() => onChange({ ...settings, exceptions: [...exceptions, { url: "" }] })}
           className="rounded-md bg-chrome-blue px-4 py-2 text-white hover:bg-blue-600"
         >
-          Add pop-up exception
+          {i18n.t("addPopupException")}
         </button>
-        <p className="text-sm text-gray-600">
-          Converted tabs start at the end. Loading Page rules apply on navigation, and later tab
-          switching follows Tab on Activate. Restored pop-up windows stay unchanged.
-        </p>
+        <p className="text-sm text-gray-600">{i18n.t("popupHelp")}</p>
       </div>
     </TabSection>
   );

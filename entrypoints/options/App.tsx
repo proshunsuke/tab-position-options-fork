@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { i18n } from "#i18n";
 import { TabBehavior } from "@/entrypoints/options/TabBehavior";
 import { TabClosing } from "@/entrypoints/options/TabClosing";
 import { TabOnActivate } from "@/entrypoints/options/TabOnActivate";
@@ -27,7 +28,10 @@ export default function App() {
   const [loadingRules, setLoadingRules] = useState<LoadingPageUrlRule[]>([]);
   const [popup, setPopup] = useState<Settings["popup"]>({ openAsNewTab: false, exceptions: [] });
   const [isSaving, setIsSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState("");
+  const [saveStatus, setSaveStatus] = useState<"saved" | "invalidPattern" | "saveFailed" | null>(
+    null,
+  );
+  const saveMessage = saveStatus ? i18n.t(saveStatus) : "";
 
   // 起動時に保存済みの設定を読み込む
   useEffect(() => {
@@ -77,11 +81,11 @@ export default function App() {
         rule => !isValidUrlPattern(rule.url.trim()),
       )
     ) {
-      setSaveMessage("Enter a valid URL pattern for each rule.");
+      setSaveStatus("invalidPattern");
       return;
     }
     setIsSaving(true);
-    setSaveMessage("");
+    setSaveStatus(null);
 
     try {
       const currentSettings = getSettings();
@@ -103,13 +107,13 @@ export default function App() {
         },
       });
 
-      setSaveMessage("Settings saved successfully!");
+      setSaveStatus("saved");
 
       // 3秒後にメッセージを消す
-      setTimeout(() => setSaveMessage(""), 3000);
+      setTimeout(() => setSaveStatus(null), 3000);
     } catch (error) {
       console.error("Failed to save settings:", error);
-      setSaveMessage("Failed to save settings. Please try again.");
+      setSaveStatus("saveFailed");
     } finally {
       setIsSaving(false);
     }
@@ -131,7 +135,7 @@ export default function App() {
                 : "border-transparent text-gray-600 hover:text-gray-800"
             }`}
           >
-            Tab Behavior
+            {i18n.t("tabBehavior")}
           </button>
           <button
             type="button"
@@ -142,7 +146,7 @@ export default function App() {
                 : "border-transparent text-gray-600 hover:text-gray-800"
             }`}
           >
-            Tab Closing
+            {i18n.t("tabClosing")}
           </button>
           <button
             type="button"
@@ -153,7 +157,7 @@ export default function App() {
                 : "border-transparent text-gray-600 hover:text-gray-800"
             }`}
           >
-            Tab on Activate
+            {i18n.t("tabOnActivate")}
           </button>
         </div>
 
@@ -198,12 +202,12 @@ export default function App() {
               className={`text-sm ${
                 !saveMessage
                   ? "invisible"
-                  : saveMessage.includes("success")
+                  : saveStatus === "saved"
                     ? "text-green-600"
                     : "text-red-600"
               }`}
             >
-              {saveMessage || "Placeholder"}
+              {saveMessage || "\u00a0"}
             </p>
             <button
               type="button"
@@ -211,7 +215,7 @@ export default function App() {
               disabled={isSaving}
               className="bg-chrome-blue text-white px-8 py-3 rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-md"
             >
-              {isSaving ? "Saving..." : "Save Settings"}
+              {isSaving ? i18n.t("saving") : i18n.t("saveSettings")}
             </button>
           </div>
         </div>
