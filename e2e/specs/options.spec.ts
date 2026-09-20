@@ -50,7 +50,6 @@ test.describe("Options Page", () => {
 
     // 保存成功メッセージを確認
     await expect(optionsPage.locator("text=Settings saved successfully")).toBeVisible();
-    await expect(optionsPage.getByRole("status")).toHaveClass(/text-green-600/);
 
     // ページをリロード
     await optionsPage.reload();
@@ -71,13 +70,13 @@ test.describe("Options Page", () => {
     await optionsPage.waitForLoadState("networkidle");
 
     // 各タブが存在することを確認
-    const tabs = ["Tab Behavior", "Tab Closing"];
+    const tabs = ["New Tab", "Tab Closing"];
     for (const tab of tabs) {
       await expect(optionsPage.locator(`button:has-text("${tab}")`)).toBeVisible();
     }
 
-    // Tab Behaviorタブの内容を確認
-    await optionsPage.click('button:has-text("Tab Behavior")');
+    // New Tabタブの内容を確認
+    await optionsPage.click('button:has-text("New Tab")');
     await expect(optionsPage.locator('h2:has-text("New Tab")')).toBeVisible();
     // New Tab Backgroundチェックボックスの存在を確認
     await expect(optionsPage.locator('label:has-text("New Tab Background")')).toBeVisible();

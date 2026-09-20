@@ -191,6 +191,7 @@ test("Loading Page rules can be validated, saved, reloaded and removed", async (
   await clearExtensionStorage(serviceWorker);
   const page = await context.newPage();
   await page.goto(`chrome-extension://${extensionId}/options.html`);
+  await page.getByRole("button", { name: "Loading Page", exact: true }).click();
   await page.getByRole("button", { name: "Add loading rule", exact: true }).click();
   await page.getByLabel("Loading URL pattern 1", { exact: true }).fill("[");
   await page.getByRole("button", { name: "Save Settings", exact: true }).click();
@@ -205,6 +206,7 @@ test("Loading Page rules can be validated, saved, reloaded and removed", async (
     expect(settings.loadingPage.urlRules).toEqual([{ url: "loading.test", position: "middle" }]);
   }).toPass();
   await page.reload();
+  await page.getByRole("button", { name: "Loading Page", exact: true }).click();
   await expect(page.getByLabel("Loading position 1", { exact: true })).toHaveValue("middle");
   await expect(page.getByLabel("Loading URL pattern 1", { exact: true })).toHaveValue(
     "loading.test",
