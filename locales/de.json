@@ -1,7 +1,6 @@
 {
   "language": "de",
   "optionsTitle": "Tab Position Options - Einstellungen",
-  "tabBehavior": "Tab-Verhalten",
   "tabClosing": "Beim Schließen eines Tabs",
   "tabOnActivate": "Beim Aktivieren eines Tabs",
   "newTab": "Neuer Tab",
@@ -89,5 +88,10 @@
   "settingsSyncHelp": "Einstellungen und URL-Regeln werden bei aktivierter Chrome-Synchronisierung automatisch synchronisiert. Ist die Synchronisierung nicht verfügbar oder das Speicherlimit überschritten, bleiben die Einstellungen auf diesem Gerät erhalten.",
   "settingsSyncCapacity": "Die Einstellungen überschreiten das Speicherlimit für die Synchronisierung und bleiben auf diesem Gerät. Reduzieren Sie die Anzahl oder Länge der URL-Regeln und speichern Sie erneut.",
   "settingsSyncUnavailable": "Die Einstellungen konnten nicht synchronisiert werden. Gespeicherte Einstellungen bleiben auf diesem Gerät. Beim nächsten Ändern der Einstellungen oder Start der Erweiterung wird es erneut versucht.",
-  "settingsSyncStatusUnavailable": "Der Synchronisierungsstatus konnte nicht gelesen werden. Öffnen Sie die Einstellungsseite erneut."
+  "settingsSyncStatusUnavailable": "Der Synchronisierungsstatus konnte nicht gelesen werden. Öffnen Sie die Einstellungsseite erneut.",
+  "settingsManagement": "Einstellungen verwalten",
+  "settingsCategories": "Einstellungskategorien",
+  "unsavedChanges": "Es gibt ungespeicherte Änderungen.",
+  "details": "Details",
+  "shortcutsSaveHelp": "Änderungen an Tastenkombinationen werden in Chrome übernommen. Sie müssen hier nicht gespeichert werden."
 }

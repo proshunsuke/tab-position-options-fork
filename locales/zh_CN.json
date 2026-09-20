@@ -1,7 +1,6 @@
 {
   "language": "zh-CN",
   "optionsTitle": "Tab Position Options - 设置",
-  "tabBehavior": "标签页行为",
   "tabClosing": "关闭标签页",
   "tabOnActivate": "激活标签页",
   "newTab": "新标签页",
@@ -89,5 +88,10 @@
   "settingsSyncHelp": "启用 Chrome 同步后，设置和 URL 规则会自动同步。无法同步或超出同步存储容量时，设置仍保留在此设备上。",
   "settingsSyncCapacity": "设置超出了同步存储容量，现保留在此设备上。请减少 URL 规则的数量或长度，然后重新保存以重试。",
   "settingsSyncUnavailable": "无法同步设置。已保存的设置仍保留在此设备上。下次更改设置或启动扩展时将重试。",
-  "settingsSyncStatusUnavailable": "无法读取同步状态。请重新打开设置页面查看。"
+  "settingsSyncStatusUnavailable": "无法读取同步状态。请重新打开设置页面查看。",
+  "settingsManagement": "设置管理",
+  "settingsCategories": "设置类别",
+  "unsavedChanges": "有未保存的更改。",
+  "details": "详细说明",
+  "shortcutsSaveHelp": "快捷键更改在 Chrome 中生效，无需在此页面保存。"
 }

@@ -1,7 +1,6 @@
 {
   "language": "zh-TW",
   "optionsTitle": "Tab Position Options - 設定",
-  "tabBehavior": "分頁行為",
   "tabClosing": "關閉分頁時",
   "tabOnActivate": "啟用分頁時",
   "newTab": "新分頁",
@@ -89,5 +88,10 @@
   "settingsSyncHelp": "啟用 Chrome 同步後，設定和 URL 規則會自動同步。無法同步或超出同步儲存容量時，設定仍保留在此裝置上。",
   "settingsSyncCapacity": "設定超出了同步儲存容量，目前保留在此裝置上。請減少 URL 規則的數量或長度，然後重新儲存以重試。",
   "settingsSyncUnavailable": "無法同步設定。已儲存的設定仍保留在此裝置上。下次變更設定或啟動擴充功能時將重試。",
-  "settingsSyncStatusUnavailable": "無法讀取同步狀態。請重新開啟設定頁面查看。"
+  "settingsSyncStatusUnavailable": "無法讀取同步狀態。請重新開啟設定頁面查看。",
+  "settingsManagement": "設定管理",
+  "settingsCategories": "設定類別",
+  "unsavedChanges": "有尚未儲存的變更。",
+  "details": "詳細說明",
+  "shortcutsSaveHelp": "快捷鍵變更會在 Chrome 中套用，無需在此頁面儲存。"
 }

@@ -1,7 +1,6 @@
 {
   "language": "es",
   "optionsTitle": "Tab Position Options - Configuración",
-  "tabBehavior": "Comportamiento de las pestañas",
   "tabClosing": "Al cerrar una pestaña",
   "tabOnActivate": "Al activar una pestaña",
   "newTab": "Nueva pestaña",
@@ -89,5 +88,10 @@
   "settingsSyncHelp": "La configuración y las reglas de URL se sincronizan automáticamente si la sincronización de Chrome está activada. Si no se pueden sincronizar o se supera el límite de almacenamiento, se conservan en este dispositivo.",
   "settingsSyncCapacity": "La configuración supera el límite de almacenamiento de sincronización y se conserva en este dispositivo. Reduzca la cantidad o longitud de las reglas de URL y vuelva a guardar.",
   "settingsSyncUnavailable": "No se pudo sincronizar la configuración. La configuración guardada permanece en este dispositivo. Se volverá a intentar al cambiar la configuración o al iniciar la extensión.",
-  "settingsSyncStatusUnavailable": "No se pudo leer el estado de sincronización. Vuelva a abrir la página de configuración."
+  "settingsSyncStatusUnavailable": "No se pudo leer el estado de sincronización. Vuelva a abrir la página de configuración.",
+  "settingsManagement": "Administrar configuración",
+  "settingsCategories": "Categorías de configuración",
+  "unsavedChanges": "Hay cambios sin guardar.",
+  "details": "Detalles",
+  "shortcutsSaveHelp": "Los cambios de atajos se aplican en Chrome. No es necesario guardarlos aquí."
 }

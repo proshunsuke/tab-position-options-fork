@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { i18n } from "#i18n";
+import { HelpDetails } from "@/entrypoints/options/ui/HelpDetails";
 
 const CommandLabels = [
   ["sort-title", "sortByTitle"],
@@ -26,8 +27,9 @@ export const KeyboardShortcuts = () => {
   }, []);
 
   return (
-    <section className="mt-8 space-y-3 rounded-lg bg-white p-6 shadow-lg">
+    <section className="space-y-4">
       <h2 className="text-xl font-semibold">{i18n.t("keyboardShortcuts")}</h2>
+      <p className="text-sm text-gray-600">{i18n.t("shortcutsSaveHelp")}</p>
       <dl className="space-y-2">
         {CommandLabels.map(([name, label]) => (
           <div key={name} className="flex flex-wrap justify-between gap-2">
@@ -43,7 +45,7 @@ export const KeyboardShortcuts = () => {
           </div>
         ))}
       </dl>
-      <p className="text-sm text-gray-600">{i18n.t("shortcutSortingHelp")}</p>
+      <HelpDetails>{i18n.t("shortcutSortingHelp")}</HelpDetails>
       <button
         type="button"
         className="rounded-md border border-gray-300 px-4 py-2 hover:bg-gray-100"
