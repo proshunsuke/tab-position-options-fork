@@ -20,25 +20,23 @@
 
 A Chrome extension that lets you customize where new tabs open, whether they open in the background, and which tab becomes active after closing the current tab. Reimplemented from the original Tab Position Options for Manifest V3.
 
-The options page follows your browser’s UI language and supports [10 locales](locales/). Unsupported languages fall back to English.
-
-You can export and import settings files to back up your configuration or transfer it between installations of this fork.
-
-Keyboard shortcuts let you sort tabs and switch back to the last active tab.
-
-<img src="store-assets/screenshots/screenshot-1.png" alt="Tab Position Options Fork settings" width="640">
-
 ## Getting Started
 
 1. Install the extension from the Chrome Web Store.
 2. Open the extension from Chrome's Extensions menu or its toolbar icon.
 3. Choose your preferences and click **Save Settings**.
 
+The options page follows your browser’s UI language. See [supported languages](locales/); unsupported languages fall back to English.
+
 For installation from source, see [Manual Installation](#manual-installation).
+
+<img src="store-assets/tab-behavior.png" alt="Tab Position Options Fork settings" width="640">
 
 ## Privacy
 
 Settings are stored locally on your device. The extension does not send data to external servers.
+
+See the [Privacy Policy](PRIVACY.md) for details.
 
 ## Development
 
