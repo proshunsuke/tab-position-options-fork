@@ -116,6 +116,7 @@ const setState = (value: WindowScopedTabSnapshot) => {
 export const refreshAllTabSnapshots = async () => {
   const tabs = await chrome.tabs.query({});
   setState(groupTabsByWindow(tabs));
+  return tabs;
 };
 
 /**
@@ -163,7 +164,7 @@ const isMissingWindowError = (error: unknown) => {
 export const initializeTabSnapshot = async () => {
   const result = await chrome.storage.session.get<TabSnapshotStorage>("tabSnapshot");
   restoredTabSnapshotState = sortAndReindexState(result.tabSnapshot ?? {});
-  await refreshAllTabSnapshots();
+  return refreshAllTabSnapshots();
 };
 
 /**

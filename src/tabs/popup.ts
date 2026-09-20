@@ -2,7 +2,7 @@ import { getSettings } from "@/src/settings/state/appData";
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
 import { handleNewTab } from "@/src/tabs/handleNewTab";
 import { handleNavigationCommitted } from "@/src/tabs/loadingPage";
-import { isSessionRestoreInProgress } from "@/src/tabs/sessionRestoreDetector";
+import { isSessionRestoreWindow } from "@/src/tabs/sessionRestoreDetector";
 import { cleanupActivationHistory } from "@/src/tabs/state/activationHistory";
 import {
   beginPopupMove,
@@ -32,11 +32,11 @@ import { cancelActivationMove } from "@/src/tabs/tabOnActivate";
 import { findUrlRule } from "@/src/tabs/urlRules";
 
 export const handleWindowCreated = async (window: chrome.windows.Window) => {
-  const restoring = isSessionRestoreInProgress();
   if (needsInitialization()) {
     // 初回イベントでは移動先ウィンドウと保存済みの変換待ち状態を復元する。
     await initializeAllStates();
   }
+  const restoring = window.id !== undefined && isSessionRestoreWindow(window.id);
   recordPopupWindow(window, !restoring && !!getSettings().popup?.openAsNewTab);
   if (window.id === undefined) {
     return;

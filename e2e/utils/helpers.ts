@@ -422,6 +422,9 @@ export const clearExtensionStorage = async (serviceWorker: Worker) => {
     // chrome.storage.localとsessionを完全にクリア
     await chrome.storage.local.clear();
     await chrome.storage.session.clear();
+    // ストレージの掃除はブラウザ再起動ではない。通常セッションのマーカーを維持する。
+    globalThis.__testExports!.sessionRestore.resetSessionRestoreState();
+    globalThis.__testExports!.sessionRestore.markSessionRestoreTabs([]);
 
     // デフォルト設定を復元
     await chrome.storage.local.set({ settings: defaultSettings });
@@ -453,7 +456,7 @@ export const simulateServiceWorkerRestart = async (serviceWorker: Worker) => {
 
     // sessionRestoreDetectorの状態もリセット
     if (globalThis.__testExports?.sessionRestore) {
-      globalThis.__testExports.sessionRestore.defaultDetector.__testHelpers.resetState();
+      globalThis.__testExports.sessionRestore.resetSessionRestoreState();
     }
   });
 

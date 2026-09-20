@@ -1,57 +1,104 @@
-import { expect, test } from "vitest";
-import { createSessionRestoreDetector } from "@/src/tabs/sessionRestoreDetector";
+import { beforeEach, expect, test, vi } from "vitest";
+import {
+  clearSessionRestoreTab,
+  consumeSessionRestoreActivation,
+  initializeSessionRestoreState,
+  isSessionRestoreTab,
+  isSessionRestoreWindow,
+  markSessionRestoreTabs,
+  recordNewSessionTab,
+  resetSessionRestoreState,
+} from "@/src/tabs/sessionRestoreDetector";
 
-test("rapid tab creation is restoration until the creation interval reaches the threshold", () => {
-  let now = 1000;
-  const detector = createSessionRestoreDetector({ timeProvider: () => now, thresholdMs: 100 });
-  expect(detector.isSessionRestoreTab()).toBe(false);
-  detector.handleBrowserStartup();
-  for (const time of [1000, 1050, 1100]) {
-    now = time;
-    expect(detector.isSessionRestoreTab()).toBe(true);
+const tabs = [
+  { id: 1, windowId: 10, active: false },
+  { id: 2, windowId: 10, active: true },
+  { id: 3, windowId: 20, active: true },
+];
+let storage: Record<string, unknown>;
+
+beforeEach(() => {
+  storage = {};
+  vi.stubGlobal("chrome", {
+    storage: {
+      session: {
+        get: async () => structuredClone(storage),
+        set: async (value: Record<string, unknown>) => {
+          Object.assign(storage, structuredClone(value));
+        },
+      },
+    },
+  });
+  resetSessionRestoreState();
+});
+
+test("restored tab identities do not expire and unrelated new tabs are immediately eligible", async () => {
+  expect(await initializeSessionRestoreState()).toBe(true);
+  markSessionRestoreTabs(tabs);
+  const now = vi.spyOn(Date, "now").mockReturnValue(1_000_000);
+  try {
+    expect(isSessionRestoreTab(1)).toBe(true);
+    expect(isSessionRestoreTab(2)).toBe(true);
+    expect(isSessionRestoreTab(4)).toBe(false);
+    expect(isSessionRestoreWindow(20)).toBe(true);
+    expect(isSessionRestoreWindow(30)).toBe(false);
+  } finally {
+    now.mockRestore();
   }
-  now = 1200;
-  expect(detector.isSessionRestoreTab()).toBe(false);
-  now = 1201;
-  expect(detector.isSessionRestoreTab()).toBe(false);
 });
 
-test("activation checks do not prolong session restoration", () => {
-  let now = 1000;
-  const detector = createSessionRestoreDetector({ timeProvider: () => now });
-  detector.handleBrowserStartup();
-  expect(detector.isSessionRestoreInProgress()).toBe(true);
-  expect(detector.isSessionRestoreTab()).toBe(true);
-  now = 1100;
-  expect(detector.isSessionRestoreInProgress()).toBe(true);
-  now = 1199;
-  expect(detector.isSessionRestoreInProgress()).toBe(true);
-  now = 1200;
-  expect(detector.isSessionRestoreInProgress()).toBe(false);
+test("startup selection is consumed once per window without suppressing subsequent user activation", () => {
+  markSessionRestoreTabs(tabs);
+  expect(consumeSessionRestoreActivation(10, 2)).toBe(true);
+  expect(consumeSessionRestoreActivation(10, 2)).toBe(false);
+  expect(consumeSessionRestoreActivation(20, 3)).toBe(true);
+  markSessionRestoreTabs(tabs);
+  expect(consumeSessionRestoreActivation(10, 2)).toBe(false);
 });
 
-test("startup expires without any created tabs and new creations extend restoration", () => {
-  let now = 1000;
-  const detector = createSessionRestoreDetector({ timeProvider: () => now });
-  detector.handleBrowserStartup();
-  now = 1200;
-  expect(detector.isSessionRestoreInProgress()).toBe(false);
-  detector.handleBrowserStartup();
-  now = 1300;
-  expect(detector.isSessionRestoreTab()).toBe(true);
-  now = 1499;
-  expect(detector.isSessionRestoreInProgress()).toBe(true);
-  now = 1500;
-  expect(detector.isSessionRestoreInProgress()).toBe(false);
+test("a different user selection clears a pending startup selection", () => {
+  markSessionRestoreTabs(tabs);
+  expect(consumeSessionRestoreActivation(10, 1)).toBe(false);
+  expect(consumeSessionRestoreActivation(10, 2)).toBe(false);
 });
 
-test("extension initialization ends restoration and browser startup starts it again", () => {
-  const detector = createSessionRestoreDetector({ timeProvider: () => 1000 });
-  detector.handleBrowserStartup();
-  detector.initSessionRestoreDetector();
-  expect(detector.isSessionRestoreInProgress()).toBe(false);
-  expect(detector.isSessionRestoreTab()).toBe(false);
-  detector.handleBrowserStartup();
-  expect(detector.isSessionRestoreInProgress()).toBe(true);
-  expect(detector.isSessionRestoreTab()).toBe(true);
+test("worker restart retains restored identities and consumed selections", async () => {
+  markSessionRestoreTabs(tabs);
+  consumeSessionRestoreActivation(10, 2);
+  await vi.waitFor(() =>
+    expect(storage.sessionRestoreState).toEqual({
+      tabs: { 1: 10, 2: 10, 3: 20 },
+      activations: { 20: 3 },
+    }),
+  );
+  resetSessionRestoreState();
+  expect(await initializeSessionRestoreState()).toBe(false);
+  expect(isSessionRestoreTab(1)).toBe(true);
+  expect(isSessionRestoreTab(4)).toBe(false);
+  expect(consumeSessionRestoreActivation(10, 2)).toBe(false);
+  expect(consumeSessionRestoreActivation(20, 3)).toBe(true);
+});
+
+test("late startup snapshots do not suppress already observed normal tabs", () => {
+  recordNewSessionTab(2);
+  markSessionRestoreTabs(tabs);
+  expect(isSessionRestoreTab(2)).toBe(false);
+  expect(consumeSessionRestoreActivation(10, 2)).toBe(false);
+});
+
+test("closing restored tabs cleans up their window and pending selection", () => {
+  markSessionRestoreTabs(tabs);
+  clearSessionRestoreTab(3);
+  expect(isSessionRestoreTab(3)).toBe(false);
+  expect(isSessionRestoreWindow(20)).toBe(false);
+  expect(consumeSessionRestoreActivation(20, 3)).toBe(false);
+  expect(isSessionRestoreTab(1)).toBe(true);
+});
+
+test("an empty initialized session is distinct from browser startup", async () => {
+  markSessionRestoreTabs([]);
+  await vi.waitFor(() => expect(storage.sessionRestoreState).toBeDefined());
+  resetSessionRestoreState();
+  expect(await initializeSessionRestoreState()).toBe(false);
+  expect(isSessionRestoreTab(1)).toBe(false);
 });

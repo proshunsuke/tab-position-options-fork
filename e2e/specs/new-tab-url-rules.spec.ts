@@ -191,7 +191,7 @@ for (const restore of [false, true]) {
     const result = await serviceWorker.evaluate(
       async ({ windowId, restore }) => {
         const { handleNewTab } = globalThis.__testExports!.tabHandlers;
-        const detector = globalThis.__testExports!.sessionRestore.defaultDetector;
+        const detector = globalThis.__testExports!.sessionRestore;
         const tabs = await chrome.tabs.query({ windowId });
         const target = tabs[1];
         const originalMove = chrome.tabs.move;
@@ -213,7 +213,8 @@ for (const restore of [false, true]) {
         }) as typeof chrome.tabs.query;
         try {
           if (restore) {
-            detector.handleBrowserStartup();
+            detector.resetSessionRestoreState();
+            detector.markSessionRestoreTabs(tabs);
           }
           const completion = handleNewTab({
             ...target,
@@ -227,7 +228,7 @@ for (const restore of [false, true]) {
           await Promise.resolve();
           return immediate;
         } finally {
-          detector.__testHelpers.resetState();
+          detector.resetSessionRestoreState();
           chrome.tabs.move = originalMove;
           chrome.tabs.update = originalUpdate;
           chrome.tabs.query = originalQuery;

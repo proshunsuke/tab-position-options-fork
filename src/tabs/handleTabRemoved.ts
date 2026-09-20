@@ -1,6 +1,7 @@
 import { getSettings } from "@/src/settings/state/appData";
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
 import { applyPendingCloseTargetActivation } from "@/src/tabs/pendingCloseTargetActivation";
+import { clearSessionRestoreTab } from "@/src/tabs/sessionRestoreDetector";
 import {
   getActivationHistory,
   getRestoredActivationHistory,
@@ -35,6 +36,7 @@ export const handleTabRemoved = async (
     await initializeAllStates();
   }
 
+  clearSessionRestoreTab(tabId);
   clearLoadingTab(tabId);
   clearPopupTab(tabId);
   const windowId = removeInfo.windowId;

@@ -25,7 +25,7 @@ vi.mock("@/src/state/initializer", () => ({ needsInitialization: () => false }))
 vi.mock("@/src/tabs/handleNewTab", () => ({ handleNewTab: vi.fn() }));
 vi.mock("@/src/tabs/loadingPage", () => ({ handleNavigationCommitted: vi.fn() }));
 vi.mock("@/src/tabs/sessionRestoreDetector", () => ({
-  isSessionRestoreInProgress: () => fixture.restoring,
+  isSessionRestoreWindow: () => fixture.restoring,
 }));
 vi.mock("@/src/tabs/state/activationHistory", () => ({ cleanupActivationHistory: vi.fn() }));
 vi.mock("@/src/tabs/tabOnActivate", () => ({ cancelActivationMove: vi.fn() }));

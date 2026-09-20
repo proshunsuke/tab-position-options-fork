@@ -1,9 +1,14 @@
 import fs from "node:fs";
 import { createServer } from "node:http";
 import path from "node:path";
-import { chromium } from "@playwright/test";
 import { expect, test } from "@/e2e/fixtures";
 import { setExtensionSettings, waitForServiceWorker } from "@/e2e/utils/helpers";
+import {
+  installSessionRestoreExtension,
+  launchSessionRestoreContext,
+  prepareSessionRestoreProfile,
+  type RestoreEvents,
+} from "@/e2e/utils/sessionRestore";
 import { DEFAULT_SETTINGS } from "@/src/types";
 
 test("browser session restoration matches native behavior with popup conversion enabled", async ({
@@ -12,7 +17,6 @@ test("browser session restoration matches native behavior with popup conversion 
 }) => {
   const root = fs.mkdtempSync(test.info().outputPath("popup-restore-"));
   const extensionPath = path.join(root, "test-extension");
-  fs.cpSync(path.join(process.cwd(), "dist/chrome-mv3"), extensionPath, { recursive: true });
   const server = createServer((_request, response) => {
     response.writeHead(200, { "content-type": "text/html" });
     response.end("<title>Restored popup</title>");
@@ -28,24 +32,11 @@ test("browser session restoration matches native behavior with popup conversion 
   try {
     for (const enabled of [false, true]) {
       const profile = path.join(root, String(enabled));
-      fs.mkdirSync(path.join(profile, "Default"), { recursive: true });
-      fs.writeFileSync(
-        path.join(profile, "Default", "Preferences"),
-        JSON.stringify({ session: { restore_on_startup: 1 } }),
-      );
-      const launch = () =>
-        chromium.launchPersistentContext(profile, {
-          channel,
-          headless,
-          ignoreDefaultArgs: ["about:blank"],
-          args: [
-            `--disable-extensions-except=${extensionPath}`,
-            `--load-extension=${extensionPath}`,
-            "--restore-last-session",
-          ],
-        });
+      prepareSessionRestoreProfile(profile, extensionPath);
+      const launch = () => launchSessionRestoreContext(profile, { channel, headless });
       let context = await launch();
       try {
+        await installSessionRestoreExtension(context, extensionPath);
         let worker = await waitForServiceWorker(context);
         await setExtensionSettings(context, DEFAULT_SETTINGS);
         await worker.evaluate(async url => {
@@ -70,6 +61,16 @@ test("browser session restoration matches native behavior with popup conversion 
         await context.close();
         context = await launch();
         worker = await waitForServiceWorker(context);
+        await expect(async () => {
+          const events = await worker.evaluate(
+            () =>
+              (globalThis as typeof globalThis & { __restoreEvents: RestoreEvents })
+                .__restoreEvents,
+          );
+          expect(events.startups).toBe(1);
+          expect(events.installs).toBe(0);
+          expect(events.created.length).toBeGreaterThan(0);
+        }).toPass();
         await expect(async () => {
           expect(
             await worker.evaluate(

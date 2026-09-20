@@ -1,5 +1,4 @@
 import { getSettings } from "@/src/settings/state/appData";
-import { isSessionRestoreInProgress } from "@/src/tabs/sessionRestoreDetector";
 import {
   getTabSnapshot,
   moveTabInSnapshot,
@@ -14,9 +13,6 @@ const TAB_EDIT_BLOCKED_ERROR = "Tabs cannot be edited right now (user may be dra
 const pendingActivationMoves = new Map<number, ActivationMove>();
 
 export const getActivationIndex = (windowId: number, tabId: number) => {
-  if (isSessionRestoreInProgress()) {
-    return null;
-  }
   const behavior = getSettings().tabOnActivate?.behavior;
   if (!behavior || behavior === "default") {
     return null;

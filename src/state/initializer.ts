@@ -4,6 +4,10 @@
  */
 
 import { initializeAppData } from "@/src/settings/state/appData";
+import {
+  initializeSessionRestoreState,
+  markSessionRestoreTabs,
+} from "@/src/tabs/sessionRestoreDetector";
 import { initializeActivationHistory } from "@/src/tabs/state/activationHistory";
 import { initializeLoadingPageState, markInitialLoadingTabs } from "@/src/tabs/state/loadingPage";
 import { initializePopupState } from "@/src/tabs/state/popup";
@@ -48,8 +52,12 @@ export const initializeAllStates = async () => {
     initializeTabSnapshot(),
     initializeLoadingPageState(),
     initializePopupState(),
+    initializeSessionRestoreState(),
   ])
-    .then(([, , , isFirstSessionInitialization]) => {
+    .then(([, , tabs, isFirstSessionInitialization, , isFirstRestoreInitialization]) => {
+      if (isFirstRestoreInitialization) {
+        markSessionRestoreTabs(tabs);
+      }
       // 起動イベントより先に届く復元navigationも、既存の初期化snapshotで除外する。
       if (isFirstSessionInitialization) {
         markInitialLoadingTabs(getAllTabIds());

@@ -17,12 +17,9 @@ import {
   handleWindowFocusChanged,
   handleWindowRemoved,
 } from "@/src/tabs/popup";
-import { initSessionRestoreDetector } from "@/src/tabs/sessionRestoreDetector";
 
 export const setupTabHandlers = () => {
   if (typeof chrome !== "undefined" && chrome.tabs && chrome.runtime) {
-    initSessionRestoreDetector();
-
     chrome.windows.onCreated.addListener(handleWindowCreated);
     chrome.windows.onFocusChanged.addListener(handleWindowFocusChanged);
     chrome.windows.onRemoved.addListener(handleWindowRemoved);
