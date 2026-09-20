@@ -249,6 +249,7 @@ for (const foreground of [true, false]) {
   test(`links from a pop-up preserve explicit activation in a normal window: ${foreground}`, async ({
     context,
     serviceWorker,
+    headless,
   }) => {
     await setExtensionSettings(context, {
       ...DEFAULT_SETTINGS,
@@ -276,8 +277,11 @@ for (const foreground of [true, false]) {
         tab.windowId,
       );
       expect(window.type).toBe("normal");
-      expect(tab.active).toBe(foreground);
-      expect(window.focused).toBe(foreground);
+      expect(tab.active, "destination tab activation").toBe(foreground);
+      // headlessでは複数windowが同時にfocused:trueになる。OSのフォーカスは画面表示時に検証する。
+      if (!headless) {
+        expect(window.focused, "destination window focus").toBe(foreground);
+      }
       const tabs = await serviceWorker.evaluate(
         windowId => chrome.tabs.query({ windowId }),
         tab.windowId,

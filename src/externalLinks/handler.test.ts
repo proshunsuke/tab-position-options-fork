@@ -15,7 +15,6 @@ vi.mock("@/src/state/initializer", () => ({
   needsInitialization: () => state.cold,
   initializeAllStates: state.initialize,
 }));
-vi.mock("@/src/tabs/sessionRestoreDetector", () => ({ isSessionRestoreInProgress: () => false }));
 vi.mock("@/src/tabs/state/popup", () => ({
   getWindowSnapshot: () => ({ type: state.popup ? "popup" : "normal" }),
   getNormalWindowId: () => state.normalWindow,
@@ -183,3 +182,15 @@ test.each([20, null])(
     expect(chrome.windows.update).toHaveBeenCalledWith(20, { focused: true });
   },
 );
+
+test("background popup links never request window focus", async () => {
+  state.popup = true;
+  state.settings.externalLinks.urlRules = [{ url: "link.test", action: "background-link" }];
+  vi.mocked(chrome.tabs.create).mockImplementationOnce(() =>
+    Promise.resolve({ id: 90, windowId: 20 } as chrome.tabs.Tab),
+  );
+  await handleExternalLink(message, sender);
+  expect(chrome.tabs.create).toHaveBeenCalledWith(expect.objectContaining({ active: false }));
+  expect(chrome.windows.update).not.toHaveBeenCalled();
+  consumeExternalLinkTab({ id: 90, windowId: 20, pendingUrl: message.url } as chrome.tabs.Tab);
+});

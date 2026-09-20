@@ -416,6 +416,7 @@ for (const scenario of [
         let count = 0;
         const destinations: number[] = [];
         let notifyAttempt = () => {};
+        let rejectAttempt = () => {};
         const attempted = new Promise<void>(resolve => {
           notifyAttempt = resolve;
         });
@@ -427,13 +428,18 @@ for (const scenario of [
           destinations.push(properties.index);
           notifyAttempt();
           if (count === 1 || scenario === "limit") {
-            return Promise.reject(
-              new Error(
-                scenario === "other-error"
-                  ? "No tab with id"
-                  : "Tabs cannot be edited right now (user may be dragging a tab).",
-              ),
+            const error = new Error(
+              scenario === "other-error"
+                ? "No tab with id"
+                : "Tabs cannot be edited right now (user may be dragging a tab).",
             );
+            if (scenario === "disable" || scenario === "change-position") {
+              // 設定変更が届いてから失敗を返し、ストレージ処理と50msの再試行を競争させない。
+              return new Promise((_, reject) => {
+                rejectAttempt = () => reject(error);
+              });
+            }
+            return Promise.reject(error);
           }
           return originalMove(tabId, properties);
         }) as typeof chrome.tabs.move;
@@ -451,12 +457,26 @@ for (const scenario of [
           }
           if (scenario === "disable" || scenario === "change-position") {
             const { settings } = await chrome.storage.local.get<{ settings: Settings }>("settings");
+            const changed = new Promise<void>(resolve => {
+              const listener = (
+                changes: Record<string, chrome.storage.StorageChange>,
+                area: string,
+              ) => {
+                if (area === "local" && changes.settings) {
+                  chrome.storage.onChanged.removeListener(listener);
+                  resolve();
+                }
+              };
+              chrome.storage.onChanged.addListener(listener);
+            });
             await chrome.storage.local.set({
               settings: {
                 ...settings,
                 tabOnActivate: { behavior: scenario === "disable" ? "default" : "first" },
               },
             });
+            await changed;
+            rejectAttempt();
           }
           if (scenario === "limit") {
             const deadline = Date.now() + 10000;
