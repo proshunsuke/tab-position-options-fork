@@ -64,5 +64,13 @@
   "imported": "Settings loaded into the form. Click Save Settings to apply them.",
   "importFailed": "Could not import this file. Choose a valid settings file exported by Tab Position Options Fork.",
   "exportFailed": "Could not export settings. Check the URL patterns and try again.",
-  "settingsTransferHelp": "Export the settings currently shown, including unsaved changes. Import replaces the settings in this form; click Save Settings to apply them. Files are processed locally."
+  "settingsTransferHelp": "Export the settings currently shown, including unsaved changes. Import replaces the settings in this form; click Save Settings to apply them. Files are processed locally.",
+  "keyboardShortcuts": "Keyboard shortcuts",
+  "sortByTitle": "Sort tabs by title",
+  "sortByUrl": "Sort tabs by URL",
+  "toggleLastActive": "Switch to the last active tab",
+  "shortcutUnassigned": "Not assigned",
+  "shortcutsUnavailable": "Unable to read shortcuts",
+  "configureShortcuts": "Configure shortcuts",
+  "shortcutSortingHelp": "Sorting keeps pinned tabs and group boundaries in place. Tabs are sorted within each group and each continuous ungrouped section."
 }

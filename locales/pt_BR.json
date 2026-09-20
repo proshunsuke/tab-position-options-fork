@@ -64,5 +64,13 @@
   "imported": "Configurações carregadas no formulário. Clique em Salvar configurações para aplicá-las.",
   "importFailed": "Não foi possível importar este arquivo. Escolha um arquivo de configurações válido exportado pelo Tab Position Options Fork.",
   "exportFailed": "Não foi possível exportar as configurações. Verifique os padrões de URL e tente novamente.",
-  "settingsTransferHelp": "Exporta as configurações exibidas, incluindo alterações não salvas. A importação substitui as configurações do formulário; clique em Salvar configurações para aplicá-las. Os arquivos são processados localmente."
+  "settingsTransferHelp": "Exporta as configurações exibidas, incluindo alterações não salvas. A importação substitui as configurações do formulário; clique em Salvar configurações para aplicá-las. Os arquivos são processados localmente.",
+  "keyboardShortcuts": "Atalhos de teclado",
+  "sortByTitle": "Ordenar abas por título",
+  "sortByUrl": "Ordenar abas por URL",
+  "toggleLastActive": "Alternar para a última aba ativa",
+  "shortcutUnassigned": "Não atribuído",
+  "shortcutsUnavailable": "Não foi possível ler os atalhos",
+  "configureShortcuts": "Configurar atalhos",
+  "shortcutSortingHelp": "As abas fixadas e os limites dos grupos são mantidos. A ordenação ocorre dentro de cada grupo e de cada sequência de abas não agrupadas."
 }

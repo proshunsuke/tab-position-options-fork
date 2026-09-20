@@ -14,6 +14,14 @@ export default defineConfig({
       "Fork of Tab Position Options - Select the tab opening position, new tab behavior and behavior after closing a tab",
     permissions: ["storage", "tabs", "webNavigation"],
     host_permissions: [],
+    commands: {
+      "sort-title": { suggested_key: { default: "Alt+T" }, description: "__MSG_sortByTitle__" },
+      "sort-url": { suggested_key: { default: "Alt+U" }, description: "__MSG_sortByUrl__" },
+      "toggle-last-active": {
+        suggested_key: { default: "Alt+C" },
+        description: "__MSG_toggleLastActive__",
+      },
+    },
     action: {
       // アイコンクリック時の動作をbackground.tsで制御
     },

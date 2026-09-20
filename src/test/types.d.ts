@@ -14,6 +14,7 @@ declare global {
      * タブハンドラー関連
      */
     tabHandlers: {
+      handleCommand: (command: string, tab?: chrome.tabs.Tab) => Promise<void>;
       handleBeforeNavigate: (
         details: chrome.webNavigation.WebNavigationBaseCallbackDetails,
       ) => Promise<void>;

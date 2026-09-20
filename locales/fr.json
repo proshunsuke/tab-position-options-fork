@@ -64,5 +64,13 @@
   "imported": "Paramètres chargés dans le formulaire. Cliquez sur Enregistrer les paramètres pour les appliquer.",
   "importFailed": "Impossible d’importer ce fichier. Choisissez un fichier de paramètres valide exporté par Tab Position Options Fork.",
   "exportFailed": "Impossible d’exporter les paramètres. Vérifiez les motifs d’URL et réessayez.",
-  "settingsTransferHelp": "Exporte les paramètres affichés, y compris les modifications non enregistrées. L’importation remplace les paramètres du formulaire ; cliquez sur Enregistrer les paramètres pour les appliquer. Les fichiers sont traités localement."
+  "settingsTransferHelp": "Exporte les paramètres affichés, y compris les modifications non enregistrées. L’importation remplace les paramètres du formulaire ; cliquez sur Enregistrer les paramètres pour les appliquer. Les fichiers sont traités localement.",
+  "keyboardShortcuts": "Raccourcis clavier",
+  "sortByTitle": "Trier les onglets par titre",
+  "sortByUrl": "Trier les onglets par URL",
+  "toggleLastActive": "Revenir au dernier onglet actif",
+  "shortcutUnassigned": "Non attribué",
+  "shortcutsUnavailable": "Impossible de lire les raccourcis",
+  "configureShortcuts": "Configurer les raccourcis",
+  "shortcutSortingHelp": "Les onglets épinglés et les limites des groupes sont conservés. Le tri se fait dans chaque groupe et chaque suite d’onglets non groupés."
 }

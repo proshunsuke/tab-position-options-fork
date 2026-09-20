@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { i18n } from "#i18n";
+import { KeyboardShortcuts } from "@/entrypoints/options/KeyboardShortcuts";
 import { TabBehavior } from "@/entrypoints/options/TabBehavior";
 import { TabClosing } from "@/entrypoints/options/TabClosing";
 import { TabOnActivate } from "@/entrypoints/options/TabOnActivate";
@@ -306,6 +307,7 @@ export default function App() {
             </button>
           </div>
         </fieldset>
+        <KeyboardShortcuts />
       </div>
     </div>
   );

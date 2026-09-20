@@ -64,5 +64,13 @@
   "imported": "설정을 화면에 불러왔습니다. 적용하려면 설정 저장을 클릭하세요.",
   "importFailed": "이 파일을 가져올 수 없습니다. Tab Position Options Fork에서 내보낸 유효한 설정 파일을 선택하세요.",
   "exportFailed": "설정을 내보내지 못했습니다. URL 패턴을 확인하고 다시 시도하세요.",
-  "settingsTransferHelp": "저장하지 않은 변경 사항을 포함하여 현재 화면의 설정을 내보냅니다. 가져오면 화면의 설정이 바뀝니다. 적용하려면 설정 저장을 클릭하세요. 파일은 기기 내에서만 처리됩니다."
+  "settingsTransferHelp": "저장하지 않은 변경 사항을 포함하여 현재 화면의 설정을 내보냅니다. 가져오면 화면의 설정이 바뀝니다. 적용하려면 설정 저장을 클릭하세요. 파일은 기기 내에서만 처리됩니다.",
+  "keyboardShortcuts": "키보드 단축키",
+  "sortByTitle": "제목순으로 탭 정렬",
+  "sortByUrl": "URL순으로 탭 정렬",
+  "toggleLastActive": "직전에 활성화한 탭으로 전환",
+  "shortcutUnassigned": "할당되지 않음",
+  "shortcutsUnavailable": "단축키를 읽을 수 없습니다",
+  "configureShortcuts": "단축키 설정",
+  "shortcutSortingHelp": "고정 탭과 그룹 경계는 유지됩니다. 각 그룹 내부와 그룹에 속하지 않은 연속된 탭 범위 안에서 정렬합니다."
 }

@@ -64,5 +64,13 @@
   "imported": "Configuración cargada en el formulario. Pulsa Guardar configuración para aplicarla.",
   "importFailed": "No se pudo importar el archivo. Elige un archivo de configuración válido exportado por Tab Position Options Fork.",
   "exportFailed": "No se pudo exportar la configuración. Revisa los patrones de URL e inténtalo de nuevo.",
-  "settingsTransferHelp": "Exporta la configuración que se muestra, incluidos los cambios sin guardar. La importación reemplaza la configuración del formulario; pulsa Guardar configuración para aplicarla. Los archivos se procesan localmente."
+  "settingsTransferHelp": "Exporta la configuración que se muestra, incluidos los cambios sin guardar. La importación reemplaza la configuración del formulario; pulsa Guardar configuración para aplicarla. Los archivos se procesan localmente.",
+  "keyboardShortcuts": "Atajos de teclado",
+  "sortByTitle": "Ordenar pestañas por título",
+  "sortByUrl": "Ordenar pestañas por URL",
+  "toggleLastActive": "Cambiar a la última pestaña activa",
+  "shortcutUnassigned": "Sin asignar",
+  "shortcutsUnavailable": "No se pudieron leer los atajos",
+  "configureShortcuts": "Configurar atajos",
+  "shortcutSortingHelp": "Se conservan las pestañas fijadas y los límites de los grupos. Se ordena dentro de cada grupo y de cada conjunto continuo de pestañas sin agrupar."
 }
