@@ -30,7 +30,7 @@
 
 ソースコードからインストールする場合は、[手動インストール](#手動インストール)を参照してください。
 
-<img src="store-assets/tab-behavior.png" alt="Tab Position Options Forkの設定画面" width="640">
+<img src="store-assets/new-tab.png" alt="Tab Position Options Forkの新規タブ設定" width="640">
 
 ## プライバシー
 
