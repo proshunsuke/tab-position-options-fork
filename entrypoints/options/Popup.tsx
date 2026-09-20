@@ -23,39 +23,45 @@ export const Popup: FC<Props> = ({ settings, onChange }) => {
         <p id="popup-exceptions-help" className="text-sm text-gray-600">
           {i18n.t("popupExceptionsHelp")}
         </p>
-        {exceptions.map((rule, index) => (
-          <div
-            // biome-ignore lint/suspicious/noArrayIndexKey: Controlled rows have no independent state or persisted identity.
-            key={index}
-            className="flex flex-wrap items-center gap-3 rounded-md bg-gray-50 p-3"
-          >
-            <input
-              aria-label={i18n.t("popupExceptionLabel", [String(index + 1)])}
-              aria-describedby="popup-exceptions-help"
-              placeholder={i18n.t("urlPattern")}
-              value={rule.url}
-              onChange={event =>
-                onChange({
-                  ...settings,
-                  exceptions: exceptions.map((item, i) =>
-                    i === index ? { url: event.target.value } : item,
-                  ),
-                })
-              }
-              className="min-w-48 flex-1 rounded-md border border-gray-300 bg-white px-3 py-2"
-            />
-            <button
-              type="button"
-              aria-label={i18n.t("removePopupExceptionLabel", [String(index + 1)])}
-              onClick={() =>
-                onChange({ ...settings, exceptions: exceptions.filter((_, i) => i !== index) })
-              }
-              className="text-red-600 hover:text-red-800"
+        <fieldset
+          aria-label={i18n.t("popupExceptionsHelp")}
+          className="min-w-0 max-h-80 overflow-y-auto space-y-3 p-1"
+        >
+          {exceptions.map((rule, index) => (
+            <div
+              // biome-ignore lint/suspicious/noArrayIndexKey: Controlled rows have no independent state or persisted identity.
+              key={index}
+              className="flex flex-wrap items-center gap-3 rounded-md bg-gray-50 p-3"
             >
-              {i18n.t("remove")}
-            </button>
-          </div>
-        ))}
+              <input
+                aria-label={i18n.t("popupExceptionLabel", [String(index + 1)])}
+                aria-describedby="popup-exceptions-help"
+                placeholder={i18n.t("urlPattern")}
+                value={rule.url}
+                onChange={event =>
+                  onChange({
+                    ...settings,
+                    exceptions: exceptions.map((item, i) =>
+                      i === index ? { url: event.target.value } : item,
+                    ),
+                  })
+                }
+                className="min-w-48 flex-1 rounded-md border border-gray-300 bg-white px-3 py-2"
+              />
+              <button
+                type="button"
+                aria-label={i18n.t("removePopupExceptionLabel", [String(index + 1)])}
+                onClick={() =>
+                  onChange({ ...settings, exceptions: exceptions.filter((_, i) => i !== index) })
+                }
+                className="text-red-600 hover:text-red-800"
+              >
+                {i18n.t("remove")}
+              </button>
+            </div>
+          ))}
+        </fieldset>
+
         <button
           type="button"
           onClick={() => onChange({ ...settings, exceptions: [...exceptions, { url: "" }] })}
