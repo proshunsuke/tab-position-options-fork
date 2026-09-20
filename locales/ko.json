@@ -57,5 +57,12 @@
   "saving": "저장 중…",
   "saved": "설정을 저장했습니다!",
   "invalidPattern": "각 규칙에 유효한 URL 패턴을 입력하세요.",
-  "saveFailed": "설정을 저장하지 못했습니다. 다시 시도하세요."
+  "saveFailed": "설정을 저장하지 못했습니다. 다시 시도하세요.",
+  "exportSettings": "설정 내보내기",
+  "importSettings": "설정 가져오기",
+  "importing": "가져오는 중…",
+  "imported": "설정을 화면에 불러왔습니다. 적용하려면 설정 저장을 클릭하세요.",
+  "importFailed": "이 파일을 가져올 수 없습니다. Tab Position Options Fork에서 내보낸 유효한 설정 파일을 선택하세요.",
+  "exportFailed": "설정을 내보내지 못했습니다. URL 패턴을 확인하고 다시 시도하세요.",
+  "settingsTransferHelp": "저장하지 않은 변경 사항을 포함하여 현재 화면의 설정을 내보냅니다. 가져오면 화면의 설정이 바뀝니다. 적용하려면 설정 저장을 클릭하세요. 파일은 기기 내에서만 처리됩니다."
 }

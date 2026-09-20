@@ -57,5 +57,12 @@
   "saving": "Saving...",
   "saved": "Settings saved successfully!",
   "invalidPattern": "Enter a valid URL pattern for each rule.",
-  "saveFailed": "Failed to save settings. Please try again."
+  "saveFailed": "Failed to save settings. Please try again.",
+  "exportSettings": "Export Settings",
+  "importSettings": "Import Settings",
+  "importing": "Importing...",
+  "imported": "Settings loaded into the form. Click Save Settings to apply them.",
+  "importFailed": "Could not import this file. Choose a valid settings file exported by Tab Position Options Fork.",
+  "exportFailed": "Could not export settings. Check the URL patterns and try again.",
+  "settingsTransferHelp": "Export the settings currently shown, including unsaved changes. Import replaces the settings in this form; click Save Settings to apply them. Files are processed locally."
 }
