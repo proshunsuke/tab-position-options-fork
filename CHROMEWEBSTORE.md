@@ -47,9 +47,11 @@ Optionally open external links in new tabs, with page exclusions and rules for f
 Settings and user-entered URL rules sync automatically when Chrome sync is enabled. A local copy remains available if synchronization fails or the settings exceed Chrome's sync capacity. You can also export and import settings files to back up your configuration.
 
 HOW TO USE
-1. Open the extension from Chrome's Extensions menu or its toolbar icon.
+1. Settings open automatically after installation. Use Chrome's Extensions menu or the toolbar icon to return to them; the toolbar icon reuses an existing settings tab.
 2. Choose your tab preferences and add URL rules if needed.
 3. Click Save Settings.
+
+Long URL rule lists scroll within their sections. If settings cannot be synchronized, the settings page explains whether the sync storage limit was exceeded or another sync failure occurred; saved local settings remain available.
 
 PRIVACY
 Settings and user-entered URL rules are stored locally and synchronized through Google's Chrome Sync service when enabled. Browsing URLs and session tab state are not synchronized. New-tab and navigation URLs are processed locally to apply your URL rules. When external-link handling is enabled, a content script reads the clicked link and current page URL. These browsing values are not sent to external services; following a link makes the normal browser request to its destination. The extension does not use analytics or tracking services.
