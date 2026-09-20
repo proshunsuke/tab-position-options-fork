@@ -168,10 +168,16 @@ Dashboard uploads were observed; exact byte-for-byte identity with local files h
 | Asset | Local file / dimensions | Dashboard and preparation status |
 | --- | --- | --- |
 | Store icon | [public/icon-128.png](public/icon-128.png), 128×128 | Uploaded |
-| Screenshot 1 | [screenshot-1.png](store-assets/screenshots/screenshot-1.png), 1280×800 | Uploaded; review against the new options UI |
-| Screenshot 2 | [screenshot-2.png](store-assets/screenshots/screenshot-2.png), 1280×800 | Uploaded; review against the new options UI |
+| Screenshot 1 — New Tab | [screenshot-1.png](store-assets/screenshots/screenshot-1.png), 1280×800 | Updated locally; not uploaded. Opening position and background behavior |
+| Screenshot 2 — Tab Closing | [screenshot-2.png](store-assets/screenshots/screenshot-2.png), 1280×800 | Updated locally; not uploaded. Choosing the next active tab after closing |
+| Screenshot 3 — Tab on Activate | [screenshot-3.png](store-assets/screenshots/screenshot-3.png), 1280×800 | Created locally; not uploaded. Activation position |
+| Screenshot 4 — URL rules and pop-ups | [screenshot-4.png](store-assets/screenshots/screenshot-4.png), 1280×800 | Created locally; not uploaded. URL rules and pop-up exceptions with example.com patterns |
 | Small promo tile | [promotional-440x280.png](store-assets/promotional-440x280.png), 440×280 | Uploaded |
 | Marquee promo tile | Local source not identified | Uploaded; dashboard specifies 1400×560 |
+
+Upload screenshots 1–4 in the order above. All four are direct captures of 1280×800 regions of the English settings page at its original scale, without added headings, backgrounds, or rearrangement. They are verified as 24-bit RGB PNG without alpha. The settings shown are illustrative. The dashboard still contains the previous screenshots until these replacements are uploaded.
+
+[tab-behavior.png](store-assets/tab-behavior.png) is the separate 1280×1721 full-page image used in the READMEs; it is not a store screenshot.
 
 `store-assets/social-preview-1280x640.png` is 1280×640 and must not be assumed to be the uploaded 1400×560 marquee asset.
 
