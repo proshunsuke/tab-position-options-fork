@@ -85,5 +85,6 @@
   "externalCurrentPage": "Page : onglet/cadre actuel",
   "externalNewLink": "Lien : nouvel onglet au premier plan",
   "externalBackgroundLink": "Lien : nouvel onglet en arrière-plan",
-  "externalCurrentLink": "Lien : onglet/cadre actuel"
+  "externalCurrentLink": "Lien : onglet/cadre actuel",
+  "settingsSyncHelp": "Les paramètres et les règles d’URL sont synchronisés automatiquement lorsque la synchronisation Chrome est activée. Si la synchronisation est indisponible ou si sa limite de stockage est dépassée, les paramètres restent sur cet appareil."
 }

@@ -85,5 +85,6 @@
   "externalCurrentPage": "頁面：目前分頁或框架",
   "externalNewLink": "連結：新前景分頁",
   "externalBackgroundLink": "連結：新背景分頁",
-  "externalCurrentLink": "連結：目前分頁或框架"
+  "externalCurrentLink": "連結：目前分頁或框架",
+  "settingsSyncHelp": "啟用 Chrome 同步後，設定和 URL 規則會自動同步。無法同步或超出同步儲存容量時，設定仍保留在此裝置上。"
 }

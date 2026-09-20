@@ -85,5 +85,6 @@
   "externalCurrentPage": "페이지: 현재 탭/프레임",
   "externalNewLink": "링크: 새 전경 탭",
   "externalBackgroundLink": "링크: 새 배경 탭",
-  "externalCurrentLink": "링크: 현재 탭/프레임"
+  "externalCurrentLink": "링크: 현재 탭/프레임",
+  "settingsSyncHelp": "Chrome 동기화가 활성화되어 있으면 설정과 URL 규칙이 자동으로 동기화됩니다. 동기화할 수 없거나 저장 용량 한도를 초과해도 설정은 이 기기에 유지됩니다."
 }

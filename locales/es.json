@@ -85,5 +85,6 @@
   "externalCurrentPage": "Página: pestaña/marco actual",
   "externalNewLink": "Enlace: nueva pestaña en primer plano",
   "externalBackgroundLink": "Enlace: nueva pestaña en segundo plano",
-  "externalCurrentLink": "Enlace: pestaña/marco actual"
+  "externalCurrentLink": "Enlace: pestaña/marco actual",
+  "settingsSyncHelp": "La configuración y las reglas de URL se sincronizan automáticamente si la sincronización de Chrome está activada. Si no se pueden sincronizar o se supera el límite de almacenamiento, se conservan en este dispositivo."
 }

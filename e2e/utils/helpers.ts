@@ -419,6 +419,7 @@ export const closeActiveTabViaServiceWorker = async (serviceWorker: Worker) =>
  */
 export const clearExtensionStorage = async (serviceWorker: Worker) => {
   await serviceWorker.evaluate(async defaultSettings => {
+    await chrome.storage.sync.clear();
     // chrome.storage.localとsessionを完全にクリア
     await chrome.storage.local.clear();
     await chrome.storage.session.clear();
@@ -427,7 +428,7 @@ export const clearExtensionStorage = async (serviceWorker: Worker) => {
     globalThis.__testExports!.sessionRestore.markSessionRestoreTabs([]);
 
     // デフォルト設定を復元
-    await chrome.storage.local.set({ settings: defaultSettings });
+    await chrome.storage.local.set({ settings: defaultSettings, settingsSyncPending: true });
   }, DEFAULT_SETTINGS);
 };
 

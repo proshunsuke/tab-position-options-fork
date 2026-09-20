@@ -85,5 +85,6 @@
   "externalCurrentPage": "页面：当前标签页或框架",
   "externalNewLink": "链接：新前台标签页",
   "externalBackgroundLink": "链接：新后台标签页",
-  "externalCurrentLink": "链接：当前标签页或框架"
+  "externalCurrentLink": "链接：当前标签页或框架",
+  "settingsSyncHelp": "启用 Chrome 同步后，设置和 URL 规则会自动同步。无法同步或超出同步存储容量时，设置仍保留在此设备上。"
 }

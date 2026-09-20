@@ -85,5 +85,6 @@
   "externalCurrentPage": "Página: aba/frame atual",
   "externalNewLink": "Link: nova aba em primeiro plano",
   "externalBackgroundLink": "Link: nova aba em segundo plano",
-  "externalCurrentLink": "Link: aba/frame atual"
+  "externalCurrentLink": "Link: aba/frame atual",
+  "settingsSyncHelp": "As configurações e regras de URL são sincronizadas automaticamente quando a sincronização do Chrome está ativada. Se a sincronização estiver indisponível ou o limite de armazenamento for excedido, as configurações permanecem neste dispositivo."
 }

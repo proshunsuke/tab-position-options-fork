@@ -85,5 +85,6 @@
   "externalCurrentPage": "ページ：現在のタブ・フレームで開く",
   "externalNewLink": "リンク先：新規タブを前面で開く",
   "externalBackgroundLink": "リンク先：新規タブを背景で開く",
-  "externalCurrentLink": "リンク先：現在のタブ・フレームで開く"
+  "externalCurrentLink": "リンク先：現在のタブ・フレームで開く",
+  "settingsSyncHelp": "Chrome の同期が有効な場合、設定と URL ルールは自動同期されます。同期できない場合や保存容量の上限を超えた場合も、この端末に設定を保持します。"
 }

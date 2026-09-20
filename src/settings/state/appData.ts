@@ -12,6 +12,7 @@ type AppDataStorage = {
  * グローバルメモリ状態として管理
  */
 let settingsState: Settings = DEFAULT_SETTINGS;
+let settingsRevision = 0;
 
 /**
  * バージョンの状態管理（chrome.storage.localの"version"キー）
@@ -24,12 +25,17 @@ let versionState: string = APP_VERSION;
  * Service Worker起動時に一度だけ呼び出される
  */
 export const initializeAppData = async () => {
+  const revision = settingsRevision;
   try {
     const result = await chrome.storage.local.get<AppDataStorage>(["settings", "version"]);
-    settingsState = result.settings ?? DEFAULT_SETTINGS;
+    if (revision === settingsRevision) {
+      settingsState = result.settings ?? DEFAULT_SETTINGS;
+    }
     versionState = result.version ?? APP_VERSION;
   } catch {
-    settingsState = DEFAULT_SETTINGS;
+    if (revision === settingsRevision) {
+      settingsState = DEFAULT_SETTINGS;
+    }
     versionState = APP_VERSION;
   }
 };
@@ -46,11 +52,12 @@ const getSettingsState = () => {
  * メモリは即座に更新し、ストレージへは遅延保存
  */
 const setSettingsState = (value: Settings) => {
+  settingsRevision++;
   settingsState = value;
 
   // ストレージへの遅延保存
   Promise.resolve().then(() => {
-    chrome.storage.local.set({ settings: value }).catch(() => {});
+    chrome.storage.local.set({ settings: value, settingsSyncPending: true }).catch(() => {});
   });
 };
 
@@ -97,8 +104,8 @@ export const saveSettingsWithVersion = (settings: Settings) => {
 export const setupStorageHandlers = () => {
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName === "local" && changes.settings) {
-      const newSettings = changes.settings.newValue as Settings;
-      settingsState = newSettings; // メモリを直接更新（ストレージへの再保存は不要）
+      settingsRevision++;
+      settingsState = (changes.settings.newValue as Settings | undefined) ?? DEFAULT_SETTINGS;
     }
   });
 };
