@@ -1,17 +1,23 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const localShard = process.env.E2E_SHARD_INDEX;
+const outputDir = localShard ? `test-results/sharded/shard-${localShard}` : "test-results";
+
 export default defineConfig({
+  outputDir,
   testDir: "./e2e/specs",
-  fullyParallel: false, // 拡張機能テストは並列実行しない
+  fullyParallel: false, // CIと同じくファイル単位で分割する
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: 1, // 拡張機能テストは1ワーカーのみ
-  reporter: [
-    // CI環境では、JUnit XMLレポートを出力
-    process.env.CI ? ["junit", { outputFile: "test-results/junit.xml" }] : ["list"],
-    // HTMLレポートは生成するが、サーバーは起動しない
-    ["html", { open: "never", outputFolder: "playwright-report" }],
-  ],
+  reporter: localShard
+    ? [["list"], ["blob", { outputDir: `${outputDir}/blob` }]]
+    : [
+        // CI環境では、JUnit XMLレポートを出力
+        process.env.CI ? ["junit", { outputFile: "test-results/junit.xml" }] : ["list"],
+        // HTMLレポートは生成するが、サーバーは起動しない
+        ["html", { open: "never", outputFolder: "playwright-report" }],
+      ],
   timeout: 60000, // 60秒のタイムアウト
   use: {
     trace: "on-first-retry",
@@ -26,8 +32,9 @@ export default defineConfig({
       name: "chromium",
       use: {
         ...devices["Desktop Chrome"],
-        // 拡張機能テストではヘッドレスモードは使用できない
-        headless: false,
+        // 分割実行は画面のフォーカスを奪い合わないよう、拡張機能対応のChromiumでheadlessにする。
+        channel: localShard ? "chromium" : undefined,
+        headless: !!localShard,
       },
     },
   ],

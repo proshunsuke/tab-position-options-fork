@@ -7,8 +7,11 @@ import { setExtensionSettings, waitForServiceWorker } from "@/e2e/utils/helpers"
 import { DEFAULT_SETTINGS, type Settings } from "@/src/types";
 
 for (const behavior of ["first", "last"] as const) {
-  test(`browser restart preserves session order with activation=${behavior}`, async () => {
-    const profile = fs.mkdtempSync(path.join(process.cwd(), "test-results", "restore-profile-"));
+  test(`browser restart preserves session order with activation=${behavior}`, async ({
+    channel,
+    headless,
+  }) => {
+    const profile = fs.mkdtempSync(test.info().outputPath("restore-profile-"));
     const extensionPath = path.join(profile, "test-extension");
     fs.cpSync(path.join(process.cwd(), "dist/chrome-mv3"), extensionPath, { recursive: true });
     fs.mkdirSync(path.join(profile, "Default"));
@@ -29,7 +32,8 @@ for (const behavior of ["first", "last"] as const) {
     const origin = `http://127.0.0.1:${address.port}`;
     const launch = () =>
       chromium.launchPersistentContext(profile, {
-        headless: false,
+        channel,
+        headless,
         ignoreDefaultArgs: ["about:blank"],
         args: [
           `--disable-extensions-except=${extensionPath}`,

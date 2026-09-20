@@ -83,10 +83,10 @@ Install Playwright's Chromium before the first run:
 
 ```fish
 npx playwright install chromium
-npm run test:e2e
+npm run test:e2e:sharded
 ```
 
-`test:e2e` builds the extension before running the tests. On Linux without a display, use the Xvfb setup in the [CI workflow](.github/workflows/test.yml). See the [E2E guide](.agents/skills/tab-position-e2e/SKILL.md) for environment setup and test-specific procedures.
+`test:e2e:sharded` builds once, runs three headless Chromium shards in parallel, and merges their reports. Use `test:e2e` for sequential execution. For `test:e2e` on Linux without a display, use the Xvfb setup in the [CI workflow](.github/workflows/test.yml). See the [E2E guide](.agents/skills/tab-position-e2e/SKILL.md) for environment setup and test-specific procedures.
 
 ## Releases
 

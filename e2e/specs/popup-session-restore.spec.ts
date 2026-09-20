@@ -6,8 +6,11 @@ import { expect, test } from "@/e2e/fixtures";
 import { setExtensionSettings, waitForServiceWorker } from "@/e2e/utils/helpers";
 import { DEFAULT_SETTINGS } from "@/src/types";
 
-test("browser session restoration matches native behavior with popup conversion enabled", async () => {
-  const root = fs.mkdtempSync(path.join(process.cwd(), "test-results", "popup-restore-"));
+test("browser session restoration matches native behavior with popup conversion enabled", async ({
+  channel,
+  headless,
+}) => {
+  const root = fs.mkdtempSync(test.info().outputPath("popup-restore-"));
   const extensionPath = path.join(root, "test-extension");
   fs.cpSync(path.join(process.cwd(), "dist/chrome-mv3"), extensionPath, { recursive: true });
   const server = createServer((_request, response) => {
@@ -32,7 +35,8 @@ test("browser session restoration matches native behavior with popup conversion 
       );
       const launch = () =>
         chromium.launchPersistentContext(profile, {
-          headless: false,
+          channel,
+          headless,
           ignoreDefaultArgs: ["about:blank"],
           args: [
             `--disable-extensions-except=${extensionPath}`,

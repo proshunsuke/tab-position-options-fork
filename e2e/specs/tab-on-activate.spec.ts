@@ -258,8 +258,10 @@ for (const order of ["activated-first", "removed-first"] as const) {
         try {
           if (order === "activated-first") {
             await chrome.tabs.update(ids[3], { active: true });
-            await handleTabActivated({ windowId, tabId: ids[3] });
             await chrome.tabs.remove(ids[2]);
+            // 実ブラウザの操作を先に完了させ、同じcloseに属するイベントを連続再生する。
+            // 間に削除APIの完了待ちを挟むと、負荷次第で25msの遷移期限を超えてしまう。
+            await handleTabActivated({ windowId, tabId: ids[3] });
             await handleTabRemoved(ids[2], { windowId, isWindowClosing: false });
           } else {
             await chrome.tabs.remove(ids[2]);
