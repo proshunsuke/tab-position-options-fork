@@ -1,5 +1,6 @@
 {
   "language": "pt-BR",
+  "extensionDescription": "Tab Position Options para Manifest V3. Configure a posição das abas e o comportamento ao abrir e fechar abas.",
   "optionsTitle": "Tab Position Options - Configurações",
   "tabClosing": "Ao fechar uma aba",
   "tabOnActivate": "Ao ativar uma aba",

@@ -30,7 +30,7 @@
 
 如需从源代码安装，请参阅[手动安装](#手动安装)。
 
-<img src="store-assets/new-tab.png" alt="Tab Position Options Fork的新标签页设置" width="640">
+<img src="store-assets/screenshots/en/01-new-tab.png" alt="Tab Position Options Fork的新标签页设置" width="640">
 
 ## 隐私
 

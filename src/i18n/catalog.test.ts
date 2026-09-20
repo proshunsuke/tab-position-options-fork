@@ -24,6 +24,7 @@ for (const [locale, messages] of Object.entries({
 })) {
   test(`${locale} provides every message and preserves substitutions`, () => {
     expect(Object.keys(messages).sort()).toEqual(Object.keys(en).sort());
+    expect(messages.extensionDescription.length).toBeLessThanOrEqual(132);
     for (const key of Object.keys(en) as (keyof typeof en)[]) {
       expect(messages[key].trim(), key).not.toBe("");
       expect(messages[key].match(/\$\d+/g) ?? [], key).toEqual(en[key].match(/\$\d+/g) ?? []);

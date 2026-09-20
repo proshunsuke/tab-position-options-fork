@@ -1,5 +1,6 @@
 {
   "language": "de",
+  "extensionDescription": "Tab Position Options für Manifest V3. Position neuer Tabs und Verhalten beim Öffnen und Schließen anpassen.",
   "optionsTitle": "Tab Position Options - Einstellungen",
   "tabClosing": "Beim Schließen eines Tabs",
   "tabOnActivate": "Beim Aktivieren eines Tabs",

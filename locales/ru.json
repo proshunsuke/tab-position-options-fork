@@ -1,5 +1,6 @@
 {
   "language": "ru",
+  "extensionDescription": "Tab Position Options для Manifest V3. Настройте расположение вкладок и поведение при их открытии и закрытии.",
   "optionsTitle": "Tab Position Options - Настройки",
   "tabClosing": "При закрытии вкладки",
   "tabOnActivate": "При активации вкладки",

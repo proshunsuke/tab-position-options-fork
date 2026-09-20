@@ -1,5 +1,6 @@
 {
   "language": "ko",
+  "extensionDescription": "Tab Position Options의 Manifest V3 버전. 새 탭의 위치, 전경·배경 열기, 탭을 닫은 후 동작을 설정하세요.",
   "optionsTitle": "Tab Position Options - 설정",
   "tabClosing": "탭을 닫을 때",
   "tabOnActivate": "탭을 활성화할 때",

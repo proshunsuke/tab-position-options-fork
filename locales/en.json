@@ -1,5 +1,6 @@
 {
   "language": "en",
+  "extensionDescription": "Fork of Tab Position Options - Select the tab opening position, new tab behavior and behavior after closing a tab",
   "optionsTitle": "Tab Position Options - Settings",
   "tabClosing": "Tab Closing",
   "tabOnActivate": "Tab on Activate",

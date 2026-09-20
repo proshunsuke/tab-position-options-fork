@@ -1,5 +1,6 @@
 {
   "language": "zh-CN",
+  "extensionDescription": "Tab Position Options 的 Manifest V3 重制版。自定义新标签页的位置、前台或后台打开方式以及关闭标签页后的行为。",
   "optionsTitle": "Tab Position Options - 设置",
   "tabClosing": "关闭标签页",
   "tabOnActivate": "激活标签页",

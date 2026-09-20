@@ -1,5 +1,6 @@
 {
   "language": "es",
+  "extensionDescription": "Versión Manifest V3 de Tab Position Options. Configura la posición de las pestañas y su comportamiento al abrirlas y cerrarlas.",
   "optionsTitle": "Tab Position Options - Configuración",
   "tabClosing": "Al cerrar una pestaña",
   "tabOnActivate": "Al activar una pestaña",

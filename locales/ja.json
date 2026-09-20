@@ -1,5 +1,6 @@
 {
   "language": "ja",
+  "extensionDescription": "Tab Position Options の Manifest V3 対応版。新しいタブの位置、前面・背景での開き方、タブを閉じた後の動作を設定できます。",
   "optionsTitle": "Tab Position Options - 設定",
   "tabClosing": "タブを閉じたとき",
   "tabOnActivate": "タブをアクティブにしたとき",
