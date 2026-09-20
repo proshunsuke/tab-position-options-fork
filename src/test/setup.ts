@@ -24,6 +24,7 @@ import {
   resetPendingCloseTarget,
 } from "@/src/tabs/state/pendingCloseTarget";
 import { resetPendingCloseTransition } from "@/src/tabs/state/pendingCloseTransition";
+import { resetPopupState } from "@/src/tabs/state/popup";
 import { removeTabFromSnapshot, resetTabSnapshotState } from "@/src/tabs/state/tabSnapshot";
 import type { GlobalTestExports } from "./types";
 
@@ -66,6 +67,7 @@ export const setupTestEnvironment = () => {
 
       states: {
         resetLoadingPageState,
+        resetPopupState,
         resetActivationHistory: resetActivationHistory,
         resetNewTabSourceTransition,
         resetNewTabActivation,

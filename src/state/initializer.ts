@@ -6,6 +6,7 @@
 import { initializeAppData } from "@/src/settings/state/appData";
 import { initializeActivationHistory } from "@/src/tabs/state/activationHistory";
 import { initializeLoadingPageState, markInitialLoadingTabs } from "@/src/tabs/state/loadingPage";
+import { initializePopupState } from "@/src/tabs/state/popup";
 import { getAllTabIds, initializeTabSnapshot } from "@/src/tabs/state/tabSnapshot";
 
 /**
@@ -46,6 +47,7 @@ export const initializeAllStates = async () => {
     initializeAppData(),
     initializeTabSnapshot(),
     initializeLoadingPageState(),
+    initializePopupState(),
   ])
     .then(([, , , isFirstSessionInitialization]) => {
       // 起動イベントより先に届く復元navigationも、既存の初期化snapshotで除外する。

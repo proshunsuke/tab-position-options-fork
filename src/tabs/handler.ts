@@ -9,12 +9,26 @@ import {
   handleNavigationCommitted,
   handleNavigationError,
 } from "@/src/tabs/loadingPage";
+import {
+  handlePopupNavigationTarget,
+  handleTabAttached,
+  handleTabDetached,
+  handleWindowCreated,
+  handleWindowFocusChanged,
+  handleWindowRemoved,
+} from "@/src/tabs/popup";
 import { initSessionRestoreDetector } from "@/src/tabs/sessionRestoreDetector";
 
 export const setupTabHandlers = () => {
   if (typeof chrome !== "undefined" && chrome.tabs && chrome.runtime) {
     initSessionRestoreDetector();
 
+    chrome.windows.onCreated.addListener(handleWindowCreated);
+    chrome.windows.onFocusChanged.addListener(handleWindowFocusChanged);
+    chrome.windows.onRemoved.addListener(handleWindowRemoved);
+    chrome.tabs.onDetached.addListener(handleTabDetached);
+    chrome.tabs.onAttached.addListener(handleTabAttached);
+    chrome.webNavigation.onCreatedNavigationTarget.addListener(handlePopupNavigationTarget);
     chrome.tabs.onCreated.addListener(handleNewTab);
     chrome.tabs.onActivated.addListener(handleTabActivated);
     chrome.tabs.onRemoved.addListener(handleTabRemoved);

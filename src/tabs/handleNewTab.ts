@@ -1,5 +1,6 @@
 import { getSettings } from "@/src/settings/state/appData";
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
+import { handlePopupTabCreated } from "@/src/tabs/popup";
 import { calculateNewTabIndex } from "@/src/tabs/position";
 import { isSessionRestoreTab } from "@/src/tabs/sessionRestoreDetector";
 import {
@@ -7,7 +8,7 @@ import {
   getLastActiveTabIdByNewTabId,
 } from "@/src/tabs/state/activationHistory";
 import { getLoadingPositionRevision, markRestoredLoadingTab } from "@/src/tabs/state/loadingPage";
-import { recordNewTabActivation } from "@/src/tabs/state/newTabActivation";
+import { consumeNewTabActivation, recordNewTabActivation } from "@/src/tabs/state/newTabActivation";
 import { consumeRecentNewTabSourceTransition } from "@/src/tabs/state/newTabSourceTransition";
 import {
   addTabToSnapshot,
@@ -39,6 +40,11 @@ export const handleNewTab = async (tab: chrome.tabs.Tab) => {
   const windowId = tab.windowId;
 
   if (!tabId) {
+    return;
+  }
+
+  if (handlePopupTabCreated(tab)) {
+    consumeNewTabActivation(windowId, tabId);
     return;
   }
 

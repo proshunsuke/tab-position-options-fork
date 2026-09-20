@@ -47,6 +47,7 @@ declare global {
      */
     states: {
       resetLoadingPageState: () => void;
+      resetPopupState: () => void;
       resetActivationHistory: () => void;
       resetNewTabSourceTransition: () => void;
       resetNewTabActivation: () => void;
