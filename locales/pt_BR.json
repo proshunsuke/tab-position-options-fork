@@ -56,7 +56,7 @@
   "saveSettings": "Salvar configurações",
   "saving": "Salvando…",
   "saved": "Configurações salvas!",
-  "invalidPattern": "Insira um padrão de URL válido para cada regra.",
+  "invalidPattern": "Insira um padrão de URL válido.",
   "saveFailed": "Não foi possível salvar as configurações. Tente novamente.",
   "exportSettings": "Exportar configurações",
   "importSettings": "Importar configurações",

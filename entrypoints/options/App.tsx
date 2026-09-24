@@ -9,6 +9,13 @@ import { SettingsSyncStatus } from "@/entrypoints/options/SettingsSyncStatus";
 import { TabClosing } from "@/entrypoints/options/TabClosing";
 import { TabOnActivate } from "@/entrypoints/options/TabOnActivate";
 import {
+  externalLinkPermissionRequest,
+  hasPermissions,
+  requestPermissions,
+  tabsPermissionRequest,
+  webNavigationPermissionRequest,
+} from "@/src/permissions/optional";
+import {
   getSettings,
   initializeAppData,
   saveSettingsWithVersion,
@@ -35,6 +42,11 @@ const Categories = [
   ["management", "settingsManagement"],
 ] as const;
 type Category = (typeof Categories)[number][0];
+type OptionalPermissionState = {
+  tabs: boolean;
+  webNavigation: boolean;
+  externalLinks: boolean;
+};
 
 const App = () => {
   const [activeTab, setActiveTab] = useState<Category>("new");
@@ -56,14 +68,67 @@ const App = () => {
   const [isReady, setIsReady] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<
-    "saved" | "invalidPattern" | "saveFailed" | "imported" | "importFailed" | "exportFailed" | null
+  const [optionalPermissions, setOptionalPermissions] = useState<OptionalPermissionState>({
+    tabs: false,
+    webNavigation: false,
+    externalLinks: false,
+  });
+  const [saveStatus, setSaveStatus] = useState<"saved" | "saveFailed" | null>(null);
+  const [transferStatus, setTransferStatus] = useState<
+    "imported" | "importFailed" | "exportFailed" | null
   >(null);
   const saveMessage = saveStatus
     ? i18n.t(saveStatus)
     : isDirty.current
       ? i18n.t("unsavedChanges")
       : "";
+  const saveMessageClass =
+    saveStatus === "saved"
+      ? "text-green-700"
+      : saveStatus === "saveFailed"
+        ? "text-red-700"
+        : "text-gray-600";
+
+  useEffect(() => {
+    let disposed = false;
+    const refreshPermissions = () => {
+      void Promise.all([
+        hasPermissions(tabsPermissionRequest),
+        hasPermissions(webNavigationPermissionRequest),
+        hasPermissions(externalLinkPermissionRequest),
+      ]).then(([tabs, webNavigation, externalLinks]) => {
+        if (!disposed) {
+          setOptionalPermissions({ tabs, webNavigation, externalLinks });
+        }
+      });
+    };
+    chrome.permissions.onAdded.addListener(refreshPermissions);
+    chrome.permissions.onRemoved.addListener(refreshPermissions);
+    refreshPermissions();
+    return () => {
+      disposed = true;
+      chrome.permissions.onAdded.removeListener(refreshPermissions);
+      chrome.permissions.onRemoved.removeListener(refreshPermissions);
+    };
+  }, []);
+
+  const requestFeaturePermission = (
+    permission: chrome.permissions.Permissions,
+    key: keyof OptionalPermissionState,
+  ) => {
+    const request = requestPermissions(permission);
+    void request.then(granted => {
+      if (granted) {
+        setOptionalPermissions(current => ({ ...current, [key]: true }));
+      }
+    });
+    return request;
+  };
+  const requestTabsPermission = () => requestFeaturePermission(tabsPermissionRequest, "tabs");
+  const requestWebNavigationPermission = () =>
+    requestFeaturePermission(webNavigationPermissionRequest, "webNavigation");
+  const requestExternalLinkPermission = () =>
+    requestFeaturePermission(externalLinkPermissionRequest, "externalLinks");
 
   const changeCategory = (category: Category) => {
     setActiveTab(category);
@@ -79,6 +144,7 @@ const App = () => {
   const markDirty = () => {
     isDirty.current = true;
     setSaveStatus(null);
+    setTransferStatus(null);
     setInvalidRule(null);
   };
 
@@ -181,8 +247,7 @@ const App = () => {
       return;
     }
     setIsImporting(true);
-    isDirty.current = true;
-    setSaveStatus(null);
+    setTransferStatus(null);
     try {
       // ファイル全体の読み込みと検証が終わるまで、画面にもストレージにも反映しない。
       const settings = parseSettingsFile(await file.text());
@@ -194,15 +259,17 @@ const App = () => {
       setTabOnActivate(settings.tabOnActivate.behavior);
       setPopup(settings.popup);
       setExternalLinks(settings.externalLinks);
-      setSaveStatus("imported");
+      isDirty.current = true;
+      setTransferStatus("imported");
     } catch {
-      setSaveStatus("importFailed");
+      setTransferStatus("importFailed");
     } finally {
       setIsImporting(false);
     }
   };
 
   const handleExport = () => {
+    setTransferStatus(null);
     try {
       const content = serializeSettings(getDraftSettings());
       const url = URL.createObjectURL(new Blob([content], { type: "application/json" }));
@@ -212,14 +279,13 @@ const App = () => {
       document.body.append(link);
       try {
         link.click();
-        setSaveStatus(null);
       } finally {
         link.remove();
         // ダウンロード開始後に解放する。タブ操作とは独立した画面内の後処理。
         setTimeout(() => URL.revokeObjectURL(url), 0);
       }
     } catch {
-      setSaveStatus("exportFailed");
+      setTransferStatus("exportFailed");
     }
   };
 
@@ -235,7 +301,6 @@ const App = () => {
       if (index !== -1) {
         changeCategory(group.category);
         setInvalidRule({ id: `${group.prefix}-${index}` });
-        setSaveStatus("invalidPattern");
         return;
       }
     }
@@ -250,6 +315,7 @@ const App = () => {
         ...getDraftSettings(),
       });
       isDirty.current = false;
+      setTransferStatus(null);
 
       setSaveStatus("saved");
 
@@ -320,11 +386,17 @@ const App = () => {
                 onNewTabPositionChange={handleNewTabPositionChange}
                 openInBackground={openInBackground}
                 onOpenInBackgroundChange={handleOpenInBackgroundChange}
+                tabsPermissionGranted={optionalPermissions.tabs}
+                onRequestTabsPermission={requestTabsPermission}
+                invalidRuleId={invalidRule?.id ?? null}
               />
             )}
             {activeTab === "loading" && (
               <LoadingPage
                 rules={loadingRules}
+                webNavigationPermissionGranted={optionalPermissions.webNavigation}
+                onRequestWebNavigationPermission={requestWebNavigationPermission}
+                invalidRuleId={invalidRule?.id ?? null}
                 onRulesChange={value => {
                   markDirty();
                   setLoadingRules(value);
@@ -334,6 +406,9 @@ const App = () => {
             {activeTab === "popup" && (
               <Popup
                 settings={popup}
+                webNavigationPermissionGranted={optionalPermissions.webNavigation}
+                onRequestWebNavigationPermission={requestWebNavigationPermission}
+                invalidRuleId={invalidRule?.id ?? null}
                 onChange={value => {
                   markDirty();
                   setPopup(value);
@@ -349,6 +424,9 @@ const App = () => {
             {activeTab === "external" && (
               <ExternalLinks
                 settings={externalLinks}
+                permissionGranted={optionalPermissions.externalLinks}
+                onRequestPermission={requestExternalLinkPermission}
+                invalidRuleId={invalidRule?.id ?? null}
                 onChange={value => {
                   markDirty();
                   setExternalLinks(value);
@@ -394,6 +472,14 @@ const App = () => {
                       }}
                     />
                   </div>
+                  {transferStatus && (
+                    <p
+                      role="status"
+                      className={`text-sm ${transferStatus === "imported" ? "text-green-700" : "text-red-700"}`}
+                    >
+                      {i18n.t(transferStatus)}
+                    </p>
+                  )}
                   <p className="text-sm text-gray-600">{i18n.t("settingsTransferHelp")}</p>
                 </div>
                 <p className="text-sm text-gray-600">{i18n.t("settingsSyncHelp")}</p>
@@ -406,10 +492,10 @@ const App = () => {
       <footer className="shrink-0 border-t border-gray-200 bg-white px-4 py-3 md:px-8">
         <div className="mx-auto max-w-7xl space-y-3">
           <SettingsSyncStatus />
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
             <p
               role="status"
-              className={`text-sm ${saveStatus && saveStatus !== "saved" && saveStatus !== "imported" ? "text-red-700" : "text-gray-600"}`}
+              className={`w-full text-right text-sm sm:w-auto sm:max-w-xl ${saveMessageClass}`}
             >
               {saveMessage}
             </p>

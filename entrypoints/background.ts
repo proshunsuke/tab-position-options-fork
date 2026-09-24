@@ -1,5 +1,6 @@
 import { setupActionHandlers } from "@/src/action/handler";
 import { setupCommandHandlers } from "@/src/commands/handler";
+import { setupExternalLinkContentScripts } from "@/src/externalLinks/contentScripts";
 import { setupExternalLinkHandlers } from "@/src/externalLinks/handler";
 import { setupStorageHandlers } from "@/src/settings/state/appData";
 import { setupSettingsSync } from "@/src/settings/sync";
@@ -11,6 +12,7 @@ export default defineBackground(() => {
   initializeAllStates();
   setupActionHandlers();
   setupCommandHandlers();
+  setupExternalLinkContentScripts();
   setupExternalLinkHandlers();
   setupStorageHandlers();
   setupSettingsSync();

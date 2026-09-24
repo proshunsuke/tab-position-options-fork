@@ -2,12 +2,20 @@ import { getExternalLinkAction } from "@/src/externalLinks/rules";
 import { DEFAULT_SETTINGS, type Settings } from "@/src/types";
 
 export default defineContentScript({
+  registration: "runtime",
   matches: ["http://*/*", "https://*/*"],
   allFrames: true,
   runAt: "document_start",
   main(ctx) {
+    const contentScriptState = globalThis as Record<string, unknown>;
+    if (contentScriptState.__tabPositionOptionsExternalLinksInitialized) {
+      return;
+    }
+    contentScriptState.__tabPositionOptionsExternalLinksInitialized = true;
+
     let settings = DEFAULT_SETTINGS.externalLinks;
     let changed = false;
+    const settingsChangedEvent = chrome.storage.onChanged;
     const onChanged = (changes: Record<string, chrome.storage.StorageChange>, area: string) => {
       if (area !== "local" || !changes.settings) {
         return;
@@ -17,8 +25,14 @@ export default defineContentScript({
         (changes.settings.newValue as Settings | undefined)?.externalLinks ??
         DEFAULT_SETTINGS.externalLinks;
     };
-    chrome.storage.onChanged.addListener(onChanged);
-    ctx.onInvalidated(() => chrome.storage.onChanged.removeListener(onChanged));
+    settingsChangedEvent.addListener(onChanged);
+    ctx.onInvalidated(() => {
+      try {
+        settingsChangedEvent.removeListener(onChanged);
+      } catch {
+        // Chrome may invalidate the global API namespace before WXT runs cleanup.
+      }
+    });
     void chrome.storage.local
       .get<{ settings?: Settings }>("settings")
       .then(result => {

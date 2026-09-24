@@ -56,7 +56,7 @@
   "saveSettings": "儲存設定",
   "saving": "儲存中…",
   "saved": "設定已儲存！",
-  "invalidPattern": "請為每個規則輸入有效的 URL 比對模式。",
+  "invalidPattern": "請輸入有效的 URL 比對模式。",
   "saveFailed": "無法儲存設定，請再試一次。",
   "exportSettings": "匯出設定",
   "importSettings": "匯入設定",

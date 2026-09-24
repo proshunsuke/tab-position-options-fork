@@ -369,7 +369,7 @@ test("options validate, save and restore external link rules", async ({
   await page.getByRole("button", { name: "Add rule", exact: true }).click();
   await page.getByRole("textbox", { name: "URL pattern 1", exact: true }).fill("[");
   await page.getByRole("button", { name: "Save Settings", exact: true }).click();
-  await expect(page.getByRole("status")).toHaveText("Enter a valid URL pattern for each rule.");
+  await expect(page.getByRole("alert")).toHaveText("Enter a valid URL pattern.");
   await page.getByRole("textbox", { name: "URL pattern 1", exact: true }).fill("example.test");
   await page
     .getByRole("combobox", { name: "Link action 1", exact: true })

@@ -56,7 +56,7 @@
   "saveSettings": "Save Settings",
   "saving": "Saving...",
   "saved": "Settings saved successfully!",
-  "invalidPattern": "Enter a valid URL pattern for each rule.",
+  "invalidPattern": "Enter a valid URL pattern.",
   "saveFailed": "Failed to save settings. Please try again.",
   "exportSettings": "Export Settings",
   "importSettings": "Import Settings",

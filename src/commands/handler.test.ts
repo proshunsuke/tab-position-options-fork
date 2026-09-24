@@ -1,5 +1,6 @@
 import { beforeEach, expect, test, vi } from "vitest";
 import { handleCommand, setupCommandHandlers } from "@/src/commands/handler";
+import { tabsPermissionRequest } from "@/src/permissions/optional";
 import { clearPendingCloseTarget } from "@/src/tabs/state/pendingCloseTarget";
 import { cancelActivationMove } from "@/src/tabs/tabOnActivate";
 
@@ -9,6 +10,7 @@ const state = vi.hoisted(() => ({
   initialize: false,
   initializeAllStates: vi.fn(async () => {}),
 }));
+const permissionsRequest = vi.fn(async () => true);
 vi.mock("@/src/state/initializer", () => ({
   needsInitialization: () => state.initialize,
   initializeAllStates: state.initializeAllStates,
@@ -36,11 +38,13 @@ const tab = { id: 2, windowId: 10 } as chrome.tabs.Tab;
 
 beforeEach(() => {
   vi.clearAllMocks();
+  permissionsRequest.mockResolvedValue(true);
   state.active = 2;
   state.history = [1, 2];
   state.initialize = false;
   vi.stubGlobal("chrome", {
     commands: { onCommand: { addListener: vi.fn() } },
+    permissions: { request: permissionsRequest },
     windows: { getLastFocused: vi.fn(async () => ({ id: 10 })) },
     tabs: {
       query: vi.fn(async () => []),
@@ -85,6 +89,33 @@ test("command listener forwards Chrome events to the handler", async () => {
   const listener = vi.mocked(chrome.commands.onCommand.addListener).mock.calls[0][0];
   listener("toggle-last-active", tab);
   expect(chrome.tabs.update).toHaveBeenCalledWith(1, { active: true });
+  expect(chrome.permissions.request).not.toHaveBeenCalled();
+});
+
+test.each(["sort-title", "sort-url"] as const)(
+  "%s requests tab access before sorting",
+  async command => {
+    setupCommandHandlers();
+    const listener = vi.mocked(chrome.commands.onCommand.addListener).mock.calls[0][0];
+
+    listener(command, tab);
+
+    expect(chrome.permissions.request).toHaveBeenCalledWith(tabsPermissionRequest);
+    await vi.waitFor(() => expect(chrome.tabs.query).toHaveBeenCalledWith({ windowId: 10 }));
+  },
+);
+
+test("declining tab access cancels a sorting shortcut", async () => {
+  permissionsRequest.mockResolvedValueOnce(false);
+  setupCommandHandlers();
+  const listener = vi.mocked(chrome.commands.onCommand.addListener).mock.calls[0][0];
+
+  listener("sort-title", tab);
+
+  expect(chrome.permissions.request).toHaveBeenCalledWith(tabsPermissionRequest);
+  expect(chrome.tabs.query).not.toHaveBeenCalled();
+  await new Promise(resolve => setTimeout(resolve, 0));
+  expect(chrome.tabs.query).not.toHaveBeenCalled();
 });
 
 test("sort failure releases the window for retry", async () => {

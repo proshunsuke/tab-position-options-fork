@@ -11,7 +11,9 @@ export default defineConfig({
     name: "Tab Position Options Fork",
     version: APP_VERSION,
     description: "__MSG_extensionDescription__",
-    permissions: ["storage", "tabs", "webNavigation"],
+    permissions: ["storage"],
+    optional_permissions: ["tabs", "webNavigation", "scripting"],
+    optional_host_permissions: ["http://*/*", "https://*/*"],
     host_permissions: [],
     commands: {
       "sort-title": { suggested_key: { default: "Alt+T" }, description: "__MSG_sortByTitle__" },
@@ -35,4 +37,20 @@ export default defineConfig({
 
   // Build configuration
   outDir: "dist",
+
+  hooks: {
+    "build:manifestGenerated": (wxt, manifest) => {
+      if (wxt.config.command === "serve") {
+        return;
+      }
+
+      const externalLinkHosts = new Set(["http://*/*", "https://*/*"]);
+      manifest.host_permissions = (manifest.host_permissions ?? []).filter(
+        (permission: string) => !externalLinkHosts.has(permission),
+      );
+      manifest.optional_host_permissions = [
+        ...new Set([...(manifest.optional_host_permissions ?? []), ...externalLinkHosts]),
+      ];
+    },
+  },
 });

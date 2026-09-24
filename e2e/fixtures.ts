@@ -8,11 +8,17 @@ export type TestFixtures = {
   extensionId: string;
   serviceWorker: Worker;
   keepInstallOptions: boolean;
+  grantOptionalPermissions: boolean;
 };
 
 export const test = base.extend<TestFixtures>({
   keepInstallOptions: [false, { option: true }],
-  context: async ({ channel, headless, keepInstallOptions }, use, testInfo) => {
+  grantOptionalPermissions: [true, { option: true }],
+  context: async (
+    { channel, headless, keepInstallOptions, grantOptionalPermissions },
+    use,
+    testInfo,
+  ) => {
     // 各テスト・分割の出力先に置き、別プロセスの後片付けから分離する。
     const userDataDir = fs.mkdtempSync(testInfo.outputPath("chrome-user-data-"));
     const extensionSource = path.join(process.cwd(), "dist", "chrome-mv3");
@@ -26,6 +32,36 @@ export const test = base.extend<TestFixtures>({
         recursive: true,
         filter: source => path.dirname(source) !== localesDir || path.basename(source) === "en",
       });
+      // Feature behavior specs need deterministic optional access without opening browser prompts.
+      if (grantOptionalPermissions) {
+        const manifestPath = path.join(pathToExtension, "manifest.json");
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as Record<
+          string,
+          unknown
+        >;
+        const optionalPermissionsKey = "optional_permissions";
+        const hostPermissionsKey = "host_permissions";
+        const optionalHostPermissionsKey = "optional_host_permissions";
+        const requiredPermissions = Array.isArray(manifest.permissions)
+          ? (manifest.permissions as string[])
+          : [];
+        const optionalPermissions = Array.isArray(manifest[optionalPermissionsKey])
+          ? (manifest[optionalPermissionsKey] as string[])
+          : [];
+        const requiredHostPermissions = Array.isArray(manifest[hostPermissionsKey])
+          ? (manifest[hostPermissionsKey] as string[])
+          : [];
+        const optionalHostPermissions = Array.isArray(manifest[optionalHostPermissionsKey])
+          ? (manifest[optionalHostPermissionsKey] as string[])
+          : [];
+        manifest.permissions = [...new Set([...requiredPermissions, ...optionalPermissions])];
+        manifest[hostPermissionsKey] = [
+          ...new Set([...requiredHostPermissions, ...optionalHostPermissions]),
+        ];
+        delete manifest[optionalPermissionsKey];
+        delete manifest[optionalHostPermissionsKey];
+        fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+      }
       context = await chromium.launchPersistentContext(userDataDir, {
         channel,
         headless,

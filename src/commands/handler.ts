@@ -1,4 +1,5 @@
 import { getSortedTabs } from "@/src/commands/sort";
+import { requestPermissions, tabsPermissionRequest } from "@/src/permissions/optional";
 import { initializeAllStates, needsInitialization } from "@/src/state/initializer";
 import {
   getActivationHistory,
@@ -19,6 +20,17 @@ const sortingWindows = new Set<number>();
 
 export const setupCommandHandlers = () => {
   chrome.commands.onCommand.addListener((command, tab) => {
+    if (command === "sort-title" || command === "sort-url") {
+      // Command events come directly from a user shortcut, so request the sensitive tab fields here.
+      void requestPermissions(tabsPermissionRequest)
+        .then(granted => {
+          if (granted) {
+            return handleCommand(command, tab);
+          }
+        })
+        .catch(error => console.error("Tab command failed:", error));
+      return;
+    }
     void handleCommand(command, tab).catch(error => console.error("Tab command failed:", error));
   });
 };

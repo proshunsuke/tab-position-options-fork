@@ -21,6 +21,19 @@ export type RestoreEvents = {
 
 export const prepareSessionRestoreProfile = (profile: string, extensionPath: string) => {
   fs.cpSync(path.join(process.cwd(), "dist/chrome-mv3"), extensionPath, { recursive: true });
+  const manifestPath = path.join(extensionPath, "manifest.json");
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as Record<string, unknown>;
+  const sessionRestorePermissions = ["tabs", "webNavigation"];
+  const permissions = Array.isArray(manifest.permissions) ? (manifest.permissions as string[]) : [];
+  const optionalPermissions = Array.isArray(manifest.optional_permissions)
+    ? (manifest.optional_permissions as string[])
+    : [];
+  // These tests exercise feature behavior after users have granted the related optional access.
+  manifest.permissions = [...new Set([...permissions, ...sessionRestorePermissions])];
+  manifest.optional_permissions = optionalPermissions.filter(
+    permission => !sessionRestorePermissions.includes(permission),
+  );
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest));
   fs.mkdirSync(path.join(profile, "Default"), { recursive: true });
   fs.writeFileSync(
     path.join(profile, "Default", "Preferences"),
