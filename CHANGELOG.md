@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.0
+- Made tab, navigation, and website access optional, requesting permissions only when you use the features that need them
+
 ## 1.0.0
 - Added the remaining original Tab Position Options features, completing the Manifest V3 reimplementation
 - Added Tab on Activate settings to move activated tabs to the first or last position

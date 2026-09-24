@@ -2,17 +2,18 @@
 
 [Developer Dashboard](https://chrome.google.com/webstore/devconsole/8009c97a-122b-4cb9-abdd-a961267915fc/bimiahgcjenkoacmdfggckkaflnnebki/edit)
 
-Target version: **1.0.0**. The values below are the intended submission contents, not a record of what is currently published. Headings match the Japanese dashboard; copy each text block into the indicated field and locale. “空欄” means leave the field empty; “維持” means keep the existing value or upload.
+Target version: **1.1.0**. The values below are the intended submission contents, not a record of what is currently published. Headings match the Japanese dashboard; copy each text block into the indicated field and locale. “空欄” means leave the field empty; “維持” means keep the existing value or upload.
 
 ## パッケージ
 
 | 項目 | 値 |
 | --- | --- |
-| パッケージ | `dist/tab-position-options-fork-1.0.0-chrome.zip` |
-| バージョン | `1.0.0` (from `package.json`) |
+| パッケージ | `dist/tab-position-options-fork-1.1.0-chrome.zip` |
+| バージョン | `1.1.0` (from `package.json`) |
 | アイテムタイプ | 拡張機能 |
-| 権限 | `storage`, `tabs`, `webNavigation` |
-| サイトへのアクセス | `http://*/*`, `https://*/*` (static content script, all frames) |
+| 必須権限 | `storage` |
+| 任意権限 | `tabs`, `webNavigation`, `scripting` (requested when using the related features) |
+| サイトへのアクセス | 任意: `http://*/*`, `https://*/*` (requested when enabling External Links; runtime content script, all frames) |
 | 検証済み CRX アップロード | 無効のまま維持 |
 
 ## ストアの掲載情報
@@ -55,6 +56,7 @@ HOW TO USE
 1. Settings open automatically after installation. Use Chrome's Extensions menu or the toolbar icon to return to them.
 2. Choose your preferences and add URL rules if needed.
 3. Click Save Settings.
+Chrome requests optional permissions when you first use a feature that needs them.
 
 SUPPORT AND SOURCE CODE
 https://github.com/proshunsuke/tab-position-options-fork
@@ -66,6 +68,9 @@ Original extension:
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
 
 CHANGELOG
+1.1.0
+- Made tab, navigation, and website access optional, requesting permissions only when you use the features that need them
+
 1.0.0
 - Added the remaining original Tab Position Options features, completing the Manifest V3 reimplementation
 - Added Tab on Activate settings to move activated tabs to the first or last position
@@ -136,6 +141,7 @@ Tab Position Options Fork は、Chrome 向けに原版の Tab Position Options �
 1. インストール後に設定画面が自動的に開きます。再度開く場合は、Chrome の拡張機能メニューまたはツールバーアイコンを使います。
 2. 動作を設定し、必要に応じて URL ルールを追加します。
 3. 「設定を保存」をクリックします。
+権限が必要な機能を初めて使うときに、Chrome が必要な権限を要求します。
 
 サポートとソースコード
 https://github.com/proshunsuke/tab-position-options-fork
@@ -147,6 +153,9 @@ https://github.com/proshunsuke/tab-position-options-fork/issues
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
 
 変更履歴
+1.1.0
+- タブ、ナビゲーション、ウェブサイトへのアクセスを任意権限に変更し、必要な機能を使うときだけ権限を要求するよう変更
+
 1.0.0
 - 原版 Tab Position Options の残りの機能を追加し、Manifest V3 向けの再実装を完了
 - アクティブになったタブを先頭または末尾へ移動する設定を追加
@@ -217,6 +226,7 @@ Tab Position Options Fork 是面向 Chrome、基于 Manifest V3 重新实现的�
 1. 安装后设置页面会自动打开。之后可通过 Chrome 的扩展程序菜单或工具栏图标再次打开。
 2. 选择所需设置，并根据需要添加 URL 规则。
 3. 点击“保存设置”。
+首次使用需要权限的功能时，Chrome 会请求相应权限。
 
 支持与源代码
 https://github.com/proshunsuke/tab-position-options-fork
@@ -228,6 +238,9 @@ https://github.com/proshunsuke/tab-position-options-fork/issues
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
 
 更新日志
+1.1.0
+- 将标签页、导航和网站访问权限改为可选，仅在使用相关功能时请求权限
+
 1.0.0
 - 添加原版 Tab Position Options 的其余功能，完成 Manifest V3 重制
 - 添加激活标签页时将其移至最前或最后的设置
@@ -298,6 +311,7 @@ Tab Position Options Fork 是針對 Chrome、以 Manifest V3 重新實作原版 
 1. 安裝後會自動開啟設定頁面。之後可透過 Chrome 的擴充功能選單或工具列圖示再次開啟。
 2. 選擇所需設定，並視需要新增 URL 規則。
 3. 按一下「儲存設定」。
+首次使用需要權限的功能時，Chrome 會要求相應權限。
 
 支援與原始碼
 https://github.com/proshunsuke/tab-position-options-fork
@@ -309,6 +323,9 @@ https://github.com/proshunsuke/tab-position-options-fork/issues
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
 
 更新紀錄
+1.1.0
+- 將分頁、導覽和網站存取權限改為選用，僅在使用相關功能時要求權限
+
 1.0.0
 - 新增原版 Tab Position Options 的其餘功能，完成 Manifest V3 重製
 - 新增啟用分頁時將其移至最前或最後的設定
@@ -379,6 +396,7 @@ Tab Position Options Fork는 원본 Tab Position Options를 Chrome용 Manifest V
 1. 설치 후 설정 화면이 자동으로 열립니다. 다시 열려면 Chrome 확장 프로그램 메뉴 또는 도구 모음 아이콘을 사용하세요.
 2. 원하는 동작을 설정하고 필요하면 URL 규칙을 추가하세요.
 3. '설정 저장'을 클릭하세요.
+권한이 필요한 기능을 처음 사용할 때 Chrome에서 해당 권한을 요청합니다.
 
 지원 및 소스 코드
 https://github.com/proshunsuke/tab-position-options-fork
@@ -390,6 +408,9 @@ https://github.com/proshunsuke/tab-position-options-fork/issues
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
 
 변경 이력
+1.1.0
+- 탭, 탐색 및 웹사이트 접근 권한을 선택 권한으로 바꾸고, 필요한 기능을 사용할 때만 요청
+
 1.0.0
 - 원본 Tab Position Options의 나머지 기능을 추가하여 Manifest V3 재구현 완료
 - 활성화된 탭을 맨 앞이나 맨 뒤로 이동하는 설정 추가
@@ -460,6 +481,7 @@ CÓMO USARLA
 1. Los ajustes se abren automáticamente tras la instalación. Para volver a abrirlos, usa el menú de extensiones de Chrome o el icono de la barra de herramientas.
 2. Elige tus preferencias y añade reglas de URL si lo necesitas.
 3. Haz clic en Guardar configuración.
+Chrome solicitará los permisos opcionales necesarios la primera vez que uses una función que los requiera.
 
 ASISTENCIA Y CÓDIGO FUENTE
 https://github.com/proshunsuke/tab-position-options-fork
@@ -471,6 +493,9 @@ Extensión original:
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
 
 HISTORIAL DE CAMBIOS
+1.1.0
+- Se hicieron opcionales los permisos de pestañas, navegación y sitios web, y se solicitan solo al usar las funciones que los necesitan
+
 1.0.0
 - Añadidas las funciones restantes de Tab Position Options, completando la reimplementación para Manifest V3
 - Añadidos ajustes para mover las pestañas activadas a la primera o última posición
@@ -541,6 +566,7 @@ UTILISATION
 1. Les paramètres s’ouvrent automatiquement après l’installation. Utilisez le menu Extensions de Chrome ou l’icône de la barre d’outils pour les rouvrir.
 2. Choisissez vos préférences et ajoutez des règles d’URL si nécessaire.
 3. Cliquez sur Enregistrer les paramètres.
+Chrome demande les autorisations facultatives nécessaires lorsque vous utilisez pour la première fois une fonctionnalité qui en a besoin.
 
 ASSISTANCE ET CODE SOURCE
 https://github.com/proshunsuke/tab-position-options-fork
@@ -552,6 +578,9 @@ Extension d’origine :
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
 
 HISTORIQUE DES MODIFICATIONS
+1.1.0
+- Rendre facultatifs les accès aux onglets, à la navigation et aux sites Web, et ne les demander que lors de l’utilisation des fonctionnalités concernées
+
 1.0.0
 - Ajout des fonctions restantes de Tab Position Options, achevant sa réimplémentation pour Manifest V3
 - Ajout de paramètres pour déplacer les onglets activés en première ou dernière position
@@ -622,6 +651,7 @@ VERWENDUNG
 1. Nach der Installation öffnen sich die Einstellungen automatisch. Über das Erweiterungsmenü von Chrome oder das Symbol in der Symbolleiste können Sie sie erneut öffnen.
 2. Wählen Sie Ihre Einstellungen und fügen Sie bei Bedarf URL-Regeln hinzu.
 3. Klicken Sie auf Einstellungen speichern.
+Chrome fragt nach den erforderlichen optionalen Berechtigungen, wenn Sie eine entsprechende Funktion zum ersten Mal verwenden.
 
 SUPPORT UND QUELLCODE
 https://github.com/proshunsuke/tab-position-options-fork
@@ -633,6 +663,9 @@ Ursprüngliche Erweiterung:
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
 
 ÄNDERUNGSPROTOKOLL
+1.1.0
+- Zugriffe auf Tabs, Navigation und Websites optional gemacht; Berechtigungen werden nur bei Verwendung der entsprechenden Funktionen angefordert
+
 1.0.0
 - Verbleibende Funktionen von Tab Position Options hinzugefügt und die Neuimplementierung für Manifest V3 abgeschlossen
 - Einstellungen zum Verschieben aktivierter Tabs an die erste oder letzte Position hinzugefügt
@@ -703,6 +736,7 @@ COMO USAR
 1. As configurações são abertas automaticamente após a instalação. Use o menu de extensões do Chrome ou o ícone na barra de ferramentas para abri-las novamente.
 2. Escolha suas preferências e adicione regras de URL, se necessário.
 3. Clique em Salvar configurações.
+O Chrome solicitará as permissões opcionais necessárias na primeira vez que você usar um recurso que precise delas.
 
 SUPORTE E CÓDIGO-FONTE
 https://github.com/proshunsuke/tab-position-options-fork
@@ -714,6 +748,9 @@ Extensão original:
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
 
 HISTÓRICO DE ALTERAÇÕES
+1.1.0
+- Tornou opcionais as permissões para acessar abas, navegação e sites, solicitando-as apenas ao usar os recursos correspondentes
+
 1.0.0
 - Adicionados os recursos restantes do Tab Position Options original, concluindo a reimplementação para Manifest V3
 - Adicionadas configurações para mover abas ativadas para a primeira ou última posição
@@ -784,6 +821,7 @@ Tab Position Options Fork — это реализация оригинально
 1. После установки настройки откроются автоматически. Чтобы открыть их снова, используйте меню расширений Chrome или значок на панели инструментов.
 2. Выберите нужные параметры и при необходимости добавьте правила URL.
 3. Нажмите «Сохранить настройки».
+Chrome запросит необходимые дополнительные разрешения при первом использовании соответствующей функции.
 
 ПОДДЕРЖКА И ИСХОДНЫЙ КОД
 https://github.com/proshunsuke/tab-position-options-fork
@@ -795,6 +833,9 @@ https://github.com/proshunsuke/tab-position-options-fork/issues
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
 
 ИСТОРИЯ ИЗМЕНЕНИЙ
+1.1.0
+- Сделаны необязательными разрешения на вкладки, навигацию и доступ к сайтам; они запрашиваются только при использовании соответствующих функций
+
 1.0.0
 - Добавлены оставшиеся функции оригинального Tab Position Options, завершена реализация для Manifest V3
 - Добавлены настройки перемещения активированных вкладок на первую или последнюю позицию
@@ -899,30 +940,36 @@ Customize Chrome tab positioning and activation: choose where tabs open, which t
 
 ### 権限が必要な理由
 
-Maximum: 1,000 characters per field. Upload the target package before filling fields for newly added permissions. Site access is declared through content-script matches; use the dashboard's host-permission/site-access justification field when it appears.
+Maximum: 1,000 characters per field. These justifications describe permissions requested only when the corresponding optional feature is used. Upload the target package before filling fields for newly added permissions. Site access is declared through the runtime content script's matches; use the dashboard's host-permission/site-access justification field when it appears.
 
 #### storage が必要な理由
 
 ```text
-Saves tab preferences and user-entered URL rules in chrome.storage.local and synchronizes them through chrome.storage.sync when Chrome sync is enabled. Local settings remain usable if sync fails or exceeds its capacity. chrome.storage.session retains tab positions, activation order, opener relationships, restored-tab markers, and pop-up window state across service worker restarts. It also temporarily retains pending navigation URLs until commit, failure, or tab closure. Session data is cleared on browser restart. Browsing URLs, titles, and session tab state are not included in synchronized settings.
+Required permission. Saves tab preferences and user-entered URL rules in chrome.storage.local and synchronizes them through chrome.storage.sync when Chrome sync is enabled. Local settings remain usable if sync fails or exceeds its capacity. chrome.storage.session retains tab positions, activation order, opener relationships, restored-tab markers, and pop-up window state across service worker restarts. It also temporarily retains pending navigation URLs until commit, failure, or tab closure. Session data is cleared on browser restart. Browsing URLs, titles, and session tab state are not included in synchronized settings.
 ```
 
 #### tabs が必要な理由
 
 ```text
-Reads Tab.pendingUrl and Tab.url to match newly created tabs against user-defined position and foreground/background rules, and to check pop-up URL exceptions before converting windows into tabs. These automatic actions must work without a toolbar click for each tab. Explicit sorting commands also read the current window's tab titles and URLs. These values are processed locally, are not transmitted externally, and are not saved as browsing history. Position-only tab operations do not require this permission; URL matching and title/URL sorting do.
+Optional permission. Requested when a user adds a New Tab URL rule or invokes a title- or URL-sorting shortcut. Reads Tab.pendingUrl and Tab.url to match newly created tabs against user-defined position and foreground/background rules, and reads the current window's tab titles and URLs for sorting. These values are processed locally, are not transmitted externally, and are not saved as browsing history. Position-only tab operations do not require this permission.
 ```
 
 #### webNavigation が必要な理由
 
 ```text
-Detects top-level navigation commits to apply Loading Page URL rules. For server redirects, the destination is checked first and the original URL is used if the destination has no match. Pending navigation URLs are temporarily retained in session storage across service worker restarts, then removed on commit, failure, or tab closure. Navigation-target and before-navigation events also provide pop-up URLs early enough to check exceptions before conversion. Tab update events alone do not provide the required navigation-commit and server-redirect information. Navigation data is processed locally and is not transmitted externally.
+Optional permission. Requested when a user adds a Loading Page rule or enables pop-up conversion. Detects top-level navigation commits to apply Loading Page URL rules. For server redirects, the destination is checked first and the original URL is used if the destination has no match. Pending navigation URLs are temporarily retained in session storage across service worker restarts, then removed on commit, failure, or tab closure. Navigation-target and before-navigation events also provide pop-up URLs early enough to check exceptions before conversion. Tab update events alone do not provide the required navigation-commit and server-redirect information. Navigation data is processed locally and is not transmitted externally.
+```
+
+#### scripting が必要な理由
+
+```text
+Optional permission. Requested together with HTTP/HTTPS site access when a user enables External Links. Registers the extension's bundled content script for HTTP/HTTPS pages and frames, and injects it into already-open matching tabs after access is granted. This lets External Links take effect immediately without requiring users to reopen pages. The script processes link clicks locally according to the user's settings; it does not collect general page content or send browsing data externally.
 ```
 
 #### ホスト権限／HTTP・HTTPS サイトへのアクセスが必要な理由
 
 ```text
-A bundled content script runs on HTTP/HTTPS pages and their frames so the user can control how external links open. When enabled, it reads the current page URL and clicked link URL/attributes, compares origins, and applies page exclusions and link rules to choose current-tab, foreground-tab, or background-tab navigation. Site access allows this on websites without a toolbar click for each link. The feature is off by default; its disabled click handler returns without inspecting links. It does not extract page text or form values, store a click history, or send browsing data externally. Following a link makes the normal request to its destination.
+Optional site access. Requested together with the `scripting` permission only when a user enables External Links. A dynamically registered bundled content script runs on HTTP/HTTPS pages and their frames so the user can control how external links open. It reads the current page URL and clicked link URL/attributes, compares origins, and applies page exclusions and link rules to choose current-tab, foreground-tab, or background-tab navigation. The feature is off by default; its disabled click handler returns without inspecting links. After permission is granted, the script is also injected into already-open HTTP/HTTPS tabs. It does not extract page text or form values, store a click history, or send browsing data externally. Following a link makes the normal request to its destination.
 ```
 
 ### リモートコード
@@ -980,5 +1027,5 @@ These selections disclose local handling of tab/navigation URLs and titles, link
 Maximum: 500 characters.
 
 ```text
-No extension account or payment is required. Open options from the toolbar icon, choose a category, change settings, and click Save Settings. Test with several tabs; URL rules can target https://example.com/. External-link handling is off by default: enable it, save, then reload an HTTP/HTTPS page before clicking links. Keyboard shortcuts are configured at chrome://extensions/shortcuts. Cross-device sync requires Chrome sync; other features work without it.
+No account or payment is required. Open options from the toolbar, set preferences, and save. Test URL rules with several tabs; patterns can target https://example.com/. Grant optional permissions when prompted. External Links is off by default: enable it, grant scripting and HTTP/HTTPS site access, then save; it also works on open HTTP/HTTPS pages. Set shortcuts at chrome://extensions/shortcuts. Chrome Sync is needed for cross-device sync; other features work without it.
 ```
