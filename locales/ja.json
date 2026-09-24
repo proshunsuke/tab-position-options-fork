@@ -56,7 +56,7 @@
   "saveSettings": "設定を保存",
   "saving": "保存中…",
   "saved": "設定を保存しました。",
-  "invalidPattern": "各ルールに有効な URL パターンを入力してください。",
+  "invalidPattern": "有効な URL パターンを入力してください。",
   "saveFailed": "設定を保存できませんでした。もう一度お試しください。",
   "exportSettings": "設定をエクスポート",
   "importSettings": "設定をインポート",

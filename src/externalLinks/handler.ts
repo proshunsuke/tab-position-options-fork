@@ -1,3 +1,7 @@
+import {
+  getExternalLinkPermissionState,
+  resolveExternalLinkPermissionState,
+} from "@/src/externalLinks/permissionState";
 import { getExternalLinkAction } from "@/src/externalLinks/rules";
 import { recordExternalLinkTab, removeExternalLinkTab } from "@/src/externalLinks/state";
 import { getSettings } from "@/src/settings/state/appData";
@@ -40,9 +44,18 @@ export const handleExternalLink = async (
   } catch {
     return false;
   }
-  if (needsInitialization()) {
-    // Worker再起動時だけ、設定とタブ位置の復元が必要。
-    await initializeAllStates();
+  const permissionState = getExternalLinkPermissionState();
+  if (permissionState === false) {
+    return false;
+  }
+  if (needsInitialization() || permissionState === undefined) {
+    const initialization = needsInitialization() ? initializeAllStates() : Promise.resolve();
+    const permission =
+      permissionState === undefined ? resolveExternalLinkPermissionState() : Promise.resolve(true);
+    const [, hasPermission] = await Promise.all([initialization, permission]);
+    if (!hasPermission) {
+      return false;
+    }
   }
   const settings = getSettings();
   const action = getExternalLinkAction(message.pageUrl, message.url, settings.externalLinks);

@@ -179,7 +179,7 @@ test("popup settings and validated exceptions persist across options reloads", a
   await page.getByRole("button", { name: "Add pop-up exception" }).click();
   await page.getByLabel("Pop-up exception 1", { exact: true }).fill("[");
   await page.getByRole("button", { name: "Save Settings" }).click();
-  await expect(page.getByRole("status")).toHaveText("Enter a valid URL pattern for each rule.");
+  await expect(page.getByRole("alert")).toHaveText("Enter a valid URL pattern.");
   await page.getByLabel("Pop-up exception 1", { exact: true }).fill("  login.test  ");
   await page.getByRole("button", { name: "Save Settings" }).click();
   await expect(async () => {

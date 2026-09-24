@@ -56,7 +56,7 @@
   "saveSettings": "Einstellungen speichern",
   "saving": "Wird gespeichert…",
   "saved": "Einstellungen gespeichert!",
-  "invalidPattern": "Geben Sie für jede Regel ein gültiges URL-Muster ein.",
+  "invalidPattern": "Geben Sie ein gültiges URL-Muster ein.",
   "saveFailed": "Die Einstellungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
   "exportSettings": "Einstellungen exportieren",
   "importSettings": "Einstellungen importieren",

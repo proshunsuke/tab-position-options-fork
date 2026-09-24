@@ -56,7 +56,7 @@
   "saveSettings": "설정 저장",
   "saving": "저장 중…",
   "saved": "설정을 저장했습니다!",
-  "invalidPattern": "각 규칙에 유효한 URL 패턴을 입력하세요.",
+  "invalidPattern": "유효한 URL 패턴을 입력하세요.",
   "saveFailed": "설정을 저장하지 못했습니다. 다시 시도하세요.",
   "exportSettings": "설정 내보내기",
   "importSettings": "설정 가져오기",

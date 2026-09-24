@@ -93,7 +93,7 @@ for (const [category, add, input] of [
     await page.getByRole("button", { name: "Settings management", exact: true }).click();
     await page.getByRole("button", { name: "Save Settings", exact: true }).click();
     await expect(page.getByRole("textbox", { name: input, exact: true })).toBeFocused();
-    await expect(page.getByRole("status")).toHaveText("Enter a valid URL pattern for each rule.");
+    await expect(page.getByRole("alert")).toHaveText("Enter a valid URL pattern.");
     await expect(
       page.getByRole("navigation").getByRole("button", { name: category, exact: true }),
     ).toHaveAttribute("aria-current", "page");

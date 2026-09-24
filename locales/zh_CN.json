@@ -56,7 +56,7 @@
   "saveSettings": "保存设置",
   "saving": "正在保存…",
   "saved": "设置已保存！",
-  "invalidPattern": "请为每条规则输入有效的 URL 匹配模式。",
+  "invalidPattern": "请输入有效的 URL 匹配模式。",
   "saveFailed": "无法保存设置，请重试。",
   "exportSettings": "导出设置",
   "importSettings": "导入设置",

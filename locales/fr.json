@@ -56,7 +56,7 @@
   "saveSettings": "Enregistrer les paramètres",
   "saving": "Enregistrement…",
   "saved": "Paramètres enregistrés !",
-  "invalidPattern": "Saisissez un motif d’URL valide pour chaque règle.",
+  "invalidPattern": "Saisissez un motif d’URL valide.",
   "saveFailed": "Impossible d’enregistrer les paramètres. Veuillez réessayer.",
   "exportSettings": "Exporter les paramètres",
   "importSettings": "Importer les paramètres",

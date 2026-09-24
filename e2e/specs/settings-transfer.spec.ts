@@ -42,7 +42,7 @@ test("imports into the form, exports drafts, and persists only on Save Settings"
     mimeType: "application/json",
     buffer: Buffer.from(JSON.stringify(file)),
   });
-  await expect(page.getByRole("status")).toHaveText(importedMessage);
+  await expect(page.locator("section").getByRole("status")).toHaveText(importedMessage);
   await page.getByRole("button", { name: "New Tab", exact: true }).click();
   await expect(page.locator('input[name="newTabPosition"][value="left"]')).toBeChecked();
   await expect(
@@ -107,13 +107,13 @@ test("imports into the form, exports drafts, and persists only on Save Settings"
   await expect(page.locator('input[name="newTabPosition"][value="default"]')).toBeChecked();
   await page.getByRole("button", { name: "Settings management", exact: true }).click();
   await page.locator('input[type="file"]').setInputFiles(exportedPath);
-  await expect(page.getByRole("status")).toHaveText(importedMessage);
+  await expect(page.locator("section").getByRole("status")).toHaveText(importedMessage);
   await page.getByRole("button", { name: "New Tab", exact: true }).click();
   // 同じファイルを選び直してもchangeが発生することを確認する。
   await page.locator('input[name="newTabPosition"][value="first"]').check();
   await page.getByRole("button", { name: "Settings management", exact: true }).click();
   await page.locator('input[type="file"]').setInputFiles(exportedPath);
-  await expect(page.getByRole("status")).toHaveText(importedMessage);
+  await expect(page.locator("section").getByRole("status")).toHaveText(importedMessage);
   await page.getByRole("button", { name: "New Tab", exact: true }).click();
   await expect(page.locator('input[name="newTabPosition"][value="left"]')).toBeChecked();
   await page.getByRole("button", { name: "Save Settings", exact: true }).click();
@@ -151,7 +151,7 @@ test("invalid files preserve both draft and saved settings, then allow retry", a
       mimeType: "application/json",
       buffer: Buffer.from(content),
     });
-    await expect(page.getByRole("status")).toHaveText(importError);
+    await expect(page.locator("section").getByRole("status")).toHaveText(importError);
     await page.getByRole("button", { name: "New Tab", exact: true }).click();
     await expect(page.locator('input[name="newTabPosition"][value="first"]')).toBeChecked();
     await expect(page.getByRole("textbox", { name: "URL pattern 1", exact: true })).toHaveCount(0);
@@ -167,7 +167,7 @@ test("invalid files preserve both draft and saved settings, then allow retry", a
     mimeType: "application/json",
     buffer: Buffer.from(JSON.stringify(file)),
   });
-  await expect(page.getByRole("status")).toHaveText(importedMessage);
+  await expect(page.locator("section").getByRole("status")).toHaveText(importedMessage);
   await page.getByRole("button", { name: "New Tab", exact: true }).click();
   await expect(page.locator('input[name="newTabPosition"][value="left"]')).toBeChecked();
 });
@@ -183,7 +183,7 @@ test("invalid draft rules cannot be exported", async ({ context, extensionId }) 
   });
   await page.getByRole("button", { name: "Settings management", exact: true }).click();
   await page.getByRole("button", { name: "Export Settings", exact: true }).click();
-  await expect(page.getByRole("status")).toHaveText(
+  await expect(page.locator("section").getByRole("status")).toHaveText(
     "Could not export settings. Check the URL patterns and try again.",
   );
   expect(downloaded).toBe(false);
@@ -216,7 +216,7 @@ test("file read failures leave settings editable and unchanged", async ({
     mimeType: "application/json",
     buffer: Buffer.from(JSON.stringify(file)),
   });
-  await expect(page.getByRole("status")).toHaveText(importError);
+  await expect(page.locator("section").getByRole("status")).toHaveText(importError);
   await page.getByRole("button", { name: "New Tab", exact: true }).click();
   await expect(page.locator('input[name="newTabPosition"][value="first"]')).toBeChecked();
   await expect(page.getByRole("button", { name: "Save Settings", exact: true })).toBeEnabled();

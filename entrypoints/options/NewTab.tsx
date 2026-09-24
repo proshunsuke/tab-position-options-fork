@@ -14,6 +14,9 @@ type Props = {
   onNewTabPositionChange: (value: string) => void;
   openInBackground: boolean;
   onOpenInBackgroundChange: (checked: boolean) => void;
+  tabsPermissionGranted: boolean;
+  onRequestTabsPermission: () => Promise<boolean>;
+  invalidRuleId: string | null;
 };
 
 const NewTabOptions: RadioOption<TabPosition>[] = [
@@ -31,7 +34,22 @@ export const NewTab: FC<Props> = ({
   onNewTabPositionChange,
   openInBackground,
   onOpenInBackgroundChange,
+  tabsPermissionGranted,
+  onRequestTabsPermission,
+  invalidRuleId,
 }) => {
+  const addRule = () => {
+    const rules = [
+      ...urlRules,
+      { url: "", position: "default" as const, active: "foreground" as const },
+    ];
+    if (tabsPermissionGranted) {
+      onUrlRulesChange(rules);
+      return;
+    }
+    void onRequestTabsPermission().then(granted => granted && onUrlRulesChange(rules));
+  };
+
   return (
     <TabContent>
       <TabSection title={i18n.t("newTab")} description={i18n.t("newTabDescription")}>
@@ -54,82 +72,89 @@ export const NewTab: FC<Props> = ({
       <TabSection title={i18n.t("matchingUrls")} description={i18n.t("matchingUrlsDescription")}>
         <div className="space-y-3">
           <fieldset aria-label={i18n.t("matchingUrls")} className="min-w-0 space-y-3">
-            {urlRules.map((rule, index) => (
-              <div
-                // biome-ignore lint/suspicious/noArrayIndexKey: Controlled rows have no independent state or persisted identity.
-                key={index}
-                className="flex flex-wrap items-center gap-3 rounded-md bg-gray-50 p-3"
-              >
-                <input
-                  id={`new-rule-${index}`}
-                  aria-label={i18n.t("urlPatternLabel", [String(index + 1)])}
-                  placeholder={i18n.t("urlPattern")}
-                  value={rule.url}
-                  onChange={event =>
-                    onUrlRulesChange(
-                      urlRules.map((item, i) =>
-                        i === index ? { ...item, url: event.target.value } : item,
-                      ),
-                    )
-                  }
-                  className="min-w-0 w-full sm:min-w-48 sm:w-auto sm:flex-1 rounded-md border border-gray-300 bg-white px-3 py-2"
-                />
-                <select
-                  aria-label={i18n.t("positionLabel", [String(index + 1)])}
-                  value={rule.position}
-                  onChange={event =>
-                    onUrlRulesChange(
-                      urlRules.map((item, i) =>
-                        i === index
-                          ? { ...item, position: event.target.value as TabPosition }
-                          : item,
-                      ),
-                    )
-                  }
-                  className="max-w-full rounded-md border border-gray-300 bg-white px-3 py-2"
+            {urlRules.map((rule, index) => {
+              const inputId = `new-rule-${index}`;
+              const errorId = `${inputId}-error`;
+              const hasError = invalidRuleId === inputId;
+              return (
+                <div
+                  // biome-ignore lint/suspicious/noArrayIndexKey: Controlled rows have no independent state or persisted identity.
+                  key={index}
+                  className="flex flex-wrap items-center gap-3 rounded-md bg-gray-50 p-3"
                 >
-                  {NewTabOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  aria-label={i18n.t("activationLabel", [String(index + 1)])}
-                  value={rule.active}
-                  onChange={event =>
-                    onUrlRulesChange(
-                      urlRules.map((item, i) =>
-                        i === index
-                          ? { ...item, active: event.target.value as NewTabUrlRule["active"] }
-                          : item,
-                      ),
-                    )
-                  }
-                  className="max-w-full rounded-md border border-gray-300 bg-white px-3 py-2"
-                >
-                  <option value="foreground">{i18n.t("foreground")}</option>
-                  <option value="background">{i18n.t("background")}</option>
-                </select>
-                <button
-                  type="button"
-                  aria-label={i18n.t("removeRuleLabel", [String(index + 1)])}
-                  onClick={() => onUrlRulesChange(urlRules.filter((_, i) => i !== index))}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  {i18n.t("remove")}
-                </button>
-              </div>
-            ))}
+                  <input
+                    id={inputId}
+                    aria-label={i18n.t("urlPatternLabel", [String(index + 1)])}
+                    aria-invalid={hasError}
+                    aria-describedby={hasError ? errorId : undefined}
+                    placeholder={i18n.t("urlPattern")}
+                    value={rule.url}
+                    onChange={event =>
+                      onUrlRulesChange(
+                        urlRules.map((item, i) =>
+                          i === index ? { ...item, url: event.target.value } : item,
+                        ),
+                      )
+                    }
+                    className={`min-w-0 w-full sm:min-w-48 sm:w-auto sm:flex-1 rounded-md border bg-white px-3 py-2 ${hasError ? "border-red-600" : "border-gray-300"}`}
+                  />
+                  <select
+                    aria-label={i18n.t("positionLabel", [String(index + 1)])}
+                    value={rule.position}
+                    onChange={event =>
+                      onUrlRulesChange(
+                        urlRules.map((item, i) =>
+                          i === index
+                            ? { ...item, position: event.target.value as TabPosition }
+                            : item,
+                        ),
+                      )
+                    }
+                    className="max-w-full rounded-md border border-gray-300 bg-white px-3 py-2"
+                  >
+                    {NewTabOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    aria-label={i18n.t("activationLabel", [String(index + 1)])}
+                    value={rule.active}
+                    onChange={event =>
+                      onUrlRulesChange(
+                        urlRules.map((item, i) =>
+                          i === index
+                            ? { ...item, active: event.target.value as NewTabUrlRule["active"] }
+                            : item,
+                        ),
+                      )
+                    }
+                    className="max-w-full rounded-md border border-gray-300 bg-white px-3 py-2"
+                  >
+                    <option value="foreground">{i18n.t("foreground")}</option>
+                    <option value="background">{i18n.t("background")}</option>
+                  </select>
+                  <button
+                    type="button"
+                    aria-label={i18n.t("removeRuleLabel", [String(index + 1)])}
+                    onClick={() => onUrlRulesChange(urlRules.filter((_, i) => i !== index))}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    {i18n.t("remove")}
+                  </button>
+                  {hasError && (
+                    <p id={errorId} role="alert" className="basis-full text-sm text-red-700">
+                      {i18n.t("invalidPattern")}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </fieldset>
           <button
             type="button"
-            onClick={() =>
-              onUrlRulesChange([
-                ...urlRules,
-                { url: "", position: "default", active: "foreground" },
-              ])
-            }
+            onClick={addRule}
             className="rounded-md bg-chrome-blue px-4 py-2 text-white hover:bg-blue-600"
           >
             {i18n.t("addRule")}

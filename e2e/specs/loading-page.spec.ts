@@ -195,7 +195,7 @@ test("Loading Page rules can be validated, saved, reloaded and removed", async (
   await page.getByRole("button", { name: "Add loading rule", exact: true }).click();
   await page.getByLabel("Loading URL pattern 1", { exact: true }).fill("[");
   await page.getByRole("button", { name: "Save Settings", exact: true }).click();
-  await expect(page.getByRole("status")).toHaveText("Enter a valid URL pattern for each rule.");
+  await expect(page.getByRole("alert")).toHaveText("Enter a valid URL pattern.");
   await page.getByLabel("Loading URL pattern 1", { exact: true }).fill(" loading.test ");
   await page.getByLabel("Loading position 1", { exact: true }).selectOption("middle");
   await page.getByRole("button", { name: "Save Settings", exact: true }).click();

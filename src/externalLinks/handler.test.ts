@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { handleExternalLink } from "@/src/externalLinks/handler";
+import { updateExternalLinkPermissionState } from "@/src/externalLinks/permissionState";
 import { consumeExternalLinkTab } from "@/src/externalLinks/state";
 import { DEFAULT_SETTINGS } from "@/src/types";
 
@@ -41,6 +42,8 @@ const sender = {
 beforeEach(() => {
   vi.useFakeTimers();
   vi.clearAllMocks();
+  // These handler tests cover behavior after the user has granted External Links access.
+  updateExternalLinkPermissionState(true);
   state.cold = false;
   state.popup = false;
   state.normalWindow = 20;
