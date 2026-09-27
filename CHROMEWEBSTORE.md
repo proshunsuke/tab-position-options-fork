@@ -31,7 +31,7 @@ Target version: **1.1.0**. The values below are the intended submission contents
 
 Maximum: 16,000 characters per locale. Upload the localized package, then select each locale in the listing language selector and copy its description below. English is the source text and default locale; keep all 10 descriptions consistent when changing their meaning. Use the matching locale’s screenshots listed under 画像アセット.
 
-Each description includes the full version history from [CHANGELOG.md](CHANGELOG.md), newest first. Keep the English entries identical to the source and translate every entry into the other nine languages in the same change.
+Each description includes only the version history from 1.0.0 onward in [CHANGELOG.md](CHANGELOG.md), newest first. Keep the English entries identical to the source and translate every entry into the other nine languages in the same change.
 
 ##### English — `en`
 
@@ -84,38 +84,6 @@ CHANGELOG
 - Added automatic settings display after installation and reuse of existing settings tabs
 - Fixed tab positions and selection changing when Chrome restores the previous session
 
-0.2.2
-- Fixed tab closing behavior on Chrome 147.0.7727.56
-- Fixed tab closing behavior to keep working even if Chrome changes tab-close event order in future updates
-
-0.2.1
-- Fixed new tab positioning and tab closing behavior using stale session state after a Service Worker restart
-
-0.2.0
-- Fixed tab closing behavior on Chrome 146 to keep the configured activation order working reliably
-- Updated the extension to work with the latest development toolchain and browser support
-
-0.1.0
-- Added "New Tab Background" option to open new tabs in the background while keeping the current tab active
-
-0.0.6
-- Significantly improved performance for all tab operations
-
-0.0.5
-- Fixed tab position settings not being applied when opening links from external applications
-
-0.0.4
-- Fixed issues with Service Worker restart handling that were not fully resolved in version 0.0.3
-
-0.0.3
-- Fixed unexpected behavior when Service Worker restarts after 30 seconds of inactivity
-
-0.0.2
-- Fixed "Left Tab" setting not working correctly when closing tabs opened via target="_blank" links
-- Fixed tab order preservation during browser session restore
-
-0.0.1
-- Initial release
 ```
 
 ##### 日本語 — `ja`
@@ -169,38 +137,6 @@ https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohoj
 - インストール後の設定画面の自動表示と、既存の設定タブの再利用を追加
 - Chrome が前回のセッションを復元する際に、タブの位置や選択状態が変わる問題を修正
 
-0.2.2
-- Chrome 147.0.7727.56 でのタブを閉じる際の動作を修正
-- 今後の Chrome 更新でタブを閉じるイベントの順序が変わっても、閉じた後の動作が維持されるよう修正
-
-0.2.1
-- Service Worker 再起動後に古いセッション状態を使用していた新規タブ配置とタブを閉じた後の動作を修正
-
-0.2.0
-- Chrome 146 で、設定したアクティベーション順序が安定して機能するようタブを閉じた後の動作を修正
-- 最新の開発ツールチェーンとブラウザ対応に合わせて拡張機能を更新
-
-0.1.0
-- 現在のタブをアクティブに保ったまま新規タブを背景で開く「新規タブをバックグラウンドで開く」設定を追加
-
-0.0.6
-- すべてのタブ操作のパフォーマンスを大幅に改善
-
-0.0.5
-- 外部アプリケーションからリンクを開いた際にタブの位置設定が適用されない問題を修正
-
-0.0.4
-- 0.0.3 で完全には解決していなかった Service Worker 再起動時の処理を修正
-
-0.0.3
-- 30秒間の非アクティブ状態の後に Service Worker が再起動した際の予期しない動作を修正
-
-0.0.2
-- target="_blank" のリンクから開いたタブを閉じる際に「左のタブ」設定が機能しない問題を修正
-- ブラウザのセッション復元時にタブの順序が維持されるよう修正
-
-0.0.1
-- 初回リリース
 ```
 
 ##### 简体中文 — `zh_CN`
@@ -254,38 +190,6 @@ https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohoj
 - 添加安装后自动显示设置页面及复用已有设置标签页的功能
 - 修复 Chrome 恢复上次会话时标签页位置和选中状态发生变化的问题
 
-0.2.2
-- 修复 Chrome 147.0.7727.56 中关闭标签页的行为
-- 修复关闭标签页的行为，使其在未来 Chrome 更新改变事件顺序时仍可正常工作
-
-0.2.1
-- 修复 Service Worker 重启后，新标签页定位和关闭标签页的行为使用过期会话状态的问题
-
-0.2.0
-- 修复 Chrome 146 中关闭标签页的行为，确保设置的激活顺序稳定工作
-- 更新扩展程序以适配最新开发工具链和浏览器支持
-
-0.1.0
-- 添加“在后台打开新标签页”选项，在保持当前标签页激活的同时在后台打开新标签页
-
-0.0.6
-- 显著提升所有标签页操作的性能
-
-0.0.5
-- 修复从外部应用程序打开链接时未应用标签页位置设置的问题
-
-0.0.4
-- 修复 0.0.3 中未完全解决的 Service Worker 重启处理问题
-
-0.0.3
-- 修复 Service Worker 在闲置30秒后重启时出现的异常行为
-
-0.0.2
-- 修复关闭通过 target="_blank" 链接打开的标签页时，“左侧标签页”设置不起作用的问题
-- 修复浏览器恢复会话时未保留标签页顺序的问题
-
-0.0.1
-- 首次发布
 ```
 
 ##### 繁體中文 — `zh_TW`
@@ -339,38 +243,6 @@ https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohoj
 - 新增安裝後自動顯示設定頁面及重用現有設定分頁的功能
 - 修正 Chrome 還原上次工作階段時分頁位置與選取狀態改變的問題
 
-0.2.2
-- 修正 Chrome 147.0.7727.56 中關閉分頁的行為
-- 修正關閉分頁的行為，使其在未來 Chrome 更新改變事件順序時仍可正常運作
-
-0.2.1
-- 修正 Service Worker 重新啟動後，新分頁定位與關閉分頁的行為使用過期工作階段狀態的問題
-
-0.2.0
-- 修正 Chrome 146 中關閉分頁的行為，確保設定的啟用順序穩定運作
-- 更新擴充功能以配合最新開發工具鏈與瀏覽器支援
-
-0.1.0
-- 新增「在背景開啟新分頁」選項，在保持目前分頁啟用的同時於背景開啟新分頁
-
-0.0.6
-- 大幅提升所有分頁操作的效能
-
-0.0.5
-- 修正從外部應用程式開啟連結時未套用分頁位置設定的問題
-
-0.0.4
-- 修正 0.0.3 中未完全解決的 Service Worker 重新啟動處理問題
-
-0.0.3
-- 修正 Service Worker 在閒置30秒後重新啟動時出現的非預期行為
-
-0.0.2
-- 修正關閉透過 target="_blank" 連結開啟的分頁時，「左側分頁」設定無效的問題
-- 修正瀏覽器還原工作階段時未保留分頁順序的問題
-
-0.0.1
-- 首次發行
 ```
 
 ##### 한국어 — `ko`
@@ -424,38 +296,6 @@ https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohoj
 - 설치 후 설정 화면 자동 표시 및 기존 설정 탭 재사용 추가
 - Chrome이 이전 세션을 복원할 때 탭 위치와 선택 상태가 바뀌는 문제 수정
 
-0.2.2
-- Chrome 147.0.7727.56에서 탭을 닫을 때의 동작 수정
-- 향후 Chrome 업데이트에서 탭 닫기 이벤트 순서가 바뀌어도 닫은 후의 동작이 유지되도록 수정
-
-0.2.1
-- Service Worker 재시작 후 오래된 세션 상태를 사용하던 새 탭 배치 및 탭 닫기 동작 수정
-
-0.2.0
-- Chrome 146에서 설정한 활성화 순서가 안정적으로 작동하도록 탭 닫기 동작 수정
-- 최신 개발 도구 체인 및 브라우저 지원에 맞춰 확장 프로그램 업데이트
-
-0.1.0
-- 현재 탭을 활성 상태로 유지하면서 새 탭을 배경에서 여는 '새 탭을 백그라운드에서 열기' 옵션 추가
-
-0.0.6
-- 모든 탭 작업의 성능을 크게 개선
-
-0.0.5
-- 외부 애플리케이션에서 링크를 열 때 탭 위치 설정이 적용되지 않는 문제 수정
-
-0.0.4
-- 0.0.3에서 완전히 해결되지 않았던 Service Worker 재시작 처리 문제 수정
-
-0.0.3
-- 30초 동안 활동이 없어 Service Worker가 중지된 뒤 재시작할 때 발생하는 예기치 않은 동작 수정
-
-0.0.2
-- target="_blank" 링크로 연 탭을 닫을 때 '왼쪽 탭' 설정이 작동하지 않는 문제 수정
-- 브라우저 세션 복원 시 탭 순서가 유지되도록 수정
-
-0.0.1
-- 최초 출시
 ```
 
 ##### Español — `es`
@@ -509,38 +349,6 @@ HISTORIAL DE CAMBIOS
 - Añadidas la apertura automática de los ajustes tras la instalación y la reutilización de pestañas de ajustes existentes
 - Corregidos los cambios de posición y selección de pestañas al restaurar Chrome la sesión anterior
 
-0.2.2
-- Corregido el comportamiento al cerrar pestañas en Chrome 147.0.7727.56
-- Corregido el cierre de pestañas para que siga funcionando aunque futuras actualizaciones de Chrome cambien el orden de los eventos
-
-0.2.1
-- Corregido el uso de un estado de sesión desactualizado al colocar nuevas pestañas y cerrar pestañas tras reiniciar el Service Worker
-
-0.2.0
-- Corregido el cierre de pestañas en Chrome 146 para mantener de forma fiable el orden de activación configurado
-- Actualizada la extensión para las herramientas de desarrollo y compatibilidad con navegadores más recientes
-
-0.1.0
-- Añadida la opción «Nueva pestaña en segundo plano» para abrir pestañas sin dejar de mantener activa la actual
-
-0.0.6
-- Mejorado significativamente el rendimiento de todas las operaciones con pestañas
-
-0.0.5
-- Corregida la falta de aplicación de la posición de pestañas al abrir enlaces desde aplicaciones externas
-
-0.0.4
-- Corregidos problemas de reinicio del Service Worker que no se habían resuelto por completo en la versión 0.0.3
-
-0.0.3
-- Corregido el comportamiento inesperado cuando el Service Worker se reinicia tras 30 segundos de inactividad
-
-0.0.2
-- Corregido el fallo de la opción «Pestaña izquierda» al cerrar pestañas abiertas mediante enlaces target="_blank"
-- Corregida la conservación del orden de las pestañas al restaurar la sesión del navegador
-
-0.0.1
-- Primera versión
 ```
 
 ##### Français — `fr`
@@ -594,38 +402,6 @@ HISTORIQUE DES MODIFICATIONS
 - Ajout de l’ouverture automatique des paramètres après installation et de la réutilisation des onglets de paramètres existants
 - Correction des changements de position et de sélection des onglets lorsque Chrome restaure la session précédente
 
-0.2.2
-- Correction du comportement à la fermeture des onglets dans Chrome 147.0.7727.56
-- Correction de la fermeture des onglets pour préserver son fonctionnement si Chrome modifie l’ordre des événements dans de futures mises à jour
-
-0.2.1
-- Correction de l’utilisation d’un état de session obsolète pour placer les nouveaux onglets et fermer les onglets après un redémarrage du Service Worker
-
-0.2.0
-- Correction de la fermeture des onglets dans Chrome 146 pour respecter de façon fiable l’ordre d’activation configuré
-- Mise à jour de l’extension pour les derniers outils de développement et la prise en charge des navigateurs
-
-0.1.0
-- Ajout de l’option « Nouvel onglet en arrière-plan » pour ouvrir des onglets tout en gardant l’onglet actuel actif
-
-0.0.6
-- Amélioration significative des performances de toutes les opérations sur les onglets
-
-0.0.5
-- Correction de la non-application du réglage de position des onglets lors de l’ouverture de liens depuis des applications externes
-
-0.0.4
-- Correction de problèmes de redémarrage du Service Worker non entièrement résolus dans la version 0.0.3
-
-0.0.3
-- Correction du comportement inattendu lorsque le Service Worker redémarre après 30 secondes d’inactivité
-
-0.0.2
-- Correction du dysfonctionnement de l’option « Onglet de gauche » à la fermeture d’onglets ouverts via des liens target="_blank"
-- Correction de la conservation de l’ordre des onglets lors de la restauration de la session du navigateur
-
-0.0.1
-- Première version
 ```
 
 ##### Deutsch — `de`
@@ -679,38 +455,6 @@ https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohoj
 - Automatisches Öffnen der Einstellungen nach der Installation und Wiederverwenden vorhandener Einstellungstabs hinzugefügt
 - Änderungen der Tab-Positionen und Auswahl beim Wiederherstellen der letzten Chrome-Sitzung behoben
 
-0.2.2
-- Verhalten beim Schließen von Tabs in Chrome 147.0.7727.56 korrigiert
-- Verhalten beim Schließen von Tabs gegen künftige Änderungen der Ereignisreihenfolge in Chrome abgesichert
-
-0.2.1
-- Verwendung veralteter Sitzungsdaten für neue Tab-Positionen und das Schließen von Tabs nach einem Service-Worker-Neustart behoben
-
-0.2.0
-- Verhalten beim Schließen von Tabs in Chrome 146 korrigiert, damit die eingestellte Aktivierungsreihenfolge zuverlässig erhalten bleibt
-- Erweiterung an aktuelle Entwicklungswerkzeuge und Browserunterstützung angepasst
-
-0.1.0
-- Option „Neuer Tab im Hintergrund“ hinzugefügt, um neue Tabs zu öffnen und den aktuellen Tab aktiv zu lassen
-
-0.0.6
-- Leistung aller Tab-Operationen deutlich verbessert
-
-0.0.5
-- Fehlende Anwendung der Tab-Positionseinstellung beim Öffnen von Links aus externen Anwendungen behoben
-
-0.0.4
-- Probleme beim Service-Worker-Neustart behoben, die in Version 0.0.3 nicht vollständig gelöst waren
-
-0.0.3
-- Unerwartetes Verhalten beim Service-Worker-Neustart nach 30 Sekunden Inaktivität behoben
-
-0.0.2
-- Fehler der Einstellung „Linker Tab“ beim Schließen von Tabs behoben, die über target="_blank"-Links geöffnet wurden
-- Beibehaltung der Tab-Reihenfolge beim Wiederherstellen der Browsersitzung korrigiert
-
-0.0.1
-- Erstveröffentlichung
 ```
 
 ##### Português (Brasil) — `pt_BR`
@@ -764,38 +508,6 @@ HISTÓRICO DE ALTERAÇÕES
 - Adicionadas a abertura automática das configurações após a instalação e a reutilização de abas de configurações existentes
 - Corrigidas alterações na posição e seleção de abas quando o Chrome restaura a sessão anterior
 
-0.2.2
-- Corrigido o comportamento ao fechar abas no Chrome 147.0.7727.56
-- Corrigido o fechamento de abas para continuar funcionando mesmo se futuras atualizações do Chrome alterarem a ordem dos eventos
-
-0.2.1
-- Corrigido o uso de estado de sessão desatualizado no posicionamento de novas abas e no fechamento de abas após reiniciar o Service Worker
-
-0.2.0
-- Corrigido o fechamento de abas no Chrome 146 para manter a ordem de ativação configurada funcionando de forma confiável
-- Atualizada a extensão para as ferramentas de desenvolvimento e o suporte a navegadores mais recentes
-
-0.1.0
-- Adicionada a opção “Nova aba em segundo plano” para abrir abas mantendo a aba atual ativa
-
-0.0.6
-- Melhorado significativamente o desempenho de todas as operações com abas
-
-0.0.5
-- Corrigida a falta de aplicação da posição das abas ao abrir links de aplicativos externos
-
-0.0.4
-- Corrigidos problemas de reinicialização do Service Worker não totalmente resolvidos na versão 0.0.3
-
-0.0.3
-- Corrigido o comportamento inesperado quando o Service Worker reinicia após 30 segundos de inatividade
-
-0.0.2
-- Corrigida a opção “Aba à esquerda” ao fechar abas abertas por links target="_blank"
-- Corrigida a preservação da ordem das abas ao restaurar a sessão do navegador
-
-0.0.1
-- Versão inicial
 ```
 
 ##### Русский — `ru`
@@ -849,38 +561,6 @@ https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohoj
 - Добавлены автоматическое открытие настроек после установки и повторное использование существующих вкладок настроек
 - Исправлено изменение положения и выбора вкладок при восстановлении предыдущего сеанса Chrome
 
-0.2.2
-- Исправлено поведение при закрытии вкладок в Chrome 147.0.7727.56
-- Исправлено закрытие вкладок для сохранения корректной работы при будущих изменениях порядка событий в Chrome
-
-0.2.1
-- Исправлено использование устаревшего состояния сеанса при размещении новых вкладок и закрытии вкладок после перезапуска Service Worker
-
-0.2.0
-- Исправлено закрытие вкладок в Chrome 146 для надёжного соблюдения заданного порядка активации
-- Расширение обновлено для работы с актуальными инструментами разработки и поддерживаемыми браузерами
-
-0.1.0
-- Добавлена настройка «Новая вкладка в фоне» для открытия вкладок с сохранением текущей вкладки активной
-
-0.0.6
-- Значительно повышена производительность всех операций с вкладками
-
-0.0.5
-- Исправлено неприменение настройки положения вкладок при открытии ссылок из внешних приложений
-
-0.0.4
-- Исправлены проблемы обработки перезапуска Service Worker, не полностью устранённые в версии 0.0.3
-
-0.0.3
-- Исправлено неожиданное поведение при перезапуске Service Worker после 30 секунд бездействия
-
-0.0.2
-- Исправлена работа настройки «Вкладка слева» при закрытии вкладок, открытых ссылками target="_blank"
-- Исправлено сохранение порядка вкладок при восстановлении сеанса браузера
-
-0.0.1
-- Первый выпуск
 ```
 
 ### 画像アセット
