@@ -31,536 +31,326 @@ Target version: **1.1.0**. The values below are the intended submission contents
 
 Maximum: 16,000 characters per locale. Upload the localized package, then select each locale in the listing language selector and copy its description below. English is the source text and default locale; keep all 10 descriptions consistent when changing their meaning. Use the matching locale’s screenshots listed under 画像アセット.
 
-Each description includes only the version history from 1.0.0 onward in [CHANGELOG.md](CHANGELOG.md), newest first. Keep the English entries identical to the source and translate every entry into the other nine languages in the same change.
+Keep all supported features listed below, aligned across all 10 locales. Avoid repeated use of the tab-related keyword and keep it to no more than five occurrences per description, counting the product name and URLs. Do not include a changelog or keyword lists. English is the source text and default locale; keep translations consistent when changing their meaning.
 
 ##### English — `en`
 
 ```text
-Tab Position Options Fork is a Manifest V3 reimplementation of the original Tab Position Options for Chrome. Customize where tabs open and which tab becomes active when you close a tab.
+Tab Position Options Fork reimplements the original Chrome extension with Manifest V3. Control where new browser views open and which becomes active after one closes. Set placement, foreground or background behavior, and URL rules for new openings and navigation.
 
 FEATURES
-・New Tab: Always first / Always last / Right of current tab / Left of current tab / Default (Browser default)
-・New Tab Background
-・Activate Tab After Tab Closing: First tab / Last tab / Right tab / Left tab / In activated order / Source tab (Open link) / Source tab & Activated order / Default (Browser default)
-・Tab on Activate: Default (Keep position) / First / Last
-・New Tab — Matching URLs: Always first / Always last / Right of current tab / Left of current tab / Default (Browser default); Foreground / Background
-・Loading Page — Matching URLs: Always last / Always middle / Always first
-・Convert pop-up windows into tabs, with URL exceptions
-・Open external links in new tabs
-・External Links — Matching URLs: Page: exclude / Page: new foreground tab / Page: new background tab / Page: current tab/frame / Link: new foreground tab / Link: new background tab / Link: current tab/frame
-・Use keyboard shortcuts to sort tabs by title or URL and switch to the last active tab
-・Export and import settings files
-・Automatically sync settings and URL rules when Chrome sync is enabled
+• New openings: first, last, immediately right or left of the current one, or the browser default.
+• Background setting: open new tabs in the background.
+• After closing one: activate the first or last, a neighbor on either side, the most recently active, the source of an opened link, that source or the most recently active, or the browser default.
+• On activation: keep the current position or move the selection to the beginning or end.
+• URL rules for new openings: choose first, last, right, left, browser default, and foreground or background behavior.
+• URL rules during loading: place a matching destination first, in the middle, or last.
+• Convert pop-up windows to open in the regular browser window, with URL exceptions.
+• External links: open in new tabs by default. URL rules can exclude a source URL or route links by source or destination URL to open in the foreground, background, or current view/frame.
+• Keyboard shortcuts: sort by title or URL, or return to the last active item.
+• Import and export settings files.
+• Automatically sync settings and URL rules when Chrome Sync is enabled.
 
 HOW TO USE
-1. Settings open automatically after installation. Use Chrome's Extensions menu or the toolbar icon to return to them.
+1. Settings open automatically after installation. Reopen them from Chrome’s Extensions menu or the toolbar.
 2. Choose your preferences and add URL rules if needed.
-3. Click Save Settings.
-Chrome requests optional permissions when you first use a feature that needs them.
+3. Save your settings. Chrome requests optional permissions when you first use a feature that needs them.
 
-SUPPORT AND SOURCE CODE
-https://github.com/proshunsuke/tab-position-options-fork
+SUPPORT
 Report bugs or request features:
 https://github.com/proshunsuke/tab-position-options-fork/issues
 
-This is an independent community fork of the original Tab Position Options.
+This is an independent community fork of the original extension.
 Original extension:
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
-
-CHANGELOG
-1.1.0
-- Made tab, navigation, and website access optional, requesting permissions only when you use the features that need them
-
-1.0.0
-- Added the remaining original Tab Position Options features, completing the Manifest V3 reimplementation
-- Added Tab on Activate settings to move activated tabs to the first or last position
-- Added URL-specific rules for new-tab position and foreground/background behavior, and Loading Page rules for navigation
-- Added pop-up conversion to tabs with URL exceptions
-- Added external-link handling with page exclusions and current-tab, foreground-tab, and background-tab rules
-- Added keyboard shortcuts to sort tabs by title or URL and switch to the last active tab
-- Added settings import/export and automatic Chrome Sync, with local fallback and synchronization failure notices
-- Added options-page and store-description translations for 10 locales
-- Updated the options page with category navigation, a persistent save bar, and dedicated settings-management and shortcut sections
-- Added automatic settings display after installation and reuse of existing settings tabs
-- Fixed tab positions and selection changing when Chrome restores the previous session
-
 ```
 
 ##### 日本語 — `ja`
 
 ```text
-Tab Position Options Fork は、Chrome 向けに原版の Tab Position Options を Manifest V3 で再実装した拡張機能です。タブを開く位置や、タブを閉じた後にアクティブになるタブを設定できます。
+Tab Position Options Fork は、原版をChrome向けManifest V3で再実装した拡張機能です。新しいタブの配置や、閉じた後にアクティブにする対象を設定できます。前面／背景での開き方とURL別ルールにも対応します。
 
 機能
-・新規タブ：常に先頭／常に末尾／現在のタブの右側／現在のタブの左側／既定（ブラウザに従う）
-・新規タブをバックグラウンドで開く
-・タブを閉じた後に選択するタブ：先頭のタブ／末尾のタブ／右側のタブ／左側のタブ／最後にアクティブだったタブ／リンクを開いた元のタブ／元のタブ、なければ最後にアクティブだったタブ／既定（ブラウザに従う）
-・タブをアクティブにしたとき：既定（位置を維持）／先頭／末尾
-・新規タブ — URL 別ルール：常に先頭／常に末尾／現在のタブの右側／現在のタブの左側／既定（ブラウザに従う）; 前面で開く／バックグラウンドで開く
-・ページ読み込み時 — URL 別ルール：常に末尾／常に中央／常に先頭
-・ポップアップウィンドウをタブに変換し、URL 別の例外を設定
-・外部リンクを新規タブで開く
-・外部リンク — URL 別ルール：ページ：除外／ページ：新規タブを前面で開く／ページ：新規タブを背景で開く／ページ：現在のタブ・フレームで開く／リンク先：新規タブを前面で開く／リンク先：新規タブを背景で開く／リンク先：現在のタブ・フレームで開く
-・キーボードショートカットでタイトル・URL 順の並べ替えや直前のアクティブタブへの切り替え
-・設定ファイルのエクスポート・インポート
-・Chrome の同期が有効な場合、設定と URL ルールを自動同期
+・新規タブの位置：常に先頭／常に末尾／現在のものの右側／左側／ブラウザの既定
+・新しいものをバックグラウンドで開く設定
+・閉じた後に選択する対象：最初／最後／右隣／左隣／直近にアクティブだったもの／リンクを開いた元／元がなければ直近にアクティブだったもの／ブラウザの既定
+・アクティブにしたとき：位置を維持／先頭／末尾
+・新規タブのURL別ルール：位置（先頭／末尾／現在のものの右側／左側／ブラウザの既定）と前面／背景での開き方
+・読み込み時のURL別ルール：条件に一致するものを先頭／中央／末尾に配置
+・ポップアップウィンドウを通常ウィンドウ内で開く形に変換し、URL別の例外を設定
+・外部リンク：既定で新しいタブに開く。URL別にリンク元を除外し、リンク元／リンク先URLに応じて前面／背景で開くか、現在の表示領域／フレームを使うかを指定
+・キーボードショートカットでタイトル／URL順に並べ替え、直前にアクティブだったものに切り替え
+・設定ファイルのインポート／エクスポート
+・Chrome 同期が有効な場合、設定とURLルールを自動同期
 
 使い方
-1. インストール後に設定画面が自動的に開きます。再度開く場合は、Chrome の拡張機能メニューまたはツールバーアイコンを使います。
-2. 動作を設定し、必要に応じて URL ルールを追加します。
-3. 「設定を保存」をクリックします。
-権限が必要な機能を初めて使うときに、Chrome が必要な権限を要求します。
+1. インストール後に設定画面が自動的に開きます。再度開く場合は、Chromeの拡張機能メニューまたはツールバーを使います。
+2. 動作を設定し、必要に応じてURLルールを追加します。
+3. 設定を保存します。権限が必要な機能を初めて使うときに、Chromeが必要な権限を要求します。
 
-サポートとソースコード
-https://github.com/proshunsuke/tab-position-options-fork
+サポート
 不具合報告・機能の要望:
 https://github.com/proshunsuke/tab-position-options-fork/issues
 
-原版の Tab Position Options から派生した、独立したコミュニティフォークです。
+原版から派生した独立したコミュニティフォークです。
 原版の拡張機能:
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
-
-変更履歴
-1.1.0
-- タブ、ナビゲーション、ウェブサイトへのアクセスを任意権限に変更し、必要な機能を使うときだけ権限を要求するよう変更
-
-1.0.0
-- 原版 Tab Position Options の残りの機能を追加し、Manifest V3 向けの再実装を完了
-- アクティブになったタブを先頭または末尾へ移動する設定を追加
-- 新規タブの位置と前面・背景の開き方を指定する URL 別ルール、およびページ移動時の配置ルールを追加
-- URL の例外を指定できるポップアップのタブ変換機能を追加
-- ページの除外、現在のタブ・前面の新規タブ・背景の新規タブのルールを指定できる外部リンク処理を追加
-- タイトル・URL でのタブの並べ替えと、直前のアクティブタブへの切り替えを行うキーボードショートカットを追加
-- 設定のインポート・エクスポートと Chrome 自動同期を追加し、同期失敗時のローカル設定利用と通知に対応
-- 設定画面とストア説明文を10言語に翻訳
-- 設定画面にカテゴリ別ナビゲーション、常時表示の保存バー、設定管理・ショートカット専用セクションを追加
-- インストール後の設定画面の自動表示と、既存の設定タブの再利用を追加
-- Chrome が前回のセッションを復元する際に、タブの位置や選択状態が変わる問題を修正
-
 ```
 
 ##### 简体中文 — `zh_CN`
 
 ```text
-Tab Position Options Fork 是面向 Chrome、基于 Manifest V3 重新实现的原版 Tab Position Options。您可以自定义标签页的打开位置，以及关闭标签页后激活哪个标签页。
+Tab Position Options Fork 是面向 Chrome、基于 Manifest V3 重新实现原版功能的扩展程序。您可以控制新内容的排列位置，以及关闭一项后要激活的对象，并按网址设置打开方式和导航规则。
 
 功能
-・新标签页：始终在最前面／始终在最后面／当前标签页右侧／当前标签页左侧／默认（遵循浏览器设置）
-・在后台打开新标签页
-・关闭标签页后激活的标签页：第一个标签页／最后一个标签页／右侧标签页／左侧标签页／最近激活的标签页／打开链接的来源标签页／来源标签页；若不存在则选择最近激活的标签页／默认（遵循浏览器设置）
-・激活标签页：默认（保持位置）／最前面／最后面
-・新标签页 — 按 URL 匹配的规则：始终在最前面／始终在最后面／当前标签页右侧／当前标签页左侧／默认（遵循浏览器设置）; 在前台打开／在后台打开
-・页面加载时 — 按 URL 匹配的规则：始终在最后面／始终在中间／始终在最前面
-・将弹出窗口转换为标签页，并设置 URL 例外
-・在新标签页中打开外部链接
-・外部链接 — 按 URL 匹配的规则：页面：排除／页面：新前台标签页／页面：新后台标签页／页面：当前标签页或框架／链接：新前台标签页／链接：新后台标签页／链接：当前标签页或框架
-・通过键盘快捷键按标题或 URL 排序标签页，或切换到上一个活动标签页
-・导出和导入设置文件
-・启用 Chrome 同步时自动同步设置和 URL 规则
+・新建位置：始终置于开头／末尾／当前项右侧／左侧，或遵循浏览器默认设置
+・设置在后台打开新建项
+・关闭后激活：第一个／最后一个／右侧／左侧／最近激活的项、打开链接的来源项、来源项（如不存在则选最近激活的项），或遵循浏览器默认设置
+・激活时：保持当前位置，或移至开头／末尾
+・新建内容的网址规则：指定位置（开头／末尾／当前项右侧／左侧／浏览器默认）及前台／后台打开方式
+・加载时的网址规则：将匹配项移至开头／中间／末尾
+・将弹出窗口并入常规浏览器窗口，并设置网址例外
+・外部链接：默认在新标签页中打开。网址规则可排除来源网址，或按来源／目标网址指定在前台／后台打开，或使用当前视图／框架
+・使用键盘快捷键按标题／网址排序，或返回最近激活的项
+・导入和导出设置文件
+・启用 Chrome 同步后自动同步设置和网址规则
 
 使用方法
-1. 安装后设置页面会自动打开。之后可通过 Chrome 的扩展程序菜单或工具栏图标再次打开。
-2. 选择所需设置，并根据需要添加 URL 规则。
-3. 点击“保存设置”。
-首次使用需要权限的功能时，Chrome 会请求相应权限。
+1. 安装后设置页面会自动打开。之后可通过 Chrome 的扩展程序菜单或工具栏再次打开。
+2. 选择所需设置，并根据需要添加网址规则。
+3. 保存设置。首次使用需要权限的功能时，Chrome 会请求相应的可选权限。
 
-支持与源代码
-https://github.com/proshunsuke/tab-position-options-fork
+支持
 报告问题或提出功能建议:
 https://github.com/proshunsuke/tab-position-options-fork/issues
 
-这是原版 Tab Position Options 的独立社区分支。
+这是原版扩展的独立社区分支。
 原版扩展程序:
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
-
-更新日志
-1.1.0
-- 将标签页、导航和网站访问权限改为可选，仅在使用相关功能时请求权限
-
-1.0.0
-- 添加原版 Tab Position Options 的其余功能，完成 Manifest V3 重制
-- 添加激活标签页时将其移至最前或最后的设置
-- 添加按 URL 设置新标签页位置及前台或后台打开方式的规则，以及页面导航时的配置规则
-- 添加将弹出窗口转换为标签页的功能，支持 URL 例外
-- 添加外部链接处理，支持页面排除及当前标签页、前台新标签页和后台新标签页规则
-- 添加按标题或 URL 排序标签页及切换到上一个活动标签页的键盘快捷键
-- 添加设置导入、导出和 Chrome 自动同步，支持同步失败时使用本地设置并显示通知
-- 为设置页面和商店说明添加10种语言的翻译
-- 更新设置页面，添加分类导航、始终可见的保存栏，以及独立的设置管理和快捷键区域
-- 添加安装后自动显示设置页面及复用已有设置标签页的功能
-- 修复 Chrome 恢复上次会话时标签页位置和选中状态发生变化的问题
-
 ```
 
 ##### 繁體中文 — `zh_TW`
 
 ```text
-Tab Position Options Fork 是針對 Chrome、以 Manifest V3 重新實作原版 Tab Position Options 的擴充功能。您可以自訂分頁的開啟位置，以及關閉分頁後要啟用哪個分頁。
+Tab Position Options Fork 是面向 Chrome、以 Manifest V3 重新實作原版功能的擴充功能。您可以控制新項目的排列位置，以及關閉一項後要啟用的對象，並依網址設定開啟方式和導覽規則。
 
 功能
-・新分頁：一律置於最前方／一律置於最後方／目前分頁的右側／目前分頁的左側／預設（依瀏覽器設定）
-・在背景開啟新分頁
-・關閉分頁後啟用的分頁：第一個分頁／最後一個分頁／右側分頁／左側分頁／最近啟用的分頁／開啟連結的來源分頁／來源分頁，若無則選擇最近啟用的分頁／預設（依瀏覽器設定）
-・啟用分頁時：預設（保留位置）／最前方／最後方
-・新分頁 — URL 比對規則：一律置於最前方／一律置於最後方／目前分頁的右側／目前分頁的左側／預設（依瀏覽器設定）; 在前景開啟／在背景開啟
-・載入網頁時 — URL 比對規則：一律置於最後方／一律置於中間／一律置於最前方
-・將彈出視窗轉換為分頁，並設定 URL 例外
-・在新分頁開啟外部連結
-・外部連結 — URL 比對規則：頁面：排除／頁面：新前景分頁／頁面：新背景分頁／頁面：目前分頁或框架／連結：新前景分頁／連結：新背景分頁／連結：目前分頁或框架
-・透過鍵盤快速鍵依標題或 URL 排序分頁，或切換至上一個作用中的分頁
-・匯出及匯入設定檔
-・啟用 Chrome 同步功能時自動同步設定和 URL 規則
+・新建位置：一律置於最前／最後／目前項目的右側／左側，或依瀏覽器預設設定
+・設定在背景開啟新項目
+・關閉後啟用：第一個／最後一個／右側／左側／最近啟用的項目、開啟連結的來源項目、來源項目（若不存在則選最近啟用的項目），或依瀏覽器預設設定
+・啟用時：保留目前位置，或移至最前／最後
+・新建內容的網址規則：指定位置（最前／最後／目前項目的右側／左側／瀏覽器預設）及前景／背景開啟方式
+・載入時的網址規則：將符合條件的項目移至最前／中間／最後
+・將彈出視窗併入一般瀏覽器視窗，並設定網址例外
+・外部連結：預設在新分頁開啟。網址規則可排除來源網址，或依來源／目標網址指定在前景／背景開啟，或使用目前檢視區／框架
+・使用鍵盤快速鍵依標題／網址排序，或返回最近作用中的項目
+・匯入及匯出設定檔
+・啟用 Chrome 同步時自動同步設定和網址規則
 
 使用方式
-1. 安裝後會自動開啟設定頁面。之後可透過 Chrome 的擴充功能選單或工具列圖示再次開啟。
-2. 選擇所需設定，並視需要新增 URL 規則。
-3. 按一下「儲存設定」。
-首次使用需要權限的功能時，Chrome 會要求相應權限。
+1. 安裝後會自動開啟設定頁面。之後可透過 Chrome 的擴充功能選單或工具列再次開啟。
+2. 選擇所需設定，並視需要新增網址規則。
+3. 儲存設定。首次使用需要權限的功能時，Chrome 會要求相應的選用權限。
 
-支援與原始碼
-https://github.com/proshunsuke/tab-position-options-fork
+支援
 回報問題或提出功能建議:
 https://github.com/proshunsuke/tab-position-options-fork/issues
 
-這是原版 Tab Position Options 的獨立社群分支。
+這是原版擴充功能的獨立社群分支。
 原版擴充功能:
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
-
-更新紀錄
-1.1.0
-- 將分頁、導覽和網站存取權限改為選用，僅在使用相關功能時要求權限
-
-1.0.0
-- 新增原版 Tab Position Options 的其餘功能，完成 Manifest V3 重製
-- 新增啟用分頁時將其移至最前或最後的設定
-- 新增依 URL 設定新分頁位置及前景或背景開啟方式的規則，以及頁面導覽時的配置規則
-- 新增將彈出視窗轉換為分頁的功能，支援 URL 例外
-- 新增外部連結處理，支援頁面排除及目前分頁、前景新分頁和背景新分頁規則
-- 新增依標題或 URL 排序分頁及切換至上一個作用中分頁的鍵盤快速鍵
-- 新增設定匯入、匯出和 Chrome 自動同步，支援同步失敗時使用本機設定並顯示通知
-- 為設定頁面與商店說明新增10種語言的翻譯
-- 更新設定頁面，新增分類導覽、持續顯示的儲存列，以及獨立的設定管理和快速鍵區塊
-- 新增安裝後自動顯示設定頁面及重用現有設定分頁的功能
-- 修正 Chrome 還原上次工作階段時分頁位置與選取狀態改變的問題
-
 ```
 
 ##### 한국어 — `ko`
 
 ```text
-Tab Position Options Fork는 원본 Tab Position Options를 Chrome용 Manifest V3로 재구현한 확장 프로그램입니다. 탭이 열리는 위치와 탭을 닫은 후 활성화할 탭을 설정할 수 있습니다.
+Tab Position Options Fork는 원본 Chrome 확장 프로그램을 Manifest V3로 재구현했습니다. 새 브라우저 항목의 배치와 하나를 닫은 뒤 활성화할 대상을 설정할 수 있으며, 전경·백그라운드 열기와 URL별 탐색 규칙도 지정할 수 있습니다.
 
 기능
-・새 탭: 항상 맨 앞 / 항상 맨 뒤 / 현재 탭 오른쪽 / 현재 탭 왼쪽 / 기본값(브라우저 기본값)
-・새 탭을 백그라운드에서 열기
-・탭을 닫은 후 활성화할 탭: 첫 번째 탭 / 마지막 탭 / 오른쪽 탭 / 왼쪽 탭 / 가장 최근에 활성화한 탭 / 링크를 연 원본 탭 / 원본 탭, 없으면 가장 최근에 활성화한 탭 / 기본값(브라우저 기본값)
-・탭을 활성화할 때: 기본값(위치 유지) / 맨 앞 / 맨 뒤
-・새 탭 — URL별 규칙: 항상 맨 앞 / 항상 맨 뒤 / 현재 탭 오른쪽 / 현재 탭 왼쪽 / 기본값(브라우저 기본값); 포그라운드에서 열기 / 백그라운드에서 열기
-・페이지를 불러올 때 — URL별 규칙: 항상 맨 뒤 / 항상 가운데 / 항상 맨 앞
-・팝업 창을 탭으로 전환하고 URL 예외 설정
-・외부 링크를 새 탭에서 열기
-・외부 링크 — URL별 규칙: 페이지: 제외 / 페이지: 새 전경 탭 / 페이지: 새 배경 탭 / 페이지: 현재 탭/프레임 / 링크: 새 전경 탭 / 링크: 새 배경 탭 / 링크: 현재 탭/프레임
-・키보드 단축키로 제목·URL별 탭 정렬 및 직전에 활성화된 탭으로 전환
-・설정 파일 내보내기·가져오기
+・새 항목 위치: 항상 맨 앞／맨 뒤／현재 항목 오른쪽／왼쪽／브라우저 기본값
+・새 탭을 백그라운드에서 여는 설정
+・닫은 뒤 활성화할 대상: 첫 번째／마지막／오른쪽／왼쪽／가장 최근에 활성화한 항목／링크를 연 원본／원본이 없으면 가장 최근 활성 항목／브라우저 기본값
+・활성화할 때: 현재 위치 유지／맨 앞／맨 뒤
+・새 항목의 URL별 규칙: 위치(맨 앞／맨 뒤／현재 항목 오른쪽／왼쪽／브라우저 기본값)와 전경／백그라운드 열기 지정
+・로드 시 URL별 규칙: 일치하는 항목을 맨 앞／가운데／맨 뒤로 배치
+・팝업 창을 일반 브라우저 창에 포함하고 URL 예외 설정
+・외부 링크: 기본적으로 새 탭에서 열기. URL별로 출발 주소를 제외하거나 출발／대상 주소에 따라 전경／백그라운드에서 열고 현재 보기／프레임을 사용하도록 지정
+・키보드 단축키로 제목／URL순 정렬 또는 가장 최근에 활성화한 항목으로 전환
+・설정 파일 내보내기／가져오기
 ・Chrome 동기화가 켜져 있으면 설정과 URL 규칙 자동 동기화
 
 사용 방법
-1. 설치 후 설정 화면이 자동으로 열립니다. 다시 열려면 Chrome 확장 프로그램 메뉴 또는 도구 모음 아이콘을 사용하세요.
+1. 설치 후 설정 화면이 자동으로 열립니다. Chrome 확장 프로그램 메뉴나 도구 모음에서 다시 열 수 있습니다.
 2. 원하는 동작을 설정하고 필요하면 URL 규칙을 추가하세요.
-3. '설정 저장'을 클릭하세요.
-권한이 필요한 기능을 처음 사용할 때 Chrome에서 해당 권한을 요청합니다.
+3. 설정을 저장하세요. 권한이 필요한 기능을 처음 사용할 때 Chrome에서 해당 선택 권한을 요청합니다.
 
-지원 및 소스 코드
-https://github.com/proshunsuke/tab-position-options-fork
+지원
 버그 신고 및 기능 요청:
 https://github.com/proshunsuke/tab-position-options-fork/issues
 
-이 프로젝트는 원본 Tab Position Options에서 파생된 독립적인 커뮤니티 포크입니다.
+원본 확장 프로그램에서 파생된 독립적인 커뮤니티 포크입니다.
 원본 확장 프로그램:
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
-
-변경 이력
-1.1.0
-- 탭, 탐색 및 웹사이트 접근 권한을 선택 권한으로 바꾸고, 필요한 기능을 사용할 때만 요청
-
-1.0.0
-- 원본 Tab Position Options의 나머지 기능을 추가하여 Manifest V3 재구현 완료
-- 활성화된 탭을 맨 앞이나 맨 뒤로 이동하는 설정 추가
-- 새 탭의 위치와 전경·배경 열기를 지정하는 URL별 규칙 및 페이지 이동 시 배치 규칙 추가
-- URL 예외를 지원하는 팝업 창의 탭 전환 기능 추가
-- 페이지 제외와 현재 탭·전경 새 탭·배경 새 탭 규칙을 지원하는 외부 링크 처리 추가
-- 제목·URL별 탭 정렬과 직전에 활성화된 탭으로 전환하는 키보드 단축키 추가
-- 설정 가져오기·내보내기와 Chrome 자동 동기화 추가, 동기화 실패 시 로컬 설정 사용 및 알림 지원
-- 설정 화면과 스토어 설명에 10개 언어 번역 추가
-- 설정 화면에 카테고리 탐색, 항상 표시되는 저장 표시줄, 설정 관리 및 단축키 전용 영역 추가
-- 설치 후 설정 화면 자동 표시 및 기존 설정 탭 재사용 추가
-- Chrome이 이전 세션을 복원할 때 탭 위치와 선택 상태가 바뀌는 문제 수정
-
 ```
 
 ##### Español — `es`
 
 ```text
-Tab Position Options Fork es una reimplementación de Tab Position Options para Chrome con Manifest V3. Personaliza dónde se abren las pestañas y cuál se activa al cerrar una pestaña.
+Tab Position Options Fork es una reimplementación para Chrome con Manifest V3 de la extensión original. Controla dónde se abren las nuevas pestañas y cuál queda activa al cerrar una. Configura la ubicación, la apertura en primer o segundo plano y reglas por URL para nuevas aperturas y navegación.
 
 FUNCIONES
-・Nueva pestaña: Siempre al principio / Siempre al final / A la derecha de la pestaña actual / A la izquierda de la pestaña actual / Predeterminado del navegador
-・Abrir pestañas nuevas en segundo plano
-・Pestaña que se activa al cerrar otra: Primera pestaña / Última pestaña / Pestaña de la derecha / Pestaña de la izquierda / Última pestaña activada / Pestaña de origen del enlace / Pestaña de origen o, si no existe, última pestaña activada / Predeterminado del navegador
-・Al activar una pestaña: Predeterminado (conservar posición) / Al principio / Al final
-・Nueva pestaña — Reglas por URL: Siempre al principio / Siempre al final / A la derecha de la pestaña actual / A la izquierda de la pestaña actual / Predeterminado del navegador; Primer plano / Segundo plano
-・Al cargar una página — Reglas por URL: Siempre al final / Siempre en el centro / Siempre al principio
-・Convierte ventanas emergentes en pestañas con excepciones por URL
-・Abrir enlaces externos en pestañas nuevas
-・Enlaces externos — Reglas por URL: Página: excluir / Página: nueva pestaña en primer plano / Página: nueva pestaña en segundo plano / Página: pestaña/marco actual / Enlace: nueva pestaña en primer plano / Enlace: nueva pestaña en segundo plano / Enlace: pestaña/marco actual
-・Usa atajos para ordenar pestañas por título o URL y volver a la última pestaña activa
-・Exporta e importa archivos de configuración
-・Sincroniza automáticamente los ajustes y las reglas de URL cuando la sincronización de Chrome está activada
+・Ubicación al abrir: principio, final, derecha o izquierda de la actual, o valor predeterminado del navegador
+・Abrir las nuevas en segundo plano
+・Al cerrar una: activar la primera, la última, la vecina derecha o izquierda, la última usada, el origen de un enlace, ese origen (o la última usada si no existe) o el valor predeterminado
+・Al activar: conservar la posición o mover la selección al principio o al final
+・Reglas por URL para nuevas aperturas: posición (principio, final, derecha, izquierda o valor predeterminado) y primer o segundo plano
+・Reglas durante la carga: colocar las coincidencias al principio, en el centro o al final
+・Integrar las ventanas emergentes en la ventana normal del navegador, con excepciones por URL
+・Enlaces externos: abrir en una pestaña nueva de forma predeterminada. Las reglas pueden excluir la URL de origen o dirigirlos según la URL de origen o destino al primer plano, segundo plano o vista/marco actual
+・Atajos para ordenar por título o URL y volver a la última activa
+・Exportar e importar archivos de configuración
+・Sincronizar ajustes y reglas por URL cuando esté activada la sincronización de Chrome
 
 CÓMO USARLA
-1. Los ajustes se abren automáticamente tras la instalación. Para volver a abrirlos, usa el menú de extensiones de Chrome o el icono de la barra de herramientas.
-2. Elige tus preferencias y añade reglas de URL si lo necesitas.
-3. Haz clic en Guardar configuración.
-Chrome solicitará los permisos opcionales necesarios la primera vez que uses una función que los requiera.
+1. Los ajustes se abren automáticamente tras la instalación. Para volver a abrirlos, usa el menú de extensiones de Chrome o la barra de herramientas.
+2. Elige tus preferencias y añade reglas por URL si lo necesitas.
+3. Guarda los ajustes. Chrome solicitará los permisos opcionales necesarios la primera vez que uses una función que los requiera.
 
-ASISTENCIA Y CÓDIGO FUENTE
-https://github.com/proshunsuke/tab-position-options-fork
+ASISTENCIA
 Informa de errores o solicita funciones:
 https://github.com/proshunsuke/tab-position-options-fork/issues
 
-Este es un fork comunitario independiente del Tab Position Options original.
+Este es un fork comunitario independiente de la extensión original.
 Extensión original:
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
-
-HISTORIAL DE CAMBIOS
-1.1.0
-- Se hicieron opcionales los permisos de pestañas, navegación y sitios web, y se solicitan solo al usar las funciones que los necesitan
-
-1.0.0
-- Añadidas las funciones restantes de Tab Position Options, completando la reimplementación para Manifest V3
-- Añadidos ajustes para mover las pestañas activadas a la primera o última posición
-- Añadidas reglas por URL para la posición y apertura en primer o segundo plano de nuevas pestañas, y reglas de posición al navegar
-- Añadida la conversión de ventanas emergentes en pestañas con excepciones por URL
-- Añadida la gestión de enlaces externos con exclusiones de páginas y reglas para la pestaña actual o nuevas pestañas en primer o segundo plano
-- Añadidos atajos para ordenar pestañas por título o URL y volver a la última pestaña activa
-- Añadidas la importación y exportación de ajustes y la sincronización automática de Chrome, con respaldo local y avisos de errores de sincronización
-- Añadidas traducciones de los ajustes y la descripción de la tienda en 10 idiomas
-- Actualizados los ajustes con navegación por categorías, una barra de guardado siempre visible y secciones de gestión de ajustes y atajos
-- Añadidas la apertura automática de los ajustes tras la instalación y la reutilización de pestañas de ajustes existentes
-- Corregidos los cambios de posición y selección de pestañas al restaurar Chrome la sesión anterior
-
 ```
 
 ##### Français — `fr`
 
 ```text
-Tab Position Options Fork est une réimplémentation de Tab Position Options pour Chrome avec Manifest V3. Personnalisez l’emplacement des nouveaux onglets et choisissez lequel devient actif après la fermeture d’un onglet.
+Tab Position Options Fork réimplémente l’extension d’origine pour Chrome avec Manifest V3. Choisissez où s’ouvrent les nouveaux éléments et lequel devient actif après la fermeture d’un autre. Réglez leur emplacement, l’ouverture au premier plan ou en arrière-plan et les règles URL pour l’ouverture et la navigation.
 
 FONCTIONNALITÉS
-・Nouvel onglet: Toujours au début / Toujours à la fin / À droite de l’onglet actuel / À gauche de l’onglet actuel / Par défaut (selon le navigateur)
-・Ouvrir les nouveaux onglets en arrière-plan
-・Onglet à activer après la fermeture: Premier onglet / Dernier onglet / Onglet de droite / Onglet de gauche / Dernier onglet actif / Onglet à l’origine du lien / Onglet d’origine, sinon dernier onglet actif / Par défaut (selon le navigateur)
-・À l’activation d’un onglet: Par défaut (conserver la position) / Au début / À la fin
-・Nouvel onglet — Règles par URL: Toujours au début / Toujours à la fin / À droite de l’onglet actuel / À gauche de l’onglet actuel / Par défaut (selon le navigateur); Premier plan / Arrière-plan
-・Au chargement d’une page — Règles par URL: Toujours à la fin / Toujours au milieu / Toujours au début
-・Convertissez les fenêtres pop-up en onglets avec des exceptions par URL
-・Ouvrir les liens externes dans de nouveaux onglets
-・Liens externes — Règles par URL: Page : exclure / Page : nouvel onglet au premier plan / Page : nouvel onglet en arrière-plan / Page : onglet/cadre actuel / Lien : nouvel onglet au premier plan / Lien : nouvel onglet en arrière-plan / Lien : onglet/cadre actuel
-・Utilisez les raccourcis pour trier les onglets par titre ou URL et revenir au dernier onglet actif
-・Exportez et importez des fichiers de paramètres
-・Synchronisez automatiquement les paramètres et les règles d’URL lorsque la synchronisation Chrome est activée
+・À l’ouverture : début, fin, à droite ou à gauche de l’élément actuel, ou valeur par défaut du navigateur
+・Ouvrir les nouveaux éléments en arrière-plan
+・Après une fermeture, activer le premier, le dernier, le voisin de droite ou de gauche, le dernier utilisé, la source d’un lien ouvert, cette source (ou le dernier utilisé si elle n’existe pas), ou le choix du navigateur
+・À l’activation : conserver la position ou déplacer la sélection au début ou à la fin
+・Règles URL pour les nouvelles ouvertures : emplacement (début, fin, droite, gauche ou valeur par défaut) et premier ou arrière-plan
+・Règles au chargement : placer les destinations correspondantes au début, au milieu ou à la fin
+・Intégrer les fenêtres pop-up à la fenêtre normale du navigateur, avec des exceptions par URL
+・Liens externes : ouvrir dans un nouvel onglet par défaut. Les règles URL peuvent exclure l’adresse source ou choisir, selon l’adresse source ou la destination, le premier plan, l’arrière-plan ou la vue/le cadre actuel
+・Raccourcis clavier pour trier par titre ou URL et revenir au dernier élément actif
+・Importer et exporter les fichiers de paramètres
+・Synchroniser automatiquement les paramètres et règles URL lorsque la synchronisation Chrome est activée
 
 UTILISATION
-1. Les paramètres s’ouvrent automatiquement après l’installation. Utilisez le menu Extensions de Chrome ou l’icône de la barre d’outils pour les rouvrir.
-2. Choisissez vos préférences et ajoutez des règles d’URL si nécessaire.
-3. Cliquez sur Enregistrer les paramètres.
-Chrome demande les autorisations facultatives nécessaires lorsque vous utilisez pour la première fois une fonctionnalité qui en a besoin.
+1. Les paramètres s’ouvrent automatiquement après l’installation. Rouvrez-les depuis le menu Extensions de Chrome ou la barre d’outils.
+2. Choisissez vos préférences et ajoutez des règles par URL si nécessaire.
+3. Enregistrez vos paramètres. Chrome demande les autorisations facultatives nécessaires lors de la première utilisation d’une fonctionnalité concernée.
 
-ASSISTANCE ET CODE SOURCE
-https://github.com/proshunsuke/tab-position-options-fork
+ASSISTANCE
 Signaler un bug ou demander une fonctionnalité :
 https://github.com/proshunsuke/tab-position-options-fork/issues
 
-Il s’agit d’un fork communautaire indépendant de Tab Position Options.
+Il s’agit d’un fork communautaire indépendant de l’extension d’origine.
 Extension d’origine :
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
-
-HISTORIQUE DES MODIFICATIONS
-1.1.0
-- Rendre facultatifs les accès aux onglets, à la navigation et aux sites Web, et ne les demander que lors de l’utilisation des fonctionnalités concernées
-
-1.0.0
-- Ajout des fonctions restantes de Tab Position Options, achevant sa réimplémentation pour Manifest V3
-- Ajout de paramètres pour déplacer les onglets activés en première ou dernière position
-- Ajout de règles par URL pour la position des nouveaux onglets et leur ouverture au premier plan ou en arrière-plan, ainsi que de règles de position lors de la navigation
-- Ajout de la conversion des fenêtres pop-up en onglets avec des exceptions par URL
-- Ajout de la gestion des liens externes avec exclusions de pages et règles pour l’onglet actuel ou de nouveaux onglets au premier plan ou en arrière-plan
-- Ajout de raccourcis pour trier les onglets par titre ou URL et revenir au dernier onglet actif
-- Ajout de l’importation et de l’exportation des paramètres et de la synchronisation automatique Chrome, avec conservation locale et notifications d’échec
-- Ajout de traductions des paramètres et de la description de la boutique en 10 langues
-- Mise à jour des paramètres avec navigation par catégories, barre d’enregistrement toujours visible et sections de gestion des paramètres et des raccourcis
-- Ajout de l’ouverture automatique des paramètres après installation et de la réutilisation des onglets de paramètres existants
-- Correction des changements de position et de sélection des onglets lorsque Chrome restaure la session précédente
-
 ```
 
 ##### Deutsch — `de`
 
 ```text
-Tab Position Options Fork ist eine Neuimplementierung der ursprünglichen Chrome-Erweiterung Tab Position Options für Manifest V3. Legen Sie fest, wo Tabs geöffnet werden und welcher Tab nach dem Schließen eines Tabs aktiv wird.
+Tab Position Options Fork ist eine Neuimplementierung der ursprünglichen Chrome-Erweiterung mit Manifest V3. Legen Sie fest, wo neue Browser-Inhalte erscheinen und welches Element nach dem Schließen aktiv wird. Bestimmen Sie Position, Vorder- oder Hintergrundverhalten sowie URL-Regeln für Öffnungen und Navigation.
 
 FUNKTIONEN
-・Neuer Tab: Immer am Anfang / Immer am Ende / Rechts vom aktuellen Tab / Links vom aktuellen Tab / Standard (Browsereinstellung)
-・Neue Tabs im Hintergrund öffnen
-・Tab nach dem Schließen aktivieren: Erster Tab / Letzter Tab / Rechter Tab / Linker Tab / Zuletzt aktiver Tab / Ursprungs-Tab des Links / Ursprungs-Tab, sonst zuletzt aktiver Tab / Standard (Browsereinstellung)
-・Beim Aktivieren eines Tabs: Standard (Position beibehalten) / An den Anfang / Ans Ende
-・Neuer Tab — URL-Regeln: Immer am Anfang / Immer am Ende / Rechts vom aktuellen Tab / Links vom aktuellen Tab / Standard (Browsereinstellung); Vordergrund / Hintergrund
-・Beim Laden einer Seite — URL-Regeln: Immer am Ende / Immer in der Mitte / Immer am Anfang
-・Pop-up-Fenster mit URL-Ausnahmen in Tabs umwandeln
-・Externe Links in neuen Tabs öffnen
-・Externe Links — URL-Regeln: Seite: ausschließen / Seite: neuer Vordergrund-Tab / Seite: neuer Hintergrund-Tab / Seite: aktueller Tab/Frame / Link: neuer Vordergrund-Tab / Link: neuer Hintergrund-Tab / Link: aktueller Tab/Frame
-・Per Tastenkombination nach Titel oder URL sortieren und zum zuletzt aktiven Tab wechseln
-・Einstellungsdateien exportieren und importieren
-・Einstellungen und URL-Regeln bei aktivierter Chrome-Synchronisierung automatisch synchronisieren
+・Beim Öffnen: Anfang, Ende, rechts oder links vom aktuellen Element oder Browsereinstellung
+・Neue Inhalte im Hintergrund öffnen
+・Nach dem Schließen aktivieren: das erste, letzte, rechte oder linke Element, das zuletzt aktive, den Ursprung eines geöffneten Links, diesen Ursprung (sonst das zuletzt aktive) oder die Browsereinstellung
+・Beim Aktivieren: Position beibehalten oder die Auswahl an den Anfang oder das Ende verschieben
+・URL-Regeln für neue Öffnungen: Position (Anfang, Ende, rechts, links oder Browsereinstellung) und Vorder- oder Hintergrund festlegen
+・Regeln beim Laden: passende Ziele an den Anfang, in die Mitte oder ans Ende verschieben
+・Pop-up-Fenster mit URL-Ausnahmen in das normale Browserfenster integrieren
+・Externe Links: standardmäßig in einem neuen Tab öffnen. URL-Regeln können eine Quelladresse ausschließen oder anhand von Quell- bzw. Zieladresse Vordergrund, Hintergrund oder die aktuelle Ansicht/den aktuellen Frame festlegen
+・Tastenkürzel zum Sortieren nach Titel oder URL und zum Wechsel zum zuletzt aktiven Element
+・Einstellungsdateien importieren und exportieren
+・Einstellungen und URL-Regeln bei aktivierter Chrome-Synchronisierung automatisch abgleichen
 
 VERWENDUNG
-1. Nach der Installation öffnen sich die Einstellungen automatisch. Über das Erweiterungsmenü von Chrome oder das Symbol in der Symbolleiste können Sie sie erneut öffnen.
+1. Nach der Installation öffnen sich die Einstellungen automatisch. Über das Erweiterungsmenü von Chrome oder die Symbolleiste können Sie sie erneut öffnen.
 2. Wählen Sie Ihre Einstellungen und fügen Sie bei Bedarf URL-Regeln hinzu.
-3. Klicken Sie auf Einstellungen speichern.
-Chrome fragt nach den erforderlichen optionalen Berechtigungen, wenn Sie eine entsprechende Funktion zum ersten Mal verwenden.
+3. Speichern Sie Ihre Einstellungen. Chrome fragt bei der ersten Nutzung einer Funktion nach den erforderlichen optionalen Berechtigungen.
 
-SUPPORT UND QUELLCODE
-https://github.com/proshunsuke/tab-position-options-fork
+SUPPORT
 Fehler melden oder Funktionen vorschlagen:
 https://github.com/proshunsuke/tab-position-options-fork/issues
 
-Dies ist ein unabhängiger Community-Fork der ursprünglichen Erweiterung Tab Position Options.
+Dies ist ein unabhängiger Community-Fork der ursprünglichen Erweiterung.
 Ursprüngliche Erweiterung:
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
-
-ÄNDERUNGSPROTOKOLL
-1.1.0
-- Zugriffe auf Tabs, Navigation und Websites optional gemacht; Berechtigungen werden nur bei Verwendung der entsprechenden Funktionen angefordert
-
-1.0.0
-- Verbleibende Funktionen von Tab Position Options hinzugefügt und die Neuimplementierung für Manifest V3 abgeschlossen
-- Einstellungen zum Verschieben aktivierter Tabs an die erste oder letzte Position hinzugefügt
-- URL-Regeln für die Position neuer Tabs und das Öffnen im Vorder- oder Hintergrund sowie Positionsregeln bei Seitennavigationen hinzugefügt
-- Umwandlung von Pop-up-Fenstern in Tabs mit URL-Ausnahmen hinzugefügt
-- Verarbeitung externer Links mit Seitenausschlüssen und Regeln für den aktuellen Tab oder neue Tabs im Vorder- oder Hintergrund hinzugefügt
-- Tastenkombinationen zum Sortieren nach Titel oder URL und zum Wechseln zum zuletzt aktiven Tab hinzugefügt
-- Import und Export von Einstellungen sowie automatische Chrome-Synchronisierung mit lokaler Ausweichlösung und Fehlermeldungen hinzugefügt
-- Übersetzungen der Einstellungen und der Store-Beschreibung für 10 Sprachen hinzugefügt
-- Einstellungen um Kategorienavigation, eine stets sichtbare Speicherleiste und eigene Bereiche für Einstellungsverwaltung und Tastenkombinationen erweitert
-- Automatisches Öffnen der Einstellungen nach der Installation und Wiederverwenden vorhandener Einstellungstabs hinzugefügt
-- Änderungen der Tab-Positionen und Auswahl beim Wiederherstellen der letzten Chrome-Sitzung behoben
-
 ```
 
 ##### Português (Brasil) — `pt_BR`
 
 ```text
-Tab Position Options Fork é uma reimplementação do Tab Position Options original para Chrome com Manifest V3. Personalize onde as abas são abertas e qual aba se torna ativa após fechar uma aba.
+Tab Position Options Fork é uma reimplementação da extensão original para Chrome com Manifest V3. Controle onde os novos itens do navegador aparecem e qual fica ativo depois que outro é fechado. Defina posição, abertura em primeiro ou segundo plano e regras por URL para novas aberturas e navegação.
 
 RECURSOS
-・Nova aba: Sempre no início / Sempre no final / À direita da aba atual / À esquerda da aba atual / Padrão do navegador
-・Abrir novas abas em segundo plano
-・Aba a ativar após fechar uma aba: Primeira aba / Última aba / Aba à direita / Aba à esquerda / Última aba ativa / Aba de origem do link / Aba de origem ou, se não existir, última aba ativa / Padrão do navegador
-・Ao ativar uma aba: Padrão (manter posição) / Início / Final
-・Nova aba — Regras por URL: Sempre no início / Sempre no final / À direita da aba atual / À esquerda da aba atual / Padrão do navegador; Primeiro plano / Segundo plano
-・Ao carregar uma página — Regras por URL: Sempre no final / Sempre no meio / Sempre no início
-・Converta janelas pop-up em abas com exceções por URL
-・Abrir links externos em novas abas
-・Links externos — Regras por URL: Página: excluir / Página: nova aba em primeiro plano / Página: nova aba em segundo plano / Página: aba/frame atual / Link: nova aba em primeiro plano / Link: nova aba em segundo plano / Link: aba/frame atual
-・Use atalhos para ordenar abas por título ou URL e voltar à última aba ativa
-・Exporte e importe arquivos de configurações
-・Sincronize automaticamente configurações e regras de URL quando a sincronização do Chrome estiver ativada
+・Ao abrir: início, fim, à direita ou à esquerda do item atual, ou padrão do navegador
+・Abrir novos itens em segundo plano
+・Ao fechar um: ativar o primeiro, o último, o vizinho à direita ou à esquerda, o último usado, a origem de um link aberto, essa origem (ou o último usado se não existir) ou o padrão do navegador
+・Ao ativar: manter a posição ou mover a seleção para o início ou o fim
+・Regras por URL para novas aberturas: posição (início, fim, direita, esquerda ou padrão do navegador) e primeiro ou segundo plano
+・Regras durante o carregamento: colocar os destinos correspondentes no início, no meio ou no fim
+・Integrar janelas pop-up à janela normal do navegador, com exceções por URL
+・Links externos: abrir em uma nova aba por padrão. As regras podem excluir a URL de origem ou escolher, conforme a origem ou o destino, primeiro plano, segundo plano ou a visualização/estrutura atual
+・Atalhos para ordenar por título ou URL e voltar ao último item ativo
+・Importar e exportar arquivos de configurações
+・Sincronizar configurações e regras por URL quando a sincronização do Chrome estiver ativada
 
 COMO USAR
-1. As configurações são abertas automaticamente após a instalação. Use o menu de extensões do Chrome ou o ícone na barra de ferramentas para abri-las novamente.
-2. Escolha suas preferências e adicione regras de URL, se necessário.
-3. Clique em Salvar configurações.
-O Chrome solicitará as permissões opcionais necessárias na primeira vez que você usar um recurso que precise delas.
+1. As configurações são abertas automaticamente após a instalação. Para abri-las novamente, use o menu de extensões do Chrome ou a barra de ferramentas.
+2. Escolha suas preferências e adicione regras por URL, se necessário.
+3. Salve as configurações. O Chrome solicitará as permissões opcionais necessárias na primeira vez que você usar um recurso que precise delas.
 
-SUPORTE E CÓDIGO-FONTE
-https://github.com/proshunsuke/tab-position-options-fork
+SUPORTE
 Relate erros ou solicite recursos:
 https://github.com/proshunsuke/tab-position-options-fork/issues
 
-Este é um fork comunitário independente do Tab Position Options original.
+Este é um fork comunitário independente da extensão original.
 Extensão original:
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
-
-HISTÓRICO DE ALTERAÇÕES
-1.1.0
-- Tornou opcionais as permissões para acessar abas, navegação e sites, solicitando-as apenas ao usar os recursos correspondentes
-
-1.0.0
-- Adicionados os recursos restantes do Tab Position Options original, concluindo a reimplementação para Manifest V3
-- Adicionadas configurações para mover abas ativadas para a primeira ou última posição
-- Adicionadas regras por URL para a posição de novas abas e abertura em primeiro ou segundo plano, além de regras de posição durante a navegação
-- Adicionada a conversão de pop-ups em abas com exceções por URL
-- Adicionado o tratamento de links externos com exclusões de páginas e regras para a aba atual ou novas abas em primeiro ou segundo plano
-- Adicionados atalhos para ordenar abas por título ou URL e voltar à última aba ativa
-- Adicionadas a importação e exportação de configurações e a sincronização automática do Chrome, com alternativa local e avisos de falha
-- Adicionadas traduções da página de configurações e da descrição na loja para 10 idiomas
-- Atualizada a página de configurações com navegação por categorias, barra de salvamento sempre visível e seções de gerenciamento e atalhos
-- Adicionadas a abertura automática das configurações após a instalação e a reutilização de abas de configurações existentes
-- Corrigidas alterações na posição e seleção de abas quando o Chrome restaura a sessão anterior
-
 ```
 
 ##### Русский — `ru`
 
 ```text
-Tab Position Options Fork — это реализация оригинального расширения Tab Position Options для Chrome на Manifest V3. Настройте, где открываются вкладки и какая вкладка становится активной после закрытия текущей.
+Tab Position Options Fork — это реализация оригинального расширения для Chrome на Manifest V3. Настройте расположение новых элементов браузера и выберите, какой станет активным после закрытия другого. Задайте положение, открытие на переднем плане или в фоне и правила URL для новых элементов и навигации.
 
 ВОЗМОЖНОСТИ
-・Новая вкладка: Всегда в начале / Всегда в конце / Справа от текущей вкладки / Слева от текущей вкладки / По умолчанию (настройка браузера)
-・Открывать новые вкладки в фоновом режиме
-・Активная вкладка после закрытия: Первая вкладка / Последняя вкладка / Вкладка справа / Вкладка слева / Последняя активная вкладка / Исходная вкладка ссылки / Исходная вкладка, а при её отсутствии — последняя активная / По умолчанию (настройка браузера)
-・При активации вкладки: По умолчанию (сохранять позицию) / В начало / В конец
-・Новая вкладка — Правила по URL: Всегда в начале / Всегда в конце / Справа от текущей вкладки / Слева от текущей вкладки / По умолчанию (настройка браузера); На переднем плане / В фоновом режиме
-・При загрузке страницы — Правила по URL: Всегда в конце / Всегда посередине / Всегда в начале
-・Преобразование всплывающих окон во вкладки с исключениями по URL
-・Открывать внешние ссылки в новых вкладках
-・Внешние ссылки — Правила по URL: Страница: исключить / Страница: новая активная вкладка / Страница: новая фоновая вкладка / Страница: текущая вкладка/фрейм / Ссылка: новая активная вкладка / Ссылка: новая фоновая вкладка / Ссылка: текущая вкладка/фрейм
-・Сочетания клавиш для сортировки по заголовку или URL и возврата к последней активной вкладке
-・Экспорт и импорт файлов настроек
+・При открытии: в начале, в конце, справа или слева от текущего элемента либо по умолчанию браузера
+・Открытие новых элементов в фоновом режиме
+・После закрытия активировать первый, последний, соседний справа или слева, последний использованный, исходный для открытой ссылки, исходный (или последний использованный, если его нет) либо вариант браузера по умолчанию
+・При активации: сохранить положение или переместить выбор в начало либо конец
+・Правила URL для новых элементов: положение (начало, конец, справа, слева или по умолчанию браузера) и открытие на переднем плане или в фоне
+・Правила при загрузке: перемещать подходящие элементы в начало, середину или конец
+・Объединение всплывающих окон с обычным окном браузера с исключениями по URL
+・Внешние ссылки: по умолчанию открывать в новой вкладке. Правила URL позволяют исключить исходный адрес или выбрать открытие на переднем плане, в фоне либо в текущем окне/фрейме в зависимости от адреса источника или назначения
+・Сочетания клавиш для сортировки по заголовку или URL и возврата к последнему активному элементу
+・Импорт и экспорт файлов настроек
 ・Автоматическая синхронизация настроек и правил URL при включённой синхронизации Chrome
 
 КАК ПОЛЬЗОВАТЬСЯ
-1. После установки настройки откроются автоматически. Чтобы открыть их снова, используйте меню расширений Chrome или значок на панели инструментов.
+1. После установки настройки откроются автоматически. Чтобы открыть их снова, используйте меню расширений Chrome или панель инструментов.
 2. Выберите нужные параметры и при необходимости добавьте правила URL.
-3. Нажмите «Сохранить настройки».
-Chrome запросит необходимые дополнительные разрешения при первом использовании соответствующей функции.
+3. Сохраните настройки. Chrome запросит необходимые дополнительные разрешения при первом использовании соответствующей функции.
 
-ПОДДЕРЖКА И ИСХОДНЫЙ КОД
-https://github.com/proshunsuke/tab-position-options-fork
+ПОДДЕРЖКА
 Сообщить об ошибке или предложить функцию:
 https://github.com/proshunsuke/tab-position-options-fork/issues
 
-Это независимый форк оригинального Tab Position Options, поддерживаемый сообществом.
+Это независимый форк оригинального расширения, поддерживаемый сообществом.
 Оригинальное расширение:
 https://chrome.google.com/webstore/detail/tab-position-options/fjccjnfkdkdmjohojoggodkigkjkkjhl
-
-ИСТОРИЯ ИЗМЕНЕНИЙ
-1.1.0
-- Сделаны необязательными разрешения на вкладки, навигацию и доступ к сайтам; они запрашиваются только при использовании соответствующих функций
-
-1.0.0
-- Добавлены оставшиеся функции оригинального Tab Position Options, завершена реализация для Manifest V3
-- Добавлены настройки перемещения активированных вкладок на первую или последнюю позицию
-- Добавлены правила по URL для положения новых вкладок и открытия на переднем плане или в фоне, а также правила расположения при навигации
-- Добавлено преобразование всплывающих окон во вкладки с исключениями по URL
-- Добавлена обработка внешних ссылок с исключениями для страниц и правилами открытия в текущей вкладке либо в новой вкладке на переднем плане или в фоне
-- Добавлены сочетания клавиш для сортировки вкладок по заголовку или URL и возврата к последней активной вкладке
-- Добавлены импорт и экспорт настроек и автоматическая синхронизация Chrome с сохранением локальной копии и уведомлениями о сбоях
-- Добавлены переводы страницы настроек и описания в магазине на 10 языков
-- Страница настроек обновлена: добавлены навигация по категориям, постоянно видимая панель сохранения и разделы управления настройками и сочетаниями клавиш
-- Добавлены автоматическое открытие настроек после установки и повторное использование существующих вкладок настроек
-- Исправлено изменение положения и выбора вкладок при восстановлении предыдущего сеанса Chrome
-
 ```
 
 ### 画像アセット
